@@ -2,11 +2,15 @@ import type {
   AssistantOut,
   CalibrationOut,
   DecisionOut,
+  FarmOut,
+  FieldOut,
   MonteCarloIn,
   MonteCarloOut,
   ScenarioIn,
   SeasonOutcome,
+  SeasonSummaryOut,
   SimulationOut,
+  SoilTestOut,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -45,6 +49,20 @@ export const api = {
     jget<Record<string, string>>(
       `/api/sowing-window?municipality=${encodeURIComponent(municipality)}&year=${year}`,
     ),
+
+  // --- Gêmeo Digital persistido (cockpit) ---
+  farms: () => jget<FarmOut[]>("/api/farms"),
+  createFarm: (name: string, municipality: string) =>
+    jpost<FarmOut>("/api/farms", { name, municipality }),
+  fields: (farmId: string) => jget<FieldOut[]>(`/api/farms/${farmId}/fields`),
+  createField: (farmId: string, body: Partial<FieldOut>) =>
+    jpost<FieldOut>(`/api/farms/${farmId}/fields`, body),
+  soilTests: (fieldId: string) => jget<SoilTestOut[]>(`/api/fields/${fieldId}/soil-tests`),
+  createSoilTest: (fieldId: string, soil: Partial<SoilTestOut>) =>
+    jpost<SoilTestOut>(`/api/fields/${fieldId}/soil-tests`, soil),
+  fieldSeasons: (fieldId: string) => jget<SeasonSummaryOut[]>(`/api/fields/${fieldId}/seasons`),
+  recordSeason: (fieldId: string, crop_year: string, scenario: ScenarioIn) =>
+    jpost<{ id: string }>(`/api/fields/${fieldId}/seasons`, { crop_year, scenario }),
 };
 
 // Cenário padrão (talhão argiloso típico do Noroeste do RS).

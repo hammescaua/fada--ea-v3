@@ -8,6 +8,9 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 - Monorepo, banco PostGIS, cadastro de fazendas/talhões/solo/safras/custos.
 - Motor determinístico: fenologia, água (FAO-56), janela ZARC, IPPD, econômico.
 - Laboratório Virtual no front (waterfall + economia + comparação de cenários).
+- ✅ **Cockpit persistido**: criar/selecionar fazenda e talhão no front, salvar análise
+  de solo e safras (linha do tempo) e carregar o talhão de volta no laboratório — fecha
+  o loop do gêmeo digital na interface.
 - **Entregue:** simular manejos e ver impacto em produtividade ± incerteza e lucro.
 
 ## Fase 2 — Motor agronômico completo  *(em andamento)*

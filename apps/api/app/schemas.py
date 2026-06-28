@@ -163,3 +163,28 @@ class FieldOut(BaseModel):
     area_ha: float | None
     centroid_lat: float | None
     centroid_lon: float | None
+
+
+class SoilTestIn(BaseModel):
+    sampled_at: date | None = None
+    clay_pct: float | None = None
+    organic_matter_pct: float | None = None
+    ph: float | None = None
+    cec: float | None = None
+    base_saturation_pct: float | None = None
+    phosphorus_ppm: float | None = None
+    potassium_ppm: float | None = None
+
+
+class SoilTestOut(SoilTestIn):
+    id: str
+    field_id: str
+
+
+class SeasonSummaryOut(BaseModel):
+    id: str
+    crop_year: str
+    cultivar_name: str | None
+    sowing_date: date | None
+    predicted_yield_sc_ha: float | None
+    actual_yield_sc_ha: float | None

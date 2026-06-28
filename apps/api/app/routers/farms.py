@@ -6,6 +6,8 @@ Exige banco PostGIS. Geometria do talhão é recebida como GeoJSON Polygon
 
 from __future__ import annotations
 
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException
 from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
@@ -13,8 +15,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..db import get_session
-from ..models import Farm, Field
-from ..schemas import FarmIn, FarmOut, FieldIn, FieldOut
+from ..models import Farm, Field, Season, SoilTest
+from ..schemas import (
+    FarmIn,
+    FarmOut,
+    FieldIn,
+    FieldOut,
+    SeasonSummaryOut,
+    SoilTestIn,
+    SoilTestOut,
+)
 
 router = APIRouter(tags=["fazendas"])
 
@@ -74,4 +84,68 @@ def list_fields(farm_id: str, db: Session = Depends(get_session)) -> list[FieldO
             centroid_lat=f.centroid_lat, centroid_lon=f.centroid_lon,
         )
         for f in fields
+    ]
+
+
+def _field_or_404(field_id: str, db: Session) -> Field:
+    field = db.get(Field, field_id)
+    if not field:
+        raise HTTPException(404, "talhão não encontrado")
+    return field
+
+
+@router.get("/fields/{field_id}", response_model=FieldOut)
+def get_field(field_id: str, db: Session = Depends(get_session)) -> FieldOut:
+    f = _field_or_404(field_id, db)
+    return FieldOut(
+        id=str(f.id), farm_id=str(f.farm_id), name=f.name,
+        municipality=f.municipality, area_ha=f.area_ha,
+        centroid_lat=f.centroid_lat, centroid_lon=f.centroid_lon,
+    )
+
+
+def _soil_out(s: SoilTest) -> SoilTestOut:
+    return SoilTestOut(
+        id=str(s.id), field_id=str(s.field_id), sampled_at=s.sampled_at,
+        clay_pct=s.clay_pct, organic_matter_pct=s.organic_matter_pct, ph=s.ph,
+        cec=s.cec, base_saturation_pct=s.base_saturation_pct,
+        phosphorus_ppm=s.phosphorus_ppm, potassium_ppm=s.potassium_ppm,
+    )
+
+
+@router.post("/fields/{field_id}/soil-tests", response_model=SoilTestOut)
+def create_soil_test(field_id: str, payload: SoilTestIn, db: Session = Depends(get_session)) -> SoilTestOut:
+    _field_or_404(field_id, db)
+    soil = SoilTest(
+        field_id=field_id,
+        sampled_at=payload.sampled_at or date.today(),
+        clay_pct=payload.clay_pct, organic_matter_pct=payload.organic_matter_pct,
+        ph=payload.ph, cec=payload.cec, base_saturation_pct=payload.base_saturation_pct,
+        phosphorus_ppm=payload.phosphorus_ppm, potassium_ppm=payload.potassium_ppm,
+    )
+    db.add(soil)
+    db.commit()
+    return _soil_out(soil)
+
+
+@router.get("/fields/{field_id}/soil-tests", response_model=list[SoilTestOut])
+def list_soil_tests(field_id: str, db: Session = Depends(get_session)) -> list[SoilTestOut]:
+    tests = db.scalars(
+        select(SoilTest).where(SoilTest.field_id == field_id).order_by(SoilTest.sampled_at.desc())
+    ).all()
+    return [_soil_out(s) for s in tests]
+
+
+@router.get("/fields/{field_id}/seasons", response_model=list[SeasonSummaryOut])
+def list_field_seasons(field_id: str, db: Session = Depends(get_session)) -> list[SeasonSummaryOut]:
+    seasons = db.scalars(
+        select(Season).where(Season.field_id == field_id).order_by(Season.crop_year.desc())
+    ).all()
+    return [
+        SeasonSummaryOut(
+            id=str(s.id), crop_year=s.crop_year, cultivar_name=s.cultivar_name,
+            sowing_date=s.sowing_date, predicted_yield_sc_ha=s.predicted_yield_sc_ha,
+            actual_yield_sc_ha=s.actual_yield_sc_ha,
+        )
+        for s in seasons
     ]

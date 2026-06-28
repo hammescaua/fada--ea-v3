@@ -111,6 +111,44 @@ export interface MonteCarloOut {
   };
 }
 
+export interface FarmOut {
+  id: string;
+  name: string;
+  municipality: string;
+}
+
+export interface FieldOut {
+  id: string;
+  farm_id: string;
+  name: string;
+  municipality: string;
+  area_ha: number | null;
+  centroid_lat: number | null;
+  centroid_lon: number | null;
+}
+
+export interface SoilTestOut {
+  id: string;
+  field_id: string;
+  sampled_at: string | null;
+  clay_pct: number | null;
+  organic_matter_pct: number | null;
+  ph: number | null;
+  cec: number | null;
+  base_saturation_pct: number | null;
+  phosphorus_ppm: number | null;
+  potassium_ppm: number | null;
+}
+
+export interface SeasonSummaryOut {
+  id: string;
+  crop_year: string;
+  cultivar_name: string | null;
+  sowing_date: string | null;
+  predicted_yield_sc_ha: number | null;
+  actual_yield_sc_ha: number | null;
+}
+
 export interface AssistantOut {
   answer: string;
   used_llm: boolean;

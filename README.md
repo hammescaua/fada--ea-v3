@@ -28,11 +28,12 @@ intervenções por retorno esperado, com probabilidade via Monte Carlo pareado) 
 talhão a cada safra + feature engineering). 33 testes passando.
 ✅ **API** (`apps/api`): FastAPI expondo `/simulate`, `/sowing-window`, catálogos, e
 CRUD de fazendas/talhões em PostGIS. Cliente de clima real (Open-Meteo).
-✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. Mapa do talhão, controles do
-cenário e o **Laboratório Virtual** com gráfico waterfall do IPPD, **recomendações de
-manejo priorizadas por retorno** (Motor de Decisão), bloco econômico, calendário
-fenológico, **análise de risco Monte Carlo** (histograma de lucro + probabilidades) e
-comparação "cenário base vs atual".
+✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. **Cockpit persistido** (criar/
+selecionar fazenda e talhão, salvar análise de solo e safras — carrega o talhão no
+laboratório), mapa, controles do cenário e o **Laboratório Virtual** com assistente de
+chat, gráfico waterfall do IPPD, **recomendações de manejo priorizadas por retorno**,
+bloco econômico, calendário fenológico, **análise de risco Monte Carlo** e comparação
+"cenário base vs atual".
 
 ✅ **Assistente de decisão (Nível 3)**: o "ChatGPT da fazenda" — **Claude Opus 4.8** via
 *tool use* consulta os motores e **narra os números, nunca calcula**. Endpoint

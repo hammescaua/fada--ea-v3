@@ -12,6 +12,7 @@ import { RiskDistribution } from "@/components/RiskDistribution";
 import { DecisionPanel } from "@/components/DecisionPanel";
 import { LearningPanel } from "@/components/LearningPanel";
 import { AssistantPanel } from "@/components/AssistantPanel";
+import { FarmManager } from "@/components/FarmManager";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -115,6 +116,11 @@ export default function Home() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
         {/* Coluna de controles */}
         <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
+          <FarmManager
+            scenario={scenario}
+            onLoadField={(patch) => setScenario((s) => ({ ...s, ...patch }))}
+          />
+          <hr className="border-stone-100" />
           <FieldMap
             lat={scenario.latitude}
             lon={scenario.longitude}
