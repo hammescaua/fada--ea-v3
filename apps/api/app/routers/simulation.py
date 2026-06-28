@@ -23,7 +23,8 @@ from agro_engine.models import (
 from agro_engine.reference import NO_RS_MUNICIPALITIES
 
 from .. import weather
-from ..schemas import MonteCarloIn, ScenarioIn, SimulationOut
+from .. import assistant
+from ..schemas import AssistantIn, MonteCarloIn, ScenarioIn, SimulationOut
 
 router = APIRouter(tags=["motor"])
 
@@ -116,6 +117,15 @@ def post_montecarlo(payload: MonteCarloIn) -> dict:
         profit_target_per_ha=payload.profit_target_per_ha,
         yield_target_sc_ha=payload.yield_target_sc_ha,
     )
+
+
+@router.post("/assistant")
+def post_assistant(payload: AssistantIn) -> dict:
+    """Assistente de decisão (LLM): interpreta a pergunta, consulta os motores via
+    tool use e narra os números — nunca calcula. Cai para narrador determinístico
+    quando não há ANTHROPIC_API_KEY."""
+    scenario = _to_scenario(payload.scenario)
+    return assistant.ask(payload.question, scenario)
 
 
 @router.post("/decisions")

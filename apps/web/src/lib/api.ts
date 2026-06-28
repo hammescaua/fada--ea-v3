@@ -1,4 +1,5 @@
 import type {
+  AssistantOut,
   CalibrationOut,
   DecisionOut,
   MonteCarloIn,
@@ -33,6 +34,8 @@ export const api = {
   decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
+  assistant: (question: string, scenario: ScenarioIn) =>
+    jpost<AssistantOut>("/api/assistant", { question, scenario }),
   municipalities: () => jget<string[]>("/api/municipalities"),
   sampleCultivars: () =>
     jget<

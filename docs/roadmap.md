@@ -48,7 +48,10 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 - O sistema deixa de ser consultado e passa a **recomendar**: prioriza intervenções
   por **retorno esperado**, com justificativa técnica, probabilidade e impacto em R$.
 - **Motor de causalidade** (inferência causal) para separar correlação de causa.
-- **LLM** que conversa e interpreta, mas nunca calcula — sempre consulta os motores.
+- ✅ **Assistente LLM (v0)** — o "ChatGPT da fazenda": **Claude Opus 4.8** via *tool use*
+  consulta os motores (simulação, Monte Carlo, decisão) e **narra os números — nunca
+  calcula**. Endpoint `/assistant` e painel de chat no cockpit. Sem chave de IA, um
+  **narrador determinístico** monta a resposta a partir dos mesmos motores.
 - Visão de longo prazo: um **Sistema Operacional da Fazenda** (planejamento, custos,
   estoque, máquinas, clima, satélite, comercialização) — ciclo de aprendizado difícil
   de replicar.

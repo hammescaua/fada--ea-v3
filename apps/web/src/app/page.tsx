@@ -11,6 +11,7 @@ import { LabControls } from "@/components/LabControls";
 import { RiskDistribution } from "@/components/RiskDistribution";
 import { DecisionPanel } from "@/components/DecisionPanel";
 import { LearningPanel } from "@/components/LearningPanel";
+import { AssistantPanel } from "@/components/AssistantPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -137,6 +138,10 @@ export default function Home() {
 
           {sim && (
             <>
+              <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+                <AssistantPanel scenario={debounced} />
+              </div>
+
               <div className="rounded-xl border border-stone-200 bg-white p-4">
                 <YieldWaterfall y={sim.yield_result} />
                 {baseline && yieldDelta !== null && (

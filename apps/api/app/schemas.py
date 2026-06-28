@@ -71,6 +71,11 @@ class MonteCarloIn(ScenarioIn):
     yield_target_sc_ha: float | None = None
 
 
+class AssistantIn(BaseModel):
+    question: str
+    scenario: ScenarioIn
+
+
 class SeasonOutcomeIn(BaseModel):
     crop_year: str
     predicted_sc_ha: float

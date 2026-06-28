@@ -111,6 +111,13 @@ export interface MonteCarloOut {
   };
 }
 
+export interface AssistantOut {
+  answer: string;
+  used_llm: boolean;
+  tool_calls: { tool: string }[];
+  note?: string;
+}
+
 export interface SeasonOutcome {
   crop_year: string;
   predicted_sc_ha: number;

@@ -11,8 +11,11 @@ explicável**. A IA é uma camada *acima* dele, em três níveis:
 2. **Machine Learning (Fase 3)** — Gradient Boosting (CatBoost/LightGBM) que aprende a
    **correção** entre o que o motor prevê e o que o talhão realmente colhe. Um modelo
    por propriedade, e idealmente por talhão.
-3. **LLM (Fase 5)** — interpreta e conversa, mas **nunca faz contas**: consulta os
-   motores e traduz números em linguagem natural com a justificativa técnica.
+3. **LLM (Fase 5, v0 entregue)** — interpreta e conversa, mas **nunca faz contas**:
+   **Claude Opus 4.8** via *tool use* (`app/assistant.py`) chama os motores (simulação,
+   Monte Carlo, decisão), que calculam de verdade, e narra os números retornados. Sem
+   chave de IA, um narrador determinístico usa os mesmos motores — o princípio "nunca
+   inventar números" vale nos dois caminhos.
 
 Esse desenho cria uma vantagem competitiva que cresce com o tempo: o ativo não é o
 código, é o **modelo digital de conhecimento de cada talhão**, refinado a cada safra.

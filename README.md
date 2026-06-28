@@ -34,8 +34,13 @@ manejo priorizadas por retorno** (Motor de Decisão), bloco econômico, calendá
 fenológico, **análise de risco Monte Carlo** (histograma de lucro + probabilidades) e
 comparação "cenário base vs atual".
 
-🔜 Próximas fases: IA personalizada por talhão, satélite (Sentinel-2/NDVI), import de
-monitor de colheita/piloto automático, Monte Carlo, assistente de decisão (LLM).
+✅ **Assistente de decisão (Nível 3)**: o "ChatGPT da fazenda" — **Claude Opus 4.8** via
+*tool use* consulta os motores e **narra os números, nunca calcula**. Endpoint
+`/assistant` + painel de chat. Sem `ANTHROPIC_API_KEY`, um narrador determinístico
+responde a partir dos mesmos motores.
+
+🔜 Próximas fases: satélite (Sentinel-2/NDVI), import de monitor de colheita/piloto
+automático, motor de causalidade, cockpit talhão-cêntrico persistido.
 Ver [`docs/roadmap.md`](docs/roadmap.md).
 
 ---
