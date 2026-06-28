@@ -63,6 +63,8 @@ def water_stress(
     start = stages.get("VE", scenario.sowing_date)
     end = stages.get("R8", start + timedelta(days=scenario.cultivar.cycle_days))
 
+    reproductive = {"R1", "R2", "R3", "R4", "R5", "R5.5", "R6"}
+    hot_days_reproductive = 0
     accum: dict[str, list[float]] = {}
     day = start
     while day <= end:
@@ -80,6 +82,8 @@ def water_stress(
             ks = 1.0
         stress = 1.0 - max(0.0, min(1.0, ks))
         accum.setdefault(stage, []).append(stress)
+        if stage in reproductive and rec.tmax > ref.HEAT_THRESHOLD_C:
+            hot_days_reproductive += 1
         day += timedelta(days=1)
 
     by_stage = {s: sum(v) / len(v) for s, v in accum.items() if v}
@@ -101,6 +105,7 @@ def water_stress(
         "critical_stage": critical,
         "taw_mm": round(taw, 1),
         "raw_mm": round(raw, 1),
+        "hot_days_reproductive": hot_days_reproductive,
     }
 
 

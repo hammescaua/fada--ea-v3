@@ -8,6 +8,7 @@ import type {
   MonteCarloOut,
   ScenarioIn,
   SeasonOutcome,
+  SeasonPlanOut,
   SeasonSummaryOut,
   SimulationOut,
   SoilTestOut,
@@ -36,6 +37,7 @@ export const api = {
   montecarlo: (input: MonteCarloIn) =>
     jpost<MonteCarloOut>("/api/simulate/montecarlo", input),
   decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
+  seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
   assistant: (question: string, scenario: ScenarioIn) =>
@@ -94,13 +96,14 @@ export function defaultScenario(): ScenarioIn {
     population_k_per_ha: 300,
     row_spacing_cm: 45,
     operations: [
+      { kind: "herbicida", op_date: "2025-11-20", cost_per_ha: 160, quality: 0.9 },
+      { kind: "inseticida", op_date: "2026-01-05", cost_per_ha: 120, quality: 0.9 },
       { kind: "fungicida", op_date: "2026-01-10", cost_per_ha: 180, quality: 0.9 },
       { kind: "fungicida", op_date: "2026-01-24", cost_per_ha: 180, quality: 0.9 },
     ],
     costs: [
       { category: "semente", description: "Semente RR", cost_per_ha: 520 },
       { category: "fertilizante", description: "MAP + KCl", cost_per_ha: 1450 },
-      { category: "defensivo", description: "Herbicidas + inseticidas", cost_per_ha: 650 },
       { category: "diesel", description: "Operações mecanizadas", cost_per_ha: 380 },
       { category: "outros", description: "Frete + secagem + admin", cost_per_ha: 620 },
     ],

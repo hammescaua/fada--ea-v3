@@ -13,6 +13,7 @@ import { DecisionPanel } from "@/components/DecisionPanel";
 import { LearningPanel } from "@/components/LearningPanel";
 import { AssistantPanel } from "@/components/AssistantPanel";
 import { FarmManager } from "@/components/FarmManager";
+import { SeasonPlanPanel } from "@/components/SeasonPlanPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -64,6 +65,12 @@ export default function Home() {
   const { data: decisions, isFetching: decisionsLoading } = useQuery({
     queryKey: ["decisions", debounced],
     queryFn: () => api.decisions(debounced),
+    placeholderData: (prev) => prev,
+  });
+
+  const { data: plan } = useQuery({
+    queryKey: ["season-plan", debounced],
+    queryFn: () => api.seasonPlan(debounced),
     placeholderData: (prev) => prev,
   });
 
@@ -164,6 +171,12 @@ export default function Home() {
               <div className="rounded-xl border border-stone-200 bg-white p-4">
                 <DecisionPanel decisions={decisions} loading={decisionsLoading} />
               </div>
+
+              {plan && (
+                <div className="rounded-xl border border-stone-200 bg-white p-4">
+                  <SeasonPlanPanel plan={plan} />
+                </div>
+              )}
 
               <div className="rounded-xl border border-stone-200 bg-white p-4">
                 <EconomicsCard e={sim.economics} />

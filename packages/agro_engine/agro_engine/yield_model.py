@@ -86,18 +86,51 @@ def _water_factor(overall_stress: float, critical_stage: str | None) -> tuple[fl
     return _clamp(m, 0.5, 1.0), 0.75, detail
 
 
-def _sanity_factor(scenario: Scenario) -> tuple[float, float, str]:
-    """Pressão de doença (ferrugem) vs. tolerância da cultivar e qualidade dos fungicidas."""
-    base_disease_pressure = 0.18  # NO do RS: pressão alta de ferrugem
-    tolerance = scenario.cultivar.disease_tolerance
-    fungicidas = [o for o in scenario.operations if o.kind.lower() == "fungicida"]
-    # cada aplicação de fungicida de boa qualidade reduz a pressão remanescente
-    remaining = base_disease_pressure * (1.0 - 0.5 * tolerance)
-    for op in fungicidas:
-        remaining *= (1.0 - 0.55 * _clamp(op.quality, 0, 1))
-    m = 1.0 - _clamp(remaining, 0, 0.25)
-    detail = f"{len(fungicidas)} aplicação(ões) de fungicida"
-    return _clamp(m, 0.75, 1.0), 0.78, detail
+def _ops_of(scenario: Scenario, kind: str):
+    return [o for o in scenario.operations if o.kind.lower() == kind]
+
+
+def _protection_factor(pressure: float, eff: float, ops, lo: float) -> float:
+    """Multiplicador genérico de proteção: cada aplicação remove parte da perda."""
+    remaining = pressure
+    for op in ops:
+        remaining *= (1.0 - eff * _clamp(op.quality, 0, 1))
+    return _clamp(1.0 - remaining, lo, 1.0)
+
+
+def _disease_factor(scenario: Scenario) -> tuple[float, float, str]:
+    """Doenças (ferrugem) — fungicida, modulado pela tolerância da cultivar."""
+    pressure = ref.DISEASE_PRESSURE * (1.0 - 0.5 * scenario.cultivar.disease_tolerance)
+    ops = _ops_of(scenario, "fungicida")
+    m = _protection_factor(pressure, ref.DISEASE_CONTROL_EFF, ops, 0.75)
+    return m, 0.78, f"{len(ops)} fungicida(s)"
+
+
+def _pest_factor(scenario: Scenario) -> tuple[float, float, str]:
+    """Pragas (percevejo/lagartas) — inseticida."""
+    ops = _ops_of(scenario, "inseticida")
+    m = _protection_factor(ref.PEST_PRESSURE, ref.PEST_CONTROL_EFF, ops, 0.82)
+    return m, 0.74, f"{len(ops)} inseticida(s)"
+
+
+def _weed_factor(scenario: Scenario) -> tuple[float, float, str]:
+    """Plantas daninhas — herbicida (competição por água/luz/nutrientes)."""
+    ops = _ops_of(scenario, "herbicida")
+    m = _protection_factor(ref.WEED_PRESSURE, ref.WEED_CONTROL_EFF, ops, 0.80)
+    return m, 0.76, f"{len(ops)} herbicida(s)"
+
+
+def _heat_factor(water: dict) -> tuple[float, float, str]:
+    """Estresse térmico: calor extremo nos estádios reprodutivos derruba vagens.
+
+    Usa a contagem de dias quentes em estádio reprodutivo calculada pelo motor hídrico
+    (quando há clima); sem clima, fica neutro.
+    """
+    hot_days = water.get("hot_days_reproductive", 0)
+    loss = min(ref.HEAT_MAX_LOSS, hot_days * 0.012)
+    m = _clamp(1.0 - loss, 0.82, 1.0)
+    detail = f"{hot_days} dia(s) > {ref.HEAT_THRESHOLD_C:.0f}°C em R" if hot_days else "sem calor extremo"
+    return m, 0.7, detail
 
 
 def decompose(scenario: Scenario, water: dict, sowing: dict) -> YieldResult:
@@ -136,7 +169,10 @@ def decompose(scenario: Scenario, water: dict, sowing: dict) -> YieldResult:
     )
 
     apply("Água", _water_factor(water.get("overall_stress", 0.0), water.get("critical_stage")))
-    apply("Sanidade", _sanity_factor(scenario))
+    apply("Calor", _heat_factor(water))
+    apply("Daninhas", _weed_factor(scenario))
+    apply("Pragas", _pest_factor(scenario))
+    apply("Doenças", _disease_factor(scenario))
 
     expected = round(running, 1)
     # Incerteza: combina a confiança média com o nº de fatores limitantes.

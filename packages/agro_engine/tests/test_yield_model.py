@@ -51,13 +51,13 @@ def test_more_fungicide_improves_sanity(base_scenario):
 
     base_scenario.operations = []
     no_fung = _run(base_scenario)
-    sanity_no = next(c for c in no_fung.contributions if c.label == "Sanidade").delta_sc_ha
+    sanity_no = next(c for c in no_fung.contributions if c.label == "Doenças").delta_sc_ha
     base_scenario.operations = [
         Operation(kind="fungicida", op_date=date(2026, 1, 10), cost_per_ha=180.0, quality=0.95),
         Operation(kind="fungicida", op_date=date(2026, 1, 24), cost_per_ha=180.0, quality=0.95),
     ]
     with_fung = _run(base_scenario)
-    sanity_yes = next(c for c in with_fung.contributions if c.label == "Sanidade").delta_sc_ha
+    sanity_yes = next(c for c in with_fung.contributions if c.label == "Doenças").delta_sc_ha
     assert sanity_yes > sanity_no  # menos perda por doença
 
 

@@ -7,9 +7,11 @@ from datetime import date, timedelta
 from fastapi import APIRouter
 
 from agro_engine import (
+    operations_impact,
     recommend_decisions,
     recommend_sowing_window,
     run_montecarlo,
+    season_budget,
     simulate,
 )
 from agro_engine.models import (
@@ -126,6 +128,17 @@ def post_assistant(payload: AssistantIn) -> dict:
     quando não há ANTHROPIC_API_KEY."""
     scenario = _to_scenario(payload.scenario)
     return assistant.ask(payload.question, scenario)
+
+
+@router.post("/season-plan")
+def post_season_plan(payload: ScenarioIn) -> dict:
+    """Plano da safra: orçamento por categoria, fluxo de caixa (capital de giro) e o
+    impacto de cada manejo (quanto cada ação representa em produtividade e R$)."""
+    scenario = _to_scenario(payload)
+    result = simulate(scenario)
+    budget = season_budget(scenario, result.yield_result.expected_sc_ha)
+    impacts = [i.__dict__ for i in operations_impact(scenario)]
+    return {"budget": budget, "operations_impact": impacts}
 
 
 @router.post("/decisions")

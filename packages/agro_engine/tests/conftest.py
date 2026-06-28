@@ -80,6 +80,8 @@ def base_scenario(base_cultivar, good_soil) -> Scenario:
         population_k_per_ha=300.0,
         weather=weather,
         operations=[
+            Operation(kind="herbicida", op_date=date(2025, 11, 20), cost_per_ha=160.0, quality=0.9),
+            Operation(kind="inseticida", op_date=date(2026, 1, 5), cost_per_ha=120.0, quality=0.9),
             Operation(kind="fungicida", op_date=date(2026, 1, 10), cost_per_ha=180.0, quality=0.9),
             Operation(kind="fungicida", op_date=date(2026, 1, 25), cost_per_ha=180.0, quality=0.9),
         ],

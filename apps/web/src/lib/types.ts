@@ -111,6 +111,27 @@ export interface MonteCarloOut {
   };
 }
 
+export interface SeasonPlanOut {
+  budget: {
+    cost_by_category: Record<string, number>;
+    total_cost_per_ha: number;
+    revenue_per_ha: number;
+    profit_per_ha: number;
+    working_capital_per_ha: number;
+    harvest_date: string;
+    cashflow: { day: string; label: string; amount: number; balance: number }[];
+  };
+  operations_impact: {
+    kind: string;
+    op_date: string;
+    cost_per_ha: number;
+    delta_yield_sc_ha: number;
+    value_per_ha: number;
+    net_per_ha: number;
+    roi: number | null;
+  }[];
+}
+
 export interface FarmOut {
   id: string;
   name: string;

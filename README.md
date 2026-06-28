@@ -25,7 +25,9 @@ confiança, modelo econômico (lucro, ROI, break-even), **simulador Monte Carlo*
 (distribuição de lucro e risco de prejuízo), **Motor de Decisão** (prioriza
 intervenções por retorno esperado, com probabilidade via Monte Carlo pareado) e
 **Knowledge Engine** (calibração previsto-vs-real que aprende a correção de cada
-talhão a cada safra + feature engineering). 33 testes passando.
+talhão a cada safra) e **Orçamento/fluxo de caixa + impacto por manejo** (quanto cada
+ação representa em sc/ha e R$). IPPD com 10 fatores (inclui daninhas, pragas, doenças,
+calor). 37 testes passando.
 ✅ **API** (`apps/api`): FastAPI expondo `/simulate`, `/sowing-window`, catálogos, e
 CRUD de fazendas/talhões em PostGIS. Cliente de clima real (Open-Meteo).
 ✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. **Cockpit persistido** (criar/

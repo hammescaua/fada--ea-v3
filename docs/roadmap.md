@@ -18,10 +18,13 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 - ✅ **Monte Carlo**: simula milhares de safras (clima + preço estocásticos) →
   distribuição de lucro, "chance de lucro ≥ R$ X/ha" e probabilidade de prejuízo.
   Motor (`montecarlo.py`, com testes), endpoint `/simulate/montecarlo` e UI de risco.
+- ✅ **Mais variáveis no IPPD**: daninhas (herbicida), pragas (inseticida) e doenças
+  (fungicida) como fatores separados, + **estresse térmico** (dias > 34 °C em R1–R6).
+- ✅ **Orçamento + fluxo de caixa + capital de giro** e **impacto por manejo** (quanto
+  cada ação representa em sc/ha e R$). Motor `budget.py` + `operations_impact`, endpoint
+  `/season-plan`, painel "Plano da Safra".
 - Curvas de nutrição mais ricas (Ca, Mg, S, micros; resposta a calagem/gessagem).
-- Risco fitossanitário dinâmico (ferrugem/percevejo em função do clima e do estádio).
-- Excesso hídrico, geada, calor extremo (VPD, dias > 34 °C).
-- Cronograma/orçamento da safra ponta a ponta (planejamento → colheita → faturamento).
+- Excesso hídrico/geada; risco fitossanitário dinâmico em função do clima observado.
 
 ## Fase 3 — IA personalizada por talhão  *(fundação entregue)*
 

@@ -19,7 +19,8 @@ from .models import (
     WeatherSeries,
     YieldResult,
 )
-from .decision import recommend_decisions
+from .budget import season_budget
+from .decision import operations_impact, recommend_decisions
 from .knowledge import (
     Calibration,
     SeasonRecord,
@@ -57,8 +58,10 @@ __all__ = [
     "compute_economics",
     "decompose_yield",
     "evaluate_sowing_window",
+    "operations_impact",
     "recommend_decisions",
     "recommend_sowing_window",
+    "season_budget",
     "run_montecarlo",
     "season_features",
     "simulate",

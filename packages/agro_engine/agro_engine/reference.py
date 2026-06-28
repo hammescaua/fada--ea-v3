@@ -106,6 +106,19 @@ V_SUFFICIENT_PCT: float = 60.0
 # --- População ---------------------------------------------------------------
 POPULATION_OPTIMAL_K: tuple[float, float] = (260.0, 340.0)  # mil plantas/ha
 
+# --- Fitossanidade: pressões e eficiência de controle (NO do RS) -------------
+# Perda potencial se NÃO houver controle algum; cada aplicação de boa qualidade
+# remove uma fração da perda remanescente. Valores conservadores de literatura.
+DISEASE_PRESSURE: float = 0.18   # ferrugem-asiática: pressão alta
+DISEASE_CONTROL_EFF: float = 0.55
+PEST_PRESSURE: float = 0.12      # percevejo / lagartas
+PEST_CONTROL_EFF: float = 0.60
+WEED_PRESSURE: float = 0.16      # competição de plantas daninhas
+WEED_CONTROL_EFF: float = 0.70   # herbicida bem manejado controla bem
+# Estresse térmico: calor acima deste limiar nos estádios reprodutivos derruba vagens.
+HEAT_THRESHOLD_C: float = 34.0
+HEAT_MAX_LOSS: float = 0.18      # perda máxima por calor extremo persistente
+
 # --- Defaults regionais Noroeste do RS ---------------------------------------
 DEFAULT_PRICE_PER_SC: float = 120.0
 NO_RS_MUNICIPALITIES: list[str] = [

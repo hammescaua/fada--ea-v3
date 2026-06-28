@@ -182,6 +182,45 @@ def _probability_positive(base: Scenario, action: Scenario, n: int, seed: int) -
     return round(wins / n, 3) if n else 0.0
 
 
+@dataclass
+class OperationImpact:
+    kind: str
+    op_date: str
+    cost_per_ha: float
+    delta_yield_sc_ha: float       # quanto este manejo agrega à produtividade
+    value_per_ha: float            # valor bruto agregado (Δprodutividade × preço)
+    net_per_ha: float              # valor líquido (valor − custo) — "quanto representa"
+    roi: float | None
+
+
+def operations_impact(scenario: Scenario) -> list[OperationImpact]:
+    """Para cada manejo no plano, mede QUANTO ele representa na safra.
+
+    Compara o cenário com e sem cada operação: a diferença é a contribuição daquele
+    manejo (produtividade ganha, valor bruto e valor líquido descontando o custo).
+    É o que deixa claro ao agricultor o retorno de cada ação.
+    """
+    base_profit, base_yield = _profit_and_yield(scenario)
+    price = scenario.soybean_price_per_sc
+    out: list[OperationImpact] = []
+
+    for op in scenario.operations:
+        without = replace(scenario, operations=[o for o in scenario.operations if o is not op])
+        _, y_without = _profit_and_yield(without)
+        d_yield = round(base_yield - y_without, 2)
+        value = round(d_yield * price, 0)
+        net = round(value - op.cost_per_ha, 0)
+        roi = round(value / op.cost_per_ha, 2) if op.cost_per_ha > 0 else None
+        out.append(
+            OperationImpact(
+                kind=op.kind, op_date=op.op_date.isoformat(), cost_per_ha=op.cost_per_ha,
+                delta_yield_sc_ha=d_yield, value_per_ha=value, net_per_ha=net, roi=roi,
+            )
+        )
+    out.sort(key=lambda o: o.net_per_ha, reverse=True)
+    return out
+
+
 def recommend_decisions(
     scenario: Scenario,
     n_prob: int = 400,
