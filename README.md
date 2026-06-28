@@ -22,9 +22,10 @@ ver, em segundos, o impacto na produtividade (± incerteza) e na rentabilidade.
 ✅ **Motor agronômico v0** (`packages/agro_engine`): fenologia por graus-dia, balanço
 hídrico FAO-56, janela de semeadura ZARC, **decomposição IPPD** com intervalo de
 confiança, modelo econômico (lucro, ROI, break-even), **simulador Monte Carlo**
-(distribuição de lucro e risco de prejuízo) e **Motor de Decisão** (prioriza
-intervenções por retorno esperado, com probabilidade via Monte Carlo pareado).
-28 testes passando.
+(distribuição de lucro e risco de prejuízo), **Motor de Decisão** (prioriza
+intervenções por retorno esperado, com probabilidade via Monte Carlo pareado) e
+**Knowledge Engine** (calibração previsto-vs-real que aprende a correção de cada
+talhão a cada safra + feature engineering). 33 testes passando.
 ✅ **API** (`apps/api`): FastAPI expondo `/simulate`, `/sowing-window`, catálogos, e
 CRUD de fazendas/talhões em PostGIS. Cliente de clima real (Open-Meteo).
 ✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. Mapa do talhão, controles do

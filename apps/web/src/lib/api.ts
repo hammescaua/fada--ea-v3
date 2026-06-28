@@ -1,8 +1,10 @@
 import type {
+  CalibrationOut,
   DecisionOut,
   MonteCarloIn,
   MonteCarloOut,
   ScenarioIn,
+  SeasonOutcome,
   SimulationOut,
 } from "./types";
 
@@ -29,6 +31,8 @@ export const api = {
   montecarlo: (input: MonteCarloIn) =>
     jpost<MonteCarloOut>("/api/simulate/montecarlo", input),
   decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
+  calibration: (records: SeasonOutcome[]) =>
+    jpost<CalibrationOut>("/api/calibration/compute", { records }),
   municipalities: () => jget<string[]>("/api/municipalities"),
   sampleCultivars: () =>
     jget<

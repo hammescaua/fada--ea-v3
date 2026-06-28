@@ -21,7 +21,7 @@ simulations    (cenários simulados: entrada + saída)
 | `fields` | **talhão** — geometria `Polygon(4326)`, área, centroide, município |
 | `soil_tests` | análise por talhão e data: argila, MO, pH, CTC, V%, P, K |
 | `cultivars` | catálogo: grupo de maturação, ciclo, potencial, tolerância |
-| `seasons` | safra: talhão × cultivar × ano-safra × data de plantio × população |
+| `seasons` | safra: talhão × cultivar × ano-safra × plantio × população; guarda **previsto vs. realizado** (`predicted/actual_yield_sc_ha`), o snapshot do cenário e os **atributos** (`features`) para o Knowledge Engine |
 | `operations` | manejos: tipo, data, produto, dose, custo, qualidade da aplicação |
 | `cost_items` | itens de custo da safra (R$/ha) |
 | `weather_cache` | clima diário em cache (evita reconsultar APIs) |

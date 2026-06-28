@@ -95,6 +95,11 @@ class Season(Base):
     population_k_per_ha: Mapped[float | None] = mapped_column(Float, nullable=True)
     row_spacing_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
     soybean_price_per_sc: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Loop de aprendizado (Knowledge Engine): previsto vs. realizado + atributos da safra.
+    predicted_yield_sc_ha: Mapped[float | None] = mapped_column(Float, nullable=True)
+    actual_yield_sc_ha: Mapped[float | None] = mapped_column(Float, nullable=True)
+    scenario_snapshot: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    features: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     field: Mapped[Field] = relationship(back_populates="seasons")
     operations: Mapped[list["Operation"]] = relationship(back_populates="season", cascade="all, delete-orphan")

@@ -20,12 +20,16 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 - Excesso hídrico, geada, calor extremo (VPD, dias > 34 °C).
 - Cronograma/orçamento da safra ponta a ponta (planejamento → colheita → faturamento).
 
-## Fase 3 — IA personalizada por talhão
+## Fase 3 — IA personalizada por talhão  *(fundação entregue)*
 
-- Após ≥1 safra real, modelos **CatBoost/LightGBM** aprendem a *correção* entre o
-  motor e o realizado, por propriedade e por talhão.
-- Feature engineering pesado (atributos derivados por estádio, não dados crus).
-- Intervalos de confiança calibrados pelo histórico do talhão.
+- ✅ **Knowledge Engine (v0)** — calibração previsto-vs-real por talhão com
+  **encolhimento bayesiano** (correção tímida com poucas safras, convergindo para o
+  viés real conforme acumula; a incerteza encolhe com o aprendizado). Motor
+  (`knowledge.py`), endpoints stateless e persistidos (PostGIS) e painel de aprendizado.
+- ✅ **Feature engineering** (`season_features`) — extrai atributos por safra (déficit
+  em R3/R4/R5, desvio da janela, etc.), nunca dados crus, persistidos em `seasons.features`.
+- 🔜 Quando houver dezenas de talhões × safras: trocar o encolhimento por
+  **CatBoost/LightGBM** sobre os mesmos atributos, mantendo a interface.
 - Meta: erro médio de previsão caindo para a faixa de 3–5% após algumas safras.
 
 ## Fase 4 — Gêmeo Digital "vivo"

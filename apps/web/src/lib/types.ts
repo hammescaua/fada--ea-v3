@@ -111,6 +111,21 @@ export interface MonteCarloOut {
   };
 }
 
+export interface SeasonOutcome {
+  crop_year: string;
+  predicted_sc_ha: number;
+  actual_sc_ha: number;
+}
+
+export interface CalibrationOut {
+  n_seasons: number;
+  bias_sc_ha: number;
+  confidence: number;
+  mae_before: number;
+  mae_after: number;
+  raw_bias_sc_ha: number;
+}
+
 export interface DecisionOut {
   key: string;
   label: string;

@@ -20,6 +20,13 @@ from .models import (
     YieldResult,
 )
 from .decision import recommend_decisions
+from .knowledge import (
+    Calibration,
+    SeasonRecord,
+    apply_correction,
+    calibrate,
+    season_features,
+)
 from .montecarlo import run_montecarlo
 from .phenology import stage_dates
 from .simulate import simulate
@@ -31,6 +38,7 @@ from .yield_model import decompose as decompose_yield
 __version__ = "0.1.0"
 
 __all__ = [
+    "Calibration",
     "Cultivar",
     "CostItem",
     "DailyWeather",
@@ -38,17 +46,21 @@ __all__ = [
     "FactorContribution",
     "Operation",
     "Scenario",
+    "SeasonRecord",
     "SimulationResult",
     "SoilProfile",
     "SoilTexture",
     "WeatherSeries",
     "YieldResult",
+    "apply_correction",
+    "calibrate",
     "compute_economics",
     "decompose_yield",
     "evaluate_sowing_window",
     "recommend_decisions",
     "recommend_sowing_window",
     "run_montecarlo",
+    "season_features",
     "simulate",
     "stage_dates",
     "water_stress",

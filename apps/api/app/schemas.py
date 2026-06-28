@@ -71,6 +71,31 @@ class MonteCarloIn(ScenarioIn):
     yield_target_sc_ha: float | None = None
 
 
+class SeasonOutcomeIn(BaseModel):
+    crop_year: str
+    predicted_sc_ha: float
+    actual_sc_ha: float
+
+
+class CalibrationComputeIn(BaseModel):
+    records: list[SeasonOutcomeIn] = Field(default_factory=list)
+
+
+class CalibrationOut(BaseModel):
+    n_seasons: int
+    bias_sc_ha: float
+    confidence: float
+    mae_before: float
+    mae_after: float
+    raw_bias_sc_ha: float
+
+
+class SeasonRecordIn(BaseModel):
+    crop_year: str
+    scenario: ScenarioIn
+    actual_yield_sc_ha: float | None = None
+
+
 class FactorOut(BaseModel):
     label: str
     delta_sc_ha: float

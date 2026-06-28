@@ -10,6 +10,7 @@ import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
 import { RiskDistribution } from "@/components/RiskDistribution";
 import { DecisionPanel } from "@/components/DecisionPanel";
+import { LearningPanel } from "@/components/LearningPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -206,6 +207,10 @@ export default function Home() {
                     {mc.isPending ? "Simulando 3.000 safras…" : "Rodar análise de risco"}
                   </button>
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-stone-200 bg-white p-4">
+                <LearningPanel currentExpected={sim.yield_result.expected_sc_ha} />
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
