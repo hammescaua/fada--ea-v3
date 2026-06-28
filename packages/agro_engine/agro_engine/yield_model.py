@@ -125,6 +125,7 @@ def decompose(scenario: Scenario, water: dict, sowing: dict) -> YieldResult:
     apply("Solo", _soil_factor(scenario.soil))
     apply("Nutrição", _nutrition_factor(scenario.soil))
     apply("Compactação", _compaction_factor(scenario.soil))
+    apply("População", _population_factor(scenario))
 
     # Janela de semeadura: penalidade vem em sc/ha → vira multiplicador.
     penalty = sowing.get("penalty_sc_ha", 0.0)

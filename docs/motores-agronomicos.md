@@ -76,6 +76,26 @@ break-even (sc) = custo / preço          break-even (preço) = custo / produtiv
 Produtividade alta não é lucro: o motor sempre devolve break-even e preço mínimo para
 avaliar se um investimento de manejo se paga.
 
+## 6. Monte Carlo — distribuição de risco
+
+Roda o motor N vezes (default 2000–3000) variando clima (chuva/temperatura sintéticas
+da climatologia de verão do NO-RS) e preço. Devolve percentis p10/p50/p90, histogramas
+e probabilidades: `P(lucro ≥ meta)`, `P(produtividade ≥ meta)`, `P(prejuízo)`. Como a
+água só reduz o teto (multiplicador ≤ 1), a distribuição é assimétrica à esquerda — anos
+ruins pesam mais que anos bons, o que é realista. `montecarlo.py`.
+
+## 7. Motor de Decisão — "vender decisão, não previsão"
+
+O sexto motor não prevê: ele **recomenda**. Para cada decisão candidata (aplicar/remover
+fungicida, antecipar semeadura, corrigir P, calagem, ajustar população) transforma o
+cenário (embutindo o custo da ação), re-simula e mede Δprodutividade e Δlucro vs. a base.
+A **probabilidade de retorno positivo** vem de um **Monte Carlo pareado** (números
+aleatórios comuns): o mesmo clima e o mesmo preço são sorteados para os dois cenários em
+cada iteração, isolando o efeito da decisão. As ações saem ordenadas por Δlucro, com ROI
+da ação e justificativa técnica. `decision.py`.
+
+> No futuro, o LLM (Nível 3) apenas **narra** estes números — nunca os calcula.
+
 ## Limitações do v0 (honestidade do modelo)
 
 - Talhão tratado como homogêneo (sem variabilidade espacial intra-talhão ainda).

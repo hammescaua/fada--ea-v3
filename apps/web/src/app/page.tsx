@@ -9,6 +9,7 @@ import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
 import { RiskDistribution } from "@/components/RiskDistribution";
+import { DecisionPanel } from "@/components/DecisionPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -54,6 +55,12 @@ export default function Home() {
   const { data: sim, isFetching, error } = useQuery({
     queryKey: ["simulate", debounced],
     queryFn: () => api.simulate(debounced),
+    placeholderData: (prev) => prev,
+  });
+
+  const { data: decisions, isFetching: decisionsLoading } = useQuery({
+    queryKey: ["decisions", debounced],
+    queryFn: () => api.decisions(debounced),
     placeholderData: (prev) => prev,
   });
 
@@ -140,6 +147,10 @@ export default function Home() {
                     </span>
                   </p>
                 )}
+              </div>
+
+              <div className="rounded-xl border border-stone-200 bg-white p-4">
+                <DecisionPanel decisions={decisions} loading={decisionsLoading} />
               </div>
 
               <div className="rounded-xl border border-stone-200 bg-white p-4">

@@ -6,7 +6,12 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter
 
-from agro_engine import recommend_sowing_window, run_montecarlo, simulate
+from agro_engine import (
+    recommend_decisions,
+    recommend_sowing_window,
+    run_montecarlo,
+    simulate,
+)
 from agro_engine.models import (
     CostItem,
     Cultivar,
@@ -111,6 +116,14 @@ def post_montecarlo(payload: MonteCarloIn) -> dict:
         profit_target_per_ha=payload.profit_target_per_ha,
         yield_target_sc_ha=payload.yield_target_sc_ha,
     )
+
+
+@router.post("/decisions")
+def post_decisions(payload: ScenarioIn) -> list[dict]:
+    """Motor de Decisão: avalia intervenções possíveis no talhão e as ordena por
+    Δlucro esperado, com Δprodutividade, ROI da ação e probabilidade de retorno."""
+    scenario = _to_scenario(payload)
+    return [r.__dict__ for r in recommend_decisions(scenario)]
 
 
 @router.get("/sowing-window")

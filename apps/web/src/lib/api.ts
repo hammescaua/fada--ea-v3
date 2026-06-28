@@ -1,4 +1,10 @@
-import type { MonteCarloIn, MonteCarloOut, ScenarioIn, SimulationOut } from "./types";
+import type {
+  DecisionOut,
+  MonteCarloIn,
+  MonteCarloOut,
+  ScenarioIn,
+  SimulationOut,
+} from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -22,6 +28,7 @@ export const api = {
   simulate: (scenario: ScenarioIn) => jpost<SimulationOut>("/api/simulate", scenario),
   montecarlo: (input: MonteCarloIn) =>
     jpost<MonteCarloOut>("/api/simulate/montecarlo", input),
+  decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
   municipalities: () => jget<string[]>("/api/municipalities"),
   sampleCultivars: () =>
     jget<

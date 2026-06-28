@@ -111,6 +111,19 @@ export interface MonteCarloOut {
   };
 }
 
+export interface DecisionOut {
+  key: string;
+  label: string;
+  description: string;
+  category: string;
+  added_cost_per_ha: number;
+  delta_yield_sc_ha: number;
+  delta_profit_per_ha: number;
+  action_roi: number | null;
+  probability_positive: number;
+  justification: string;
+}
+
 export interface MonteCarloIn extends ScenarioIn {
   iterations: number;
   seed: number | null;

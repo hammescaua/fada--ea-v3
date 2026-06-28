@@ -37,6 +37,10 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 
 ## Fase 5 — Assistente de decisão
 
+- ✅ **Motor de Decisão (v0)** — já entregue: prioriza intervenções por **retorno
+  esperado**, com Δprodutividade, Δlucro, ROI da ação, justificativa técnica e
+  **probabilidade de retorno positivo** (Monte Carlo pareado com números aleatórios
+  comuns). Motor (`decision.py`), endpoint `/decisions` e painel de recomendações.
 - O sistema deixa de ser consultado e passa a **recomendar**: prioriza intervenções
   por **retorno esperado**, com justificativa técnica, probabilidade e impacto em R$.
 - **Motor de causalidade** (inferência causal) para separar correlação de causa.
