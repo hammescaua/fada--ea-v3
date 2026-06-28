@@ -7,6 +7,7 @@ import type {
   FieldOut,
   MonteCarloIn,
   MonteCarloOut,
+  OptimizeOut,
   ScenarioIn,
   SeasonOutcome,
   SeasonPlanOut,
@@ -40,6 +41,7 @@ export const api = {
   decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
   seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
   fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
+  optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
   assistant: (question: string, scenario: ScenarioIn) =>

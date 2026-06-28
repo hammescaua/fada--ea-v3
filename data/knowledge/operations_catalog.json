@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "descricao": "Mapa CANÔNICO de todos os manejos possíveis na cultura da soja. Cada manejo declara: a fase/janela ideal, a variável-alvo que ele afeta no modelo de produtividade (IPPD), o insumo associado (preço no inputs_catalog) e a unidade de dose. Adicionar um manejo novo é uma ENTRADA AQUI, não código.",
+    "fonte": "Embrapa Soja — Tecnologias de Produção; CQFS-RS/SC 2016",
+    "alvo_legenda": "fator do IPPD que o manejo influencia (solo, nutricao, populacao, janela, agua, calor, daninhas, pragas, doencas)"
+  },
+  "operations": {
+    "calagem":        {"label": "Calagem", "category": "correcao", "janela": "3–6 meses antes da semeadura", "alvo": "solo", "insumo": "calcario_dolomitico", "dose_unit": "t/ha", "funcao": "corrigir acidez/elevar V%"},
+    "gessagem":       {"label": "Gessagem", "category": "correcao", "janela": "pré-semeadura", "alvo": "solo", "insumo": "gesso_agricola", "dose_unit": "t/ha", "funcao": "Ca/Al em subsuperfície"},
+    "adubacao_p":     {"label": "Adubação fosfatada", "category": "nutricao", "janela": "semeadura", "alvo": "nutricao", "insumo": "map", "dose_unit": "kg/ha", "funcao": "construção/manutenção de P"},
+    "adubacao_k":     {"label": "Adubação potássica", "category": "nutricao", "janela": "semeadura/pré", "alvo": "nutricao", "insumo": "kcl", "dose_unit": "kg/ha", "funcao": "reposição de K"},
+    "adubacao_base":  {"label": "Adubação de base (formulado)", "category": "nutricao", "janela": "semeadura", "alvo": "nutricao", "insumo": "map", "dose_unit": "kg/ha", "funcao": "NPK no sulco"},
+    "adubacao_foliar":{"label": "Adubação foliar (micros)", "category": "nutricao", "janela": "V4–R2", "alvo": "nutricao", "insumo": null, "dose_unit": "L/ha", "funcao": "micronutrientes (Mn, B, Co/Mo)"},
+    "inoculacao":     {"label": "Inoculação (Bradyrhizobium)", "category": "semeadura", "janela": "tratamento de semente", "alvo": "nutricao", "insumo": null, "dose_unit": "dose/ha", "funcao": "fixação biológica de N"},
+    "tratamento_sementes": {"label": "Tratamento de sementes", "category": "semeadura", "janela": "pré-semeadura", "alvo": "populacao", "insumo": null, "dose_unit": "dose/ha", "funcao": "proteção inicial (stand)"},
+    "semeadura":      {"label": "Semeadura", "category": "semeadura", "janela": "janela ZARC", "alvo": "janela", "insumo": null, "dose_unit": "—", "funcao": "definir data/população/espaçamento"},
+    "dessecacao":     {"label": "Dessecação pré-semeadura", "category": "daninhas", "janela": "pré-semeadura", "alvo": "daninhas", "insumo": null, "dose_unit": "L/ha", "funcao": "limpar a área (plantio direto)"},
+    "herbicida_pre":  {"label": "Herbicida pré-emergente", "category": "daninhas", "janela": "semeadura", "alvo": "daninhas", "insumo": null, "dose_unit": "L/ha", "funcao": "residual de daninhas"},
+    "herbicida":      {"label": "Herbicida pós-emergente", "category": "daninhas", "janela": "V2–V6", "alvo": "daninhas", "insumo": null, "dose_unit": "L/ha", "funcao": "controle de daninhas em pós"},
+    "inseticida":     {"label": "Inseticida", "category": "pragas", "janela": "V/R conforme monitoramento", "alvo": "pragas", "insumo": null, "dose_unit": "L/ha", "funcao": "percevejos/lagartas"},
+    "fungicida":      {"label": "Fungicida", "category": "doencas", "janela": "R1–R5 (preventivo)", "alvo": "doencas", "insumo": null, "dose_unit": "L/ha", "funcao": "ferrugem/mancha-alvo"},
+    "regulador":      {"label": "Regulador/bioestimulante", "category": "fisiologico", "janela": "V/R", "alvo": "populacao", "insumo": null, "dose_unit": "L/ha", "funcao": "arquitetura/enchimento (uso situacional)"},
+    "cobertura":      {"label": "Adubação de cobertura", "category": "nutricao", "janela": "V4–R1", "alvo": "nutricao", "insumo": "kcl", "dose_unit": "kg/ha", "funcao": "reforço de K em cobertura"},
+    "colheita":       {"label": "Colheita", "category": "colheita", "janela": "R8 (umidade ~14%)", "alvo": "janela", "insumo": null, "dose_unit": "—", "funcao": "perdas por atraso/regulagem"}
+  }
+}

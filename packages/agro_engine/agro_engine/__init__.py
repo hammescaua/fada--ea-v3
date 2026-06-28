@@ -31,6 +31,7 @@ from .knowledge import (
 )
 from .montecarlo import run_montecarlo
 from .phenology import stage_dates
+from .scenario_search import optimize_season
 from .simulate import simulate
 from .sowing_window import evaluate as evaluate_sowing_window
 from .sowing_window import recommend as recommend_sowing_window
@@ -60,6 +61,7 @@ __all__ = [
     "decompose_yield",
     "evaluate_sowing_window",
     "operations_impact",
+    "optimize_season",
     "recommend_amendments",
     "recommend_decisions",
     "recommend_sowing_window",

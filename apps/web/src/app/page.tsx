@@ -15,6 +15,7 @@ import { AssistantPanel } from "@/components/AssistantPanel";
 import { FarmManager } from "@/components/FarmManager";
 import { SeasonPlanPanel } from "@/components/SeasonPlanPanel";
 import { FertilityPanel } from "@/components/FertilityPanel";
+import { BestPlanPanel } from "@/components/BestPlanPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -160,6 +161,13 @@ export default function Home() {
             <>
               <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
                 <AssistantPanel scenario={debounced} />
+              </div>
+
+              <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+                <BestPlanPanel
+                  scenario={debounced}
+                  onApply={(patch) => setScenario((s) => ({ ...s, ...patch }))}
+                />
               </div>
 
               <div className="rounded-xl border border-stone-200 bg-white p-4">

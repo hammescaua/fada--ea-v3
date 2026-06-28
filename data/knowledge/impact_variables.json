@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "descricao": "Taxonomia FECHADA das variáveis que mais impactam a produtividade da soja, agrupadas. Para cada uma: como entra no modelo (fator do IPPD, contexto climático, ou econômico). É o escopo definido — novas variáveis entram como dado, mapeadas a um fator existente, sem reescrever o motor.",
+    "fonte": "Embrapa Soja; CQFS-RS/SC; FAO-56; ZARC/MAPA",
+    "como_entra_legenda": "ippd = fator multiplicativo na decomposição de produtividade; clima = série diária no balanço hídrico/térmico; economia = custo/receita; contexto = condiciona outros fatores"
+  },
+  "grupos": {
+    "solo": {
+      "variaveis": ["textura/argila", "pH", "V% (saturação por bases)", "CTC", "matéria orgânica", "P", "K", "Ca/Mg", "S", "micronutrientes", "compactação", "profundidade efetiva"],
+      "como_entra": "ippd (fatores Solo, Nutrição, Compactação) + base para recomendação de fertilidade"
+    },
+    "clima": {
+      "variaveis": ["chuva por estádio", "déficit hídrico diário", "ET0", "radiação", "temperatura máx/mín", "dias > 34°C (calor)", "geada", "ENSO (El Niño/La Niña)"],
+      "como_entra": "clima (balanço hídrico FAO-56 → fator Água; contagem de calor → fator Calor)"
+    },
+    "planta_cultivar": {
+      "variaveis": ["grupo de maturação", "potencial genético", "ciclo", "tolerância a doenças", "hábito de crescimento", "população", "espaçamento"],
+      "como_entra": "ippd (potencial de partida + fatores População e Doenças) e fenologia (GDD)"
+    },
+    "manejo": {
+      "variaveis": ["data de semeadura", "programa de daninhas", "programa de pragas", "programa de doenças", "adubação/correção", "qualidade da aplicação (T°/vento/umidade)"],
+      "como_entra": "ippd (fatores Janela, Daninhas, Pragas, Doenças, Nutrição) via operations_catalog"
+    },
+    "maquina_operacao": {
+      "variaveis": ["regulagem da plantadeira (estande/falhas/duplos)", "profundidade", "velocidade", "condições de pulverização", "perdas na colheita"],
+      "como_entra": "ippd (qualidade da operação modula População e a eficiência dos manejos) — refino futuro"
+    },
+    "historico_relevo": {
+      "variaveis": ["rotação/cultura anterior", "produtividade histórica", "doenças recorrentes", "altitude", "declividade", "drenagem/erosão"],
+      "como_entra": "contexto + Knowledge Engine (calibração por talhão) — refino futuro"
+    },
+    "mercado": {
+      "variaveis": ["preço da soja", "preço dos insumos", "câmbio", "frete", "custo de secagem/comercialização"],
+      "como_entra": "economia (motor de orçamento/fluxo de caixa) — preços no inputs_catalog"
+    }
+  }
+}

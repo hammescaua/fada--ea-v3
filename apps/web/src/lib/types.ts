@@ -111,6 +111,30 @@ export interface MonteCarloOut {
   };
 }
 
+export interface OptimizeOut {
+  combinacoes_avaliadas: number;
+  atual: { expected_sc_ha: number; profit_per_ha: number };
+  melhor_plano: {
+    sowing_date: string;
+    population_k_per_ha: number;
+    num_fungicidas: number;
+    expected_sc_ha: number;
+    profit_per_ha: number;
+    delta_profit_vs_atual: number;
+    delta_yield_vs_atual: number;
+  };
+  ranking: {
+    sowing_date: string;
+    population_k_per_ha: number;
+    num_fungicidas: number;
+    expected_sc_ha: number;
+    profit_per_ha: number;
+  }[];
+  decomposicao: { fator: string; delta_sc_ha: number; detalhe: string }[];
+  porques: string[];
+  fertilidade: { acao: string; investimento_por_ha: number; liquido_por_ano: number; roi: number | null }[];
+}
+
 export interface FertilityRec {
   key: string;
   label: string;

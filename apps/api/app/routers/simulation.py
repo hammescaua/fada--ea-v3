@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from agro_engine import (
     operations_impact,
+    optimize_season,
     recommend_amendments,
     recommend_decisions,
     recommend_sowing_window,
@@ -129,6 +130,14 @@ def post_assistant(payload: AssistantIn) -> dict:
     quando não há ANTHROPIC_API_KEY."""
     scenario = _to_scenario(payload.scenario)
     return assistant.ask(payload.question, scenario)
+
+
+@router.post("/optimize-season")
+def post_optimize_season(payload: ScenarioIn) -> dict:
+    """Motor de cenários: varre combinações de data × população × programa de fungicida,
+    ranqueia por lucro e devolve o melhor plano para o talhão + a explicação do porquê."""
+    scenario = _to_scenario(payload)
+    return optimize_season(scenario)
 
 
 @router.post("/fertility")
