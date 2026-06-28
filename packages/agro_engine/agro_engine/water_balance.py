@@ -109,7 +109,7 @@ def _day_weather(weather: WeatherSeries | None, day: date) -> DailyWeather:
         for d in weather.days:
             if d.day == day:
                 return d
-    # Fallback climatológico: safra de chuva ADEQUADA no verão do NO-RS (baixo
-    # estresse). Serve só quando não há clima real; com Open-Meteo o déficit é
-    # calculado a partir da série diária observada.
-    return DailyWeather(day=day, tmin=18.0, tmax=30.0, rain_mm=7.5, radiation_mj=20.0)
+    # Fallback climatológico: ANO NORMAL do verão do NO-RS (~5,5 mm/dia ≈ 800 mm/ciclo,
+    # com leve déficit típico). Serve só quando não há clima real; com Open-Meteo o
+    # déficit é calculado da série observada, e o Monte Carlo amostra a distribuição.
+    return DailyWeather(day=day, tmin=18.0, tmax=30.0, rain_mm=5.5, radiation_mj=20.0)

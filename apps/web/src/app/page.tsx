@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { api, defaultScenario } from "@/lib/api";
 import type { ScenarioIn, SimulationOut } from "@/lib/types";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
+import { RiskDistribution } from "@/components/RiskDistribution";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -30,7 +31,20 @@ const PHENO_ORDER = ["VE", "V1", "V4", "R1", "R2", "R3", "R4", "R5", "R5.5", "R6
 export default function Home() {
   const [scenario, setScenario] = useState<ScenarioIn>(defaultScenario);
   const [baseline, setBaseline] = useState<SimulationOut | null>(null);
+  const [profitTarget, setProfitTarget] = useState(3500);
   const debounced = useDebounced(scenario, 350);
+
+  const mc = useMutation({
+    mutationFn: () =>
+      api.montecarlo({
+        ...scenario,
+        iterations: 3000,
+        seed: null,
+        price_sd_pct: 0.12,
+        profit_target_per_ha: profitTarget,
+        yield_target_sc_ha: null,
+      }),
+  });
 
   const { data: municipalities = [] } = useQuery({
     queryKey: ["municipalities"],
@@ -146,6 +160,41 @@ export default function Home() {
                     </span>
                   </p>
                 )}
+              </div>
+
+              <div className="rounded-xl border border-stone-200 bg-white p-4">
+                {mc.data ? (
+                  <RiskDistribution mc={mc.data} />
+                ) : (
+                  <div className="text-sm text-stone-600">
+                    <h3 className="mb-1 text-sm font-semibold text-stone-600">
+                      Análise de risco (Monte Carlo)
+                    </h3>
+                    <p className="text-stone-500">
+                      Simule milhares de safras variando clima e preço para ver a
+                      distribuição de lucro e a probabilidade de prejuízo.
+                    </p>
+                  </div>
+                )}
+                <div className="mt-3 flex flex-wrap items-end gap-3">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="font-medium text-stone-600">Meta de lucro (R$/ha)</span>
+                    <input
+                      type="number"
+                      step={250}
+                      value={profitTarget}
+                      onChange={(e) => setProfitTarget(Number(e.target.value))}
+                      className="w-32 rounded-md border border-stone-300 px-2 py-1 text-sm focus:border-leaf focus:outline-none"
+                    />
+                  </label>
+                  <button
+                    onClick={() => mc.mutate()}
+                    disabled={mc.isPending}
+                    className="rounded-md bg-leaf px-3 py-1.5 text-sm font-medium text-white hover:bg-leafdark disabled:opacity-60"
+                  >
+                    {mc.isPending ? "Simulando 3.000 safras…" : "Rodar análise de risco"}
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">

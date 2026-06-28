@@ -83,3 +83,38 @@ export interface SimulationOut {
   water: Record<string, unknown>;
   sowing_window: Record<string, unknown>;
 }
+
+export interface HistBin {
+  start: number;
+  end: number;
+  count: number;
+}
+
+export interface DistributionOut {
+  mean: number;
+  p10: number;
+  p50: number;
+  p90: number;
+  histogram: HistBin[];
+}
+
+export interface MonteCarloOut {
+  iterations: number;
+  yield: DistributionOut;
+  profit: DistributionOut;
+  probabilities: {
+    yield_above_target: number;
+    yield_target: number;
+    profit_above_target: number;
+    profit_target: number;
+    loss: number;
+  };
+}
+
+export interface MonteCarloIn extends ScenarioIn {
+  iterations: number;
+  seed: number | null;
+  price_sd_pct: number;
+  profit_target_per_ha: number;
+  yield_target_sc_ha: number | null;
+}

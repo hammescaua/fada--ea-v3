@@ -1,4 +1,4 @@
-import type { ScenarioIn, SimulationOut } from "./types";
+import type { MonteCarloIn, MonteCarloOut, ScenarioIn, SimulationOut } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -20,6 +20,8 @@ async function jpost<T>(path: string, body: unknown): Promise<T> {
 
 export const api = {
   simulate: (scenario: ScenarioIn) => jpost<SimulationOut>("/api/simulate", scenario),
+  montecarlo: (input: MonteCarloIn) =>
+    jpost<MonteCarloOut>("/api/simulate/montecarlo", input),
   municipalities: () => jget<string[]>("/api/municipalities"),
   sampleCultivars: () =>
     jget<

@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter
 
-from agro_engine import recommend_sowing_window, simulate
+from agro_engine import recommend_sowing_window, run_montecarlo, simulate
 from agro_engine.models import (
     CostItem,
     Cultivar,
@@ -18,7 +18,7 @@ from agro_engine.models import (
 from agro_engine.reference import NO_RS_MUNICIPALITIES
 
 from .. import weather
-from ..schemas import ScenarioIn, SimulationOut
+from ..schemas import MonteCarloIn, ScenarioIn, SimulationOut
 
 router = APIRouter(tags=["motor"])
 
@@ -94,6 +94,22 @@ def post_simulate(payload: ScenarioIn) -> SimulationOut:
         phenology=result.phenology,
         water=result.water,
         sowing_window=result.sowing_window,
+    )
+
+
+@router.post("/simulate/montecarlo")
+def post_montecarlo(payload: MonteCarloIn) -> dict:
+    """Roda N safras possíveis (clima + preço estocásticos) e devolve a distribuição
+    de produtividade e lucro, com probabilidades de atingir metas e de prejuízo."""
+    payload.use_live_weather = False  # Monte Carlo sintetiza o próprio clima
+    scenario = _to_scenario(payload)
+    return run_montecarlo(
+        scenario,
+        n=payload.iterations,
+        seed=payload.seed,
+        price_sd_pct=payload.price_sd_pct,
+        profit_target_per_ha=payload.profit_target_per_ha,
+        yield_target_sc_ha=payload.yield_target_sc_ha,
     )
 
 

@@ -19,6 +19,7 @@ from .models import (
     WeatherSeries,
     YieldResult,
 )
+from .montecarlo import run_montecarlo
 from .phenology import stage_dates
 from .simulate import simulate
 from .sowing_window import evaluate as evaluate_sowing_window
@@ -45,6 +46,7 @@ __all__ = [
     "decompose_yield",
     "evaluate_sowing_window",
     "recommend_sowing_window",
+    "run_montecarlo",
     "simulate",
     "stage_dates",
     "water_stress",

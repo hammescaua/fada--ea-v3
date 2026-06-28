@@ -63,6 +63,14 @@ class ScenarioIn(BaseModel):
     use_live_weather: bool = False  # se True, busca clima histórico real
 
 
+class MonteCarloIn(ScenarioIn):
+    iterations: int = Field(default=2000, ge=100, le=20000)
+    seed: int | None = None
+    price_sd_pct: float = Field(default=0.12, ge=0, le=1)
+    profit_target_per_ha: float = 0.0
+    yield_target_sc_ha: float | None = None
+
+
 class FactorOut(BaseModel):
     label: str
     delta_sc_ha: float

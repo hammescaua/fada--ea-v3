@@ -10,12 +10,14 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
 - Laboratório Virtual no front (waterfall + economia + comparação de cenários).
 - **Entregue:** simular manejos e ver impacto em produtividade ± incerteza e lucro.
 
-## Fase 2 — Motor agronômico completo
+## Fase 2 — Motor agronômico completo  *(em andamento)*
 
+- ✅ **Monte Carlo**: simula milhares de safras (clima + preço estocásticos) →
+  distribuição de lucro, "chance de lucro ≥ R$ X/ha" e probabilidade de prejuízo.
+  Motor (`montecarlo.py`, com testes), endpoint `/simulate/montecarlo` e UI de risco.
 - Curvas de nutrição mais ricas (Ca, Mg, S, micros; resposta a calagem/gessagem).
 - Risco fitossanitário dinâmico (ferrugem/percevejo em função do clima e do estádio).
 - Excesso hídrico, geada, calor extremo (VPD, dias > 34 °C).
-- **Monte Carlo**: em vez de uma safra, simular milhares → "chance de lucro > R$ X/ha".
 - Cronograma/orçamento da safra ponta a ponta (planejamento → colheita → faturamento).
 
 ## Fase 3 — IA personalizada por talhão

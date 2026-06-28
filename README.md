@@ -21,12 +21,14 @@ ver, em segundos, o impacto na produtividade (± incerteza) e na rentabilidade.
 
 ✅ **Motor agronômico v0** (`packages/agro_engine`): fenologia por graus-dia, balanço
 hídrico FAO-56, janela de semeadura ZARC, **decomposição IPPD** com intervalo de
-confiança e modelo econômico (lucro, ROI, break-even). 18 testes passando.
+confiança, modelo econômico (lucro, ROI, break-even) e **simulador Monte Carlo**
+(distribuição de lucro e risco de prejuízo). 23 testes passando.
 ✅ **API** (`apps/api`): FastAPI expondo `/simulate`, `/sowing-window`, catálogos, e
 CRUD de fazendas/talhões em PostGIS. Cliente de clima real (Open-Meteo).
 ✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. Mapa do talhão, controles do
 cenário e o **Laboratório Virtual** com gráfico waterfall do IPPD, bloco econômico,
-calendário fenológico e comparação "cenário base vs atual".
+calendário fenológico, **análise de risco Monte Carlo** (histograma de lucro +
+probabilidades) e comparação "cenário base vs atual".
 
 🔜 Próximas fases: IA personalizada por talhão, satélite (Sentinel-2/NDVI), import de
 monitor de colheita/piloto automático, Monte Carlo, assistente de decisão (LLM).
