@@ -1,0 +1,15 @@
+{
+  "_fonte": "Janelas representativas baseadas no Zoneamento Agrícola de Risco Climático (ZARC/MAPA) para soja no RS. Refinar por portaria anual e tipo de solo (1/2/3).",
+  "_formato": "janela = [[mes_inicio, dia_inicio], [mes_fim, dia_fim]]",
+  "_observacao": "Núcleo ótimo de maior potencial ~ terço inicial da janela.",
+  "municipios": {
+    "Santo Ângelo": [[10, 11], [12, 20]],
+    "Ijuí": [[10, 11], [12, 20]],
+    "Cruz Alta": [[10, 21], [12, 31]],
+    "Santa Rosa": [[10, 1], [12, 10]],
+    "Três de Maio": [[10, 1], [12, 10]],
+    "Panambi": [[10, 11], [12, 20]],
+    "Carazinho": [[10, 21], [12, 31]],
+    "Palmeira das Missões": [[10, 11], [12, 20]]
+  }
+}

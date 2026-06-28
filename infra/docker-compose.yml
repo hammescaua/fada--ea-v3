@@ -1,0 +1,23 @@
+# Infra mínima do FADA EA v3 — apenas o banco geoespacial.
+# A API (FastAPI) e o web (Next.js) rodam localmente via Makefile, mantendo o
+# ciclo de desenvolvimento simples e barato (solo / custo mínimo).
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: fada-postgis
+    environment:
+      POSTGRES_USER: fada
+      POSTGRES_PASSWORD: fada
+      POSTGRES_DB: fada
+    ports:
+      - "5432:5432"
+    volumes:
+      - fada_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fada"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fada_pgdata:

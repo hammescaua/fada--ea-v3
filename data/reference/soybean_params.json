@@ -1,0 +1,43 @@
+{
+  "_fonte": "Literatura consolidada (Embrapa Soja, FAO-56, DSSAT/CROPGRO). Parâmetros do motor v0 determinístico; calibráveis pela IA por talhão nas fases futuras.",
+  "fenologia": {
+    "tbase_c": 10.0,
+    "tupper_c": 30.0,
+    "gdd_plantio_a_emergencia": 110.0,
+    "gdd_emergencia_a_r8_ref": 1450.0,
+    "grupo_maturacao_ref": 5.5,
+    "gdd_por_ponto_grupo": 0.08,
+    "fracao_gdd_por_estadio": {
+      "VE": 0.0, "V1": 0.05, "V4": 0.18, "R1": 0.35, "R2": 0.42,
+      "R3": 0.5, "R4": 0.58, "R5": 0.66, "R5.5": 0.73, "R6": 0.8,
+      "R7": 0.92, "R8": 1.0
+    }
+  },
+  "agua_fao56": {
+    "kc_por_estadio": {
+      "VE": 0.4, "V1": 0.55, "V4": 0.8, "R1": 1.05, "R2": 1.15,
+      "R3": 1.15, "R4": 1.15, "R5": 1.1, "R5.5": 1.0, "R6": 0.9,
+      "R7": 0.65, "R8": 0.45
+    },
+    "sensibilidade_hidrica_por_estadio": {
+      "VE": 0.1, "V1": 0.15, "V4": 0.3, "R1": 0.6, "R2": 0.75,
+      "R3": 0.95, "R4": 1.0, "R5": 1.0, "R5.5": 0.9, "R6": 0.7,
+      "R7": 0.3, "R8": 0.05
+    },
+    "awc_mm_por_m": { "arenoso": 90.0, "medio": 140.0, "argiloso": 160.0 },
+    "fracao_depleção_p": 0.5,
+    "perda_max_produtividade_por_agua": 0.45
+  },
+  "nutricao": {
+    "ph_otimo": [5.8, 6.5],
+    "p_suficiente_ppm": 12.0,
+    "k_suficiente_ppm": 120.0,
+    "v_suficiente_pct": 60.0
+  },
+  "populacao": { "otima_mil_por_ha": [260.0, 340.0] },
+  "sanidade": {
+    "pressao_ferrugem_no_rs": 0.18,
+    "reducao_por_fungicida_qualidade_plena": 0.55
+  },
+  "semeadura": { "penalidade_sc_por_dia_fora_do_otimo": 0.18 }
+}
