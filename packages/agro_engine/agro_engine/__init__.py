@@ -21,6 +21,7 @@ from .models import (
 )
 from .budget import season_budget
 from .decision import operations_impact, recommend_decisions
+from .fertility import recommend_amendments
 from .knowledge import (
     Calibration,
     SeasonRecord,
@@ -59,6 +60,7 @@ __all__ = [
     "decompose_yield",
     "evaluate_sowing_window",
     "operations_impact",
+    "recommend_amendments",
     "recommend_decisions",
     "recommend_sowing_window",
     "season_budget",

@@ -1,0 +1,68 @@
+{
+  "_meta": {
+    "descricao": "Catálogo de insumos: composição (teor de nutriente/PRNT) e PREÇO DE REFERÊNCIA. Os preços são valores de mercado para orientação — devem ser substituídos pelo preço real negociado pelo agricultor.",
+    "moeda": "BRL",
+    "fontes_preco": [
+      "Fertilizantes (MAP/KCl/Ureia): mercado doméstico BR, nov/2025 (farmnews.com.br, agrolink)",
+      "Calcário/gesso: mercado RS 2025 (Scot Consultoria / ABRACAL) — inclui frete posto-fazenda e aplicação",
+      "Soja: CONAB/CEPEA — preço de referência"
+    ],
+    "atualizado_em": "2025-11"
+  },
+  "inputs": {
+    "calcario_dolomitico": {
+      "label": "Calcário dolomítico",
+      "category": "corretivo",
+      "unit": "t",
+      "price": 150.0,
+      "prnt_pct": 80.0,
+      "note": "PRNT ~80%; preço posto-fazenda + aplicação",
+      "source": "Scot/ABRACAL 2025"
+    },
+    "gesso_agricola": {
+      "label": "Gesso agrícola",
+      "category": "corretivo",
+      "unit": "t",
+      "price": 260.0,
+      "ca_pct": 16.0,
+      "s_pct": 15.0,
+      "note": "Corrige Ca/Al em subsuperfície; não corrige pH",
+      "source": "mercado RS 2025"
+    },
+    "map": {
+      "label": "MAP (11-52-00)",
+      "category": "fertilizante",
+      "unit": "t",
+      "price": 4899.0,
+      "n_pct": 11.0,
+      "p2o5_pct": 52.0,
+      "source": "farmnews nov/2025"
+    },
+    "super_simples": {
+      "label": "Superfosfato simples (0-18-00)",
+      "category": "fertilizante",
+      "unit": "t",
+      "price": 1700.0,
+      "p2o5_pct": 18.0,
+      "ca_pct": 18.0,
+      "s_pct": 11.0,
+      "source": "mercado BR 2025"
+    },
+    "kcl": {
+      "label": "Cloreto de potássio (0-0-60)",
+      "category": "fertilizante",
+      "unit": "t",
+      "price": 2880.0,
+      "k2o_pct": 60.0,
+      "source": "farmnews nov/2025"
+    },
+    "ureia": {
+      "label": "Ureia (45-00-00)",
+      "category": "fertilizante",
+      "unit": "t",
+      "price": 3445.0,
+      "n_pct": 45.0,
+      "source": "farmnews nov/2025"
+    }
+  }
+}

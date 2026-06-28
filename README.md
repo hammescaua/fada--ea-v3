@@ -102,6 +102,7 @@ docs/                 arquitetura, modelo de dados, motores, fontes, roadmap, ca
 
 ## Documentação
 
+- [`docs/base-conhecimento.md`](docs/base-conhecimento.md) — **de onde vêm os números** (coeficientes com fonte + catálogo de insumos/preços + motor de fertilidade).
 - [`docs/arquitetura.md`](docs/arquitetura.md) — camadas, decisões e os 5 motores.
 - [`docs/motores-agronomicos.md`](docs/motores-agronomicos.md) — fórmulas e referências.
 - [`docs/modelo-dados.md`](docs/modelo-dados.md) — o gêmeo digital no banco.

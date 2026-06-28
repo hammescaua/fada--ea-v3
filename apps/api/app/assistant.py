@@ -21,7 +21,12 @@ import os
 from dataclasses import replace
 from datetime import date, timedelta
 
-from agro_engine import recommend_decisions, run_montecarlo, simulate
+from agro_engine import (
+    recommend_amendments,
+    recommend_decisions,
+    run_montecarlo,
+    simulate,
+)
 from agro_engine.models import Operation, Scenario
 
 MODEL = "claude-opus-4-8"
@@ -79,6 +84,16 @@ TOOLS = [
             },
             "additionalProperties": False,
         },
+    },
+    {
+        "name": "recomendar_fertilidade",
+        "description": (
+            "A partir da análise de solo do talhão, recomenda corretivos/adubação (calagem, "
+            "fósforo, potássio): a dose pelo método CQFS-RS/SC, o investimento (preço de "
+            "referência), o impacto na produtividade e o ROI — ranqueado por rentabilidade. "
+            "Use para 'vale a pena calcário/adubar?', 'qual investimento é melhor para o meu solo?'."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "additionalProperties": False},
     },
     {
         "name": "recomendar_decisoes",
@@ -153,6 +168,18 @@ def dispatch_tool(name: str, args: dict, scenario: Scenario) -> dict:
             "meta_lucro": mc["probabilities"]["profit_target"],
             "prob_prejuizo": mc["probabilities"]["loss"],
             "produtividade_p50": mc["yield"]["p50"],
+        }
+    if name == "recomendar_fertilidade":
+        return {
+            "recomendacoes": [
+                {
+                    "acao": r.label, "produto": r.product, "dose": r.dose, "unidade": r.dose_unit,
+                    "investimento_por_ha": r.investment_per_ha, "anos_residual": r.residual_years,
+                    "custo_anual_por_ha": r.annual_cost_per_ha, "delta_produtividade_sc_ha": r.delta_yield_sc_ha,
+                    "liquido_por_ano_por_ha": r.net_per_ha, "roi": r.roi, "justificativa": r.rationale,
+                }
+                for r in recommend_amendments(scenario)
+            ]
         }
     if name == "recomendar_decisoes":
         recs = recommend_decisions(scenario, n_prob=300, seed=11, top=5)
@@ -231,6 +258,7 @@ def _deterministic_answer(question: str, scenario: Scenario) -> dict:
     sim = dispatch_tool("simular_cenario", {}, scenario)
     risk = dispatch_tool("analise_risco", {"profit_target_per_ha": 3500.0}, scenario)
     decisions = dispatch_tool("recomendar_decisoes", {}, scenario)
+    fertility = dispatch_tool("recomendar_fertilidade", {}, scenario)
 
     brl = lambda v: f"R$ {v:,.0f}".replace(",", ".")
     top = decisions["decisoes"][0] if decisions["decisoes"] else None
@@ -259,6 +287,18 @@ def _deterministic_answer(question: str, scenario: Scenario) -> dict:
             f"{top['delta_lucro_por_ha']:+.0f} R$/ha ({top['delta_produtividade_sc_ha']:+.1f} sc/ha{roi}), "
             f"com {top['prob_retorno_positivo'] * 100:.0f}% de chance de retorno positivo. "
             f"{top['justificativa']}",
+        ]
+
+    fert = fertility.get("recomendacoes", [])
+    if fert:
+        f0 = fert[0]
+        froi = f", ROI {f0['roi']:.1f}x" if f0["roi"] is not None else ""
+        linhas += [
+            "",
+            f"Fertilidade do solo: a correção mais rentável é **{f0['acao']}** "
+            f"({f0['dose']:.1f} {f0['unidade']} de {f0['produto']}, investimento {brl(f0['investimento_por_ha'])}/ha "
+            f"em {f0['anos_residual']} ano(s)), agregando {f0['delta_produtividade_sc_ha']:+.1f} sc/ha — "
+            f"líquido {brl(f0['liquido_por_ano_por_ha'])}/ano{froi}. {f0['justificativa']}",
         ]
 
     return {

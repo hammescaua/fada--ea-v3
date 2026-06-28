@@ -3,6 +3,7 @@ import type {
   CalibrationOut,
   DecisionOut,
   FarmOut,
+  FertilityRec,
   FieldOut,
   MonteCarloIn,
   MonteCarloOut,
@@ -38,6 +39,7 @@ export const api = {
     jpost<MonteCarloOut>("/api/simulate/montecarlo", input),
   decisions: (scenario: ScenarioIn) => jpost<DecisionOut[]>("/api/decisions", scenario),
   seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
+  fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
   assistant: (question: string, scenario: ScenarioIn) =>

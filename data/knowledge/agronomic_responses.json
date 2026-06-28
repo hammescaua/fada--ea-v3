@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "descricao": "Base de conhecimento agronômico: coeficientes de resposta da soja com FONTE citada. É a referência auditável que dirige o motor IPPD e o de fertilidade. Valores conservadores de literatura consolidada; a IA por talhão (Knowledge Engine) os ajusta com dados reais ao longo das safras.",
+    "fontes": [
+      "Embrapa Soja — Indicações Técnicas para a cultura da soja no RS/SC",
+      "CQFS-RS/SC — Manual de Calagem e Adubação para RS e SC, 2016",
+      "FAO-56 — Crop evapotranspiration (balanço hídrico)",
+      "ZARC/MAPA — Zoneamento Agrícola de Risco Climático (janela de semeadura)"
+    ]
+  },
+  "fitossanidade": {
+    "disease_pressure": {"value": 0.18, "unit": "fração de perda potencial", "source": "Embrapa — ferrugem-asiática, pressão alta no NO-RS"},
+    "disease_control_eff": {"value": 0.55, "unit": "fração removida por aplicação", "source": "Embrapa — eficiência média de fungicida"},
+    "pest_pressure": {"value": 0.12, "source": "Embrapa — percevejos/lagartas"},
+    "pest_control_eff": {"value": 0.60, "source": "Embrapa — inseticida"},
+    "weed_pressure": {"value": 0.16, "source": "Embrapa — competição de plantas daninhas"},
+    "weed_control_eff": {"value": 0.70, "source": "Embrapa — herbicida bem manejado"}
+  },
+  "clima": {
+    "heat_threshold_c": {"value": 34.0, "unit": "°C", "source": "literatura — abortamento de vagens por calor em R1–R6"},
+    "heat_max_loss": {"value": 0.18, "source": "estimativa conservadora"},
+    "water_max_loss": {"value": 0.45, "source": "FAO-56 / Embrapa — déficit hídrico severo na soja"}
+  },
+  "nutricao": {
+    "ph_otimo": {"value": [5.8, 6.5], "source": "CQFS-RS/SC 2016"},
+    "p_suficiente_ppm": {"value": 12.0, "unit": "mg/dm³ (Mehlich-1)", "source": "CQFS — solo classe argilosa (faixa Médio/Alto)"},
+    "k_suficiente_ppm": {"value": 120.0, "unit": "mg/dm³", "source": "CQFS-RS/SC 2016"},
+    "v_suficiente_pct": {"value": 60.0, "source": "CQFS-RS/SC 2016"}
+  },
+  "calagem": {
+    "metodo": "saturação por bases (V%)",
+    "v_alvo_soja": {"value": 65.0, "unit": "%", "source": "CQFS-RS/SC 2016 — soja: V2 = 65% (pH ~5,5–6,0)"},
+    "indicada_se_ph_abaixo": {"value": 5.5, "source": "CQFS — plantio direto consolidado, camada 0–10 cm"},
+    "indicada_se_v_abaixo": {"value": 65.0, "source": "CQFS-RS/SC 2016"},
+    "formula": "NC (t/ha, PRNT 100%) = (V2 − V1) × CTC / 100 ; dose = NC × (100 / PRNT)"
+  },
+  "adubacao": {
+    "p2o5_por_ppm_deficit": {"value": 12.0, "unit": "kg P2O5/ha por mg/dm³ de déficit", "source": "CQFS — construção de fósforo (aprox., classe argilosa)"},
+    "p2o5_manutencao": {"value": 60.0, "unit": "kg P2O5/ha", "source": "CQFS — reposição p/ ~3.000 kg/ha de soja"},
+    "k2o_por_ppm_deficit": {"value": 2.0, "unit": "kg K2O/ha por mg/dm³ de déficit", "source": "CQFS (aprox.)"},
+    "k2o_manutencao": {"value": 60.0, "unit": "kg K2O/ha", "source": "CQFS — reposição"}
+  },
+  "amortizacao": {
+    "_nota": "Anos de efeito residual — corretivos/adubação de construção são investimentos plurianuais; a comparação com o ganho de UMA safra usa o custo anualizado.",
+    "calagem_anos": {"value": 4, "source": "CQFS — residual da calagem 3–5 anos"},
+    "fosforo_anos": {"value": 2, "source": "CQFS — residual da construção de P"},
+    "potassio_anos": {"value": 1, "source": "CQFS — K com menor residual"}
+  },
+  "semeadura": {
+    "penalidade_sc_por_dia_fora_otimo": {"value": 0.18, "unit": "sc/ha por dia", "source": "estimativa a partir do ZARC + curvas de época × produtividade (Embrapa)"}
+  },
+  "populacao": {
+    "otima_mil_por_ha": {"value": [260.0, 340.0], "source": "Embrapa — indicações técnicas soja RS"}
+  }
+}

@@ -111,6 +111,22 @@ export interface MonteCarloOut {
   };
 }
 
+export interface FertilityRec {
+  key: string;
+  label: string;
+  product: string;
+  dose: number;
+  dose_unit: string;
+  investment_per_ha: number;
+  residual_years: number;
+  annual_cost_per_ha: number;
+  delta_yield_sc_ha: number;
+  value_per_ha: number;
+  net_per_ha: number;
+  roi: number | null;
+  rationale: string;
+}
+
 export interface SeasonPlanOut {
   budget: {
     cost_by_category: Record<string, number>;

@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from agro_engine import (
     operations_impact,
+    recommend_amendments,
     recommend_decisions,
     recommend_sowing_window,
     run_montecarlo,
@@ -128,6 +129,15 @@ def post_assistant(payload: AssistantIn) -> dict:
     quando não há ANTHROPIC_API_KEY."""
     scenario = _to_scenario(payload.scenario)
     return assistant.ask(payload.question, scenario)
+
+
+@router.post("/fertility")
+def post_fertility(payload: ScenarioIn) -> list[dict]:
+    """Recomendação de corretivos/adubação para o solo do talhão: dose (método CQFS),
+    investimento (preço do catálogo), impacto na produtividade e ROI — ranqueado por
+    rentabilidade. Responde 'vale a pena para o meu solo e qual é mais rentável'."""
+    scenario = _to_scenario(payload)
+    return [r.__dict__ for r in recommend_amendments(scenario)]
 
 
 @router.post("/season-plan")

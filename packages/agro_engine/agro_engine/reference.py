@@ -135,3 +135,35 @@ def gdd_total_for(maturity_group: float) -> float:
 
 def zarc_window(municipality: str) -> tuple[tuple[int, int], tuple[int, int]]:
     return ZARC_SOWING_WINDOW.get(municipality, ZARC_SOWING_WINDOW["_default_no_rs"])
+
+
+# --- Sincroniza os coeficientes com a Base de Conhecimento (data/knowledge) ---
+# Os valores no JSON são idênticos aos literais acima (que servem de fallback): o
+# objetivo é tornar a fonte auditável e atualizável sem mexer no código.
+def _sync_from_kb() -> None:
+    try:
+        from . import kb
+    except Exception:  # noqa: BLE001
+        return
+    g = globals()
+    mapping = {
+        "DISEASE_PRESSURE": "fitossanidade.disease_pressure",
+        "DISEASE_CONTROL_EFF": "fitossanidade.disease_control_eff",
+        "PEST_PRESSURE": "fitossanidade.pest_pressure",
+        "PEST_CONTROL_EFF": "fitossanidade.pest_control_eff",
+        "WEED_PRESSURE": "fitossanidade.weed_pressure",
+        "WEED_CONTROL_EFF": "fitossanidade.weed_control_eff",
+        "HEAT_THRESHOLD_C": "clima.heat_threshold_c",
+        "HEAT_MAX_LOSS": "clima.heat_max_loss",
+        "P_SUFFICIENT_PPM": "nutricao.p_suficiente_ppm",
+        "K_SUFFICIENT_PPM": "nutricao.k_suficiente_ppm",
+        "V_SUFFICIENT_PCT": "nutricao.v_suficiente_pct",
+        "SOWING_PENALTY_SC_PER_DAY": "semeadura.penalidade_sc_por_dia_fora_otimo",
+    }
+    for const, path in mapping.items():
+        val = kb.param(path)
+        if isinstance(val, (int, float)):
+            g[const] = float(val)
+
+
+_sync_from_kb()
