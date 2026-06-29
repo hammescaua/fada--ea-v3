@@ -13,6 +13,7 @@ import { PersonalityPanel } from "@/components/PersonalityPanel";
 import { CounterfactualPanel } from "@/components/CounterfactualPanel";
 import { ObservationLog } from "@/components/ObservationLog";
 import { SeasonReviewPanel } from "@/components/SeasonReviewPanel";
+import { SeasonReport } from "@/components/SeasonReport";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
@@ -193,6 +194,8 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
+      <SeasonReport scenario={scenario} briefing={briefing} sim={sim ?? undefined} accuracy={accuracy} />
+      <div className="print:hidden">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-leafdark">🌱 FADA — Gêmeo Digital da Soja</h1>
@@ -203,6 +206,12 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           {(isFetching || cropPlanLoading) && <span className="text-xs text-stone-400">atualizando…</span>}
+          <button
+            onClick={() => window.print()}
+            className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            📄 Relatório (PDF)
+          </button>
           <button
             onClick={() => setOnboarding(true)}
             className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
@@ -438,6 +447,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      </div>
     </main>
   );
 }

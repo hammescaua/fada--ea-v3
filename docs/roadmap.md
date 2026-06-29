@@ -32,6 +32,18 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
   testes), endpoint `/briefing` e painel-herói no topo do cockpit; os demais painéis
   passam a ser o *detalhamento* (auditar cada número).
 
+## ✅ Fase 1.5 — Fidelidade local e camada de evidências  *(fechando a versão)*
+
+- ✅ **Camada de evidências** (`observations`) + Reality Engine (confiança por fonte +
+  corroboração), **Personalidade do talhão**, **Counterfactual**, **interações
+  evento→consequência** que realimentam o número (Plano vs. Realidade). Ver
+  [arquitetura-evidencias.md](arquitetura-evidencias.md).
+- ✅ **Matrizes do NO-RS**: **ENSO** (El Niño/La Niña) no risco, **Nematoides** e
+  **Rotação** como fatores do IPPD. Ver [matrizes-soja-noroeste-rs.md](matrizes-soja-noroeste-rs.md).
+- ✅ **Relatório de safra** (PDF/impressão) — documento de uma página com resumo,
+  decomposição, ações e confiança dos dados.
+- Avaliação crítica do produto e do método em [avaliacao-produto-e-metodo.md](avaliacao-produto-e-metodo.md).
+
 ## Fase 2 — Motor agronômico completo  *(em andamento)*
 
 - ✅ **Monte Carlo**: simula milhares de safras (clima + preço estocásticos) →
