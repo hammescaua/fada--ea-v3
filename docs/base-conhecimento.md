@@ -12,6 +12,8 @@ números mágicos no código.
 |--------|----------|--------|
 | `agronomic_responses.json` | coeficientes de resposta da soja (pressões de doença/praga/daninha, eficiência de controle, limiares de suficiência, método/alvo de calagem, doses de construção P/K, penalidade de janela, estresse hídrico/térmico, anos de residual) | **Embrapa Soja**, **CQFS-RS/SC 2016**, **FAO-56**, **ZARC/MAPA** |
 | `inputs_catalog.json` | insumos: composição (N-P₂O₅-K₂O, PRNT) e **preço de referência** com data/fonte | mercado BR nov/2025 (farmnews/Scot/ABRACAL), **CONAB/CEPEA** para soja |
+| `manejo_evidence.json` | **evidência científica por manejo**: mecanismo agronômico, coeficiente de resposta usado (referenciado em `agronomic_responses.json`) e quais atributos do talhão personalizam o impacto | **Embrapa Soja** (Tecnologias de Produção; Rede de Ensaios de Fungicidas; MIP/FBN), **CQFS-RS/SC 2016**, **ZARC/MAPA**, **FAO-56** |
+| `data_sources.json` | ficha de proveniência/acurácia por variável (hierarquia de fontes, locality, como melhorar) | Open-Meteo, INMET, laboratório de solo, obtentoras, ZARC, CONAB/CEPEA |
 
 O motor lê esses arquivos via `agro_engine/kb.py`. O `reference.py` é sincronizado a
 partir da KB no carregamento (os literais no código são apenas fallback). Assim os
@@ -29,6 +31,14 @@ Não é uma tabela fixa de "fungicida = +X sc". O impacto é **derivado do model
    que gera a produtividade — é coerente e auditável, não um chute.
 3. Conforme o agricultor registra safras reais, o **Knowledge Engine** ajusta a correção
    por talhão — os coeficientes de literatura viram o ponto de partida, não a verdade final.
+
+Além do número, cada manejo carrega a sua **evidência científica personalizada**
+(`manejo_science.py` + `manejo_evidence.json`): o mecanismo agronômico, o coeficiente
+citado (com fonte) e a **leitura para aquele talhão** — ex.: *"sua cultivar tem
+tolerância 40% à ferrugem → pressão efetiva 14%; cada fungicida remove ~55% da perda
+restante (Embrapa)"* ou *"pH 5,4, V% 52: faltam 13 pontos de V% — a calagem pela CTC
+tende a se pagar (CQFS)"*. Aparece na timeline em "📚 base científica e por que vale para
+o seu talhão", ligando o número à pesquisa **e** ao perfil real da lavoura.
 
 ## Fertilidade: dose, preço, impacto e alternativa mais rentável
 
