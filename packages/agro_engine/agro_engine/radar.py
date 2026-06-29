@@ -13,9 +13,21 @@ coerente e explicável, nada inventado.
 
 from __future__ import annotations
 
+from datetime import date
+
+from .crop_plan import PHASE_LABEL, current_phase
 from .priorities import prioritized_actions
 from .models import Scenario
 from .simulate import simulate
+
+# O que mais importa em cada fase do ciclo (foco do estado da safra).
+_PHASE_FOCUS = {
+    "preparo_solo": (["solo", "nutricao"], "Corrigir solo e definir o plano antes de semear."),
+    "semeadura": (["execucao", "solo"], "Acertar data, população e adubação de base na semeadura."),
+    "vegetativo": (["sanidade", "nutricao"], "Manter no limpo e nutrido até o florescimento."),
+    "reprodutivo": (["clima", "sanidade"], "Fase crítica: água e proteção contra ferrugem/percevejo."),
+    "colheita": (["mercado", "clima"], "Colher na hora certa e acompanhar o preço."),
+}
 
 # Cada dimensão agrega os fatores da cascata IPPD que a compõem.
 _DIMENSIONS = {
@@ -58,8 +70,14 @@ def _mercado_score(econ) -> float:
     return round(max(0.0, min(100.0, score)), 0)
 
 
-def season_radar(scenario: Scenario) -> dict:
-    """Monta o Radar da Safra: índice geral, 6 dimensões e os 3 destaques + as 4 respostas."""
+def season_radar(scenario: Scenario, today: date | None = None) -> dict:
+    """Monta o Radar da Safra: índice geral, 6 dimensões e os 3 destaques + as 4 respostas.
+
+    Ciente do ESTADO da safra (fase do ciclo hoje): as recomendações priorizam o que dá
+    para fazer neste momento — não sugere antecipar plantio se a lavoura já floresceu."""
+    today = today or date.today()
+    phase = current_phase(scenario, today)
+    foco_dims, foco_texto = _PHASE_FOCUS.get(phase, ([], ""))
     sim = simulate(scenario)
     y = sim.yield_result
     econ = sim.economics
@@ -84,17 +102,19 @@ def season_radar(scenario: Scenario) -> dict:
             "detalhe": detail,
         }
 
-    # Oportunidade e investimento vêm do Motor de Priorização.
-    actions = prioritized_actions(scenario, top=6)
-    maior_oportunidade = actions[0] if actions else None
-    com_custo = [a for a in actions if (a["custo_per_ha"] or 0) > 0 and a["roi"]]
+    # Oportunidade e investimento vêm do Motor de Priorização, cientes da fase do ciclo.
+    actions = prioritized_actions(scenario, top=6, phase=phase)
+    acionaveis = [a for a in actions if a["janela_status"] == "agora"]
+    maior_oportunidade = acionaveis[0] if acionaveis else (actions[0] if actions else None)
+    com_custo = [a for a in acionaveis if (a["custo_per_ha"] or 0) > 0 and a["roi"]]
     maior_investimento = max(com_custo, key=lambda a: a["roi"]) if com_custo else None
 
     return {
         "score": score,
         "score_label": _label(score),
+        "estado": {"fase": phase, "fase_label": PHASE_LABEL.get(phase, phase), "foco": foco_dims, "foco_texto": foco_texto},
         "dimensions": [
-            {"key": k, "label": _DIM_LABEL[k], "score": dimensions[k]} for k in
+            {"key": k, "label": _DIM_LABEL[k], "score": dimensions[k], "foco": k in foco_dims} for k in
             ["solo", "clima", "sanidade", "nutricao", "mercado", "execucao"]
         ],
         "maior_risco": maior_risco,

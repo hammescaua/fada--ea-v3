@@ -58,9 +58,9 @@ export default function Guia() {
         <h2 className="mb-3 text-lg font-bold text-stone-700">O que você encontra na plataforma</h2>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Capability icon="🛰️" title="Radar da safra (comece por aqui)"
-            oque="A primeira tela: a saúde da safra em 6 notas (Solo, Clima, Sanidade, Nutrição, Mercado, Execução) e as 4 respostas que importam — maior risco, melhor decisão, quanto vale e por quê."
-            ajuda="Em 20 segundos você sabe onde está o problema e onde colocar o dinheiro primeiro, sem procurar em gráficos."
-            usar="É o topo da aba Acompanhamento. Leia as 4 respostas e a tabela 'Onde investir primeiro'." />
+            oque="A primeira tela: a saúde da safra em 6 notas (Solo, Clima, Sanidade, Nutrição, Mercado, Execução) e as 4 respostas que importam — maior risco, melhor decisão, quanto vale e por quê. Ele respeita a FASE da safra: só recomenda o que dá para fazer agora (não sugere antecipar plantio se a lavoura já floresceu)."
+            ajuda="Em 20 segundos você sabe onde está o problema e onde colocar o dinheiro primeiro, sem procurar em gráficos — e na hora certa do ciclo."
+            usar="É o topo da aba Acompanhamento. Leia as 4 respostas e a tabela 'Onde investir primeiro' (ações com a janela já passada aparecem apagadas)." />
           <Capability icon="📋" title="Resumo da safra"
             oque="A resposta única: quanto deve colher (com faixa), quanto ganha, qual o risco e qual a ação nº 1 agora."
             ajuda="Você entende a situação do talhão em 10 segundos, sem decifrar planilhas."

@@ -18,6 +18,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 from . import kb
+from . import phenology
 from .data_sources import accuracy_report
 from .decision import operations_impact
 from .manejo_science import manejo_evidence
@@ -96,6 +97,31 @@ def _phase_windows(stages: dict[str, date], sowing: date, harvest: date) -> dict
         "reprodutivo": (r1, r7),
         "colheita": (r7, harvest),
     }
+
+
+PHASE_ORDER = ["preparo_solo", "semeadura", "vegetativo", "reprodutivo", "colheita"]
+PHASE_LABEL = {
+    "preparo_solo": "Preparo do solo", "semeadura": "Semeadura", "vegetativo": "Vegetativo",
+    "reprodutivo": "Reprodutivo", "colheita": "Colheita",
+}
+
+
+def current_phase(scenario: Scenario, today: date | None = None) -> str:
+    """A fase do ciclo em que a safra está HOJE — base do 'estado da safra'."""
+    today = today or date.today()
+    stages = phenology.stage_dates(scenario.cultivar, scenario.sowing_date, scenario.weather)
+    sowing = scenario.sowing_date
+    harvest = stages.get("R8", sowing + timedelta(days=scenario.cultivar.cycle_days))
+    if today < sowing:
+        return "preparo_solo"
+    if today >= harvest:
+        return "colheita"
+    windows = _phase_windows(stages, sowing, harvest)
+    for key in PHASE_ORDER:
+        start, end = windows[key]
+        if start <= today <= end:
+            return key
+    return "reprodutivo"
 
 
 def _status(start: date, end: date, today: date) -> str:

@@ -265,12 +265,14 @@ export interface PriorityAction {
   probabilidade: number;
   prazo: string;
   porque: string;
+  janela_status?: "agora" | "em breve" | "passou";
 }
 
 export interface RadarOut {
   score: number;
   score_label: "saudável" | "atenção" | "crítico";
-  dimensions: { key: string; label: string; score: number }[];
+  estado?: { fase: string; fase_label: string; foco: string[]; foco_texto: string };
+  dimensions: { key: string; label: string; score: number; foco?: boolean }[];
   maior_risco: { dimensao: string; fator: string; perda_sc_ha: number; perda_rs_ha: number; detalhe: string } | null;
   maior_oportunidade: PriorityAction | null;
   maior_investimento: PriorityAction | null;
