@@ -82,11 +82,31 @@ O salto vem de personalizar o que é local: solo, clima do ponto e cultivar real
   a fonte atual e o que medir para aquela etapa ficar mais verídica.
 - **Resumo da safra**: o veredito já aponta o dado de maior alavancagem a medir primeiro.
 
+## Como o agricultor torna as variáveis "verdadeiras" (e o modelo aprende)
+
+Duas alavancas, ambas implementadas:
+
+1. **Preencher o real → a proveniência sobe sozinha** (`infer_provenance`). Ao informar a
+   cultivar real, registrar o manejo de fato feito (produto/dose) e a data já realizada,
+   o sistema reconhece e eleva o nível da fonte — sem toggle manual. Verificado: ao
+   preencher esses dados, a precisão do talhão sobe.
+2. **Registrar a colheita → o talhão calibra a si mesmo** (Knowledge Engine). A cada safra
+   guardamos previsto×colhido; o resíduo vira uma **correção aditiva com encolhimento
+   bayesiano** que entra como fator transparente "Calibração do talhão" na cascata IPPD e
+   corrige TODAS as previsões seguintes (produtividade, lucro, risco, decisões). A
+   incerteza também encurta conforme o talhão acumula histórico.
+   - Verificado ponta-a-ponta (PostGIS): 2 safras previstas 46,4 e colhidas 53,4 →
+     correção **+2,8 sc/ha** (encolhida de +7 bruto, porque 2 safras ainda são poucas) →
+     erro médio cai de 7,0 para 4,2 sc/ha; nova previsão 46,4 → 49,2.
+   - Quanto mais safras, mais a correção converge para o viés real e mais a incerteza cai.
+
 ## Roadmap de acurácia (próximos ganhos)
 
 1. ✅ **Clima da safra corrente** — observado até hoje + previsão (16 d) + climatologia só
-   no fim do ciclo; safra passada usa o realizado. Implementado (`get_season_weather`).
-2. **Solo por zonas de manejo** — múltiplas análises/zonas dentro do talhão.
-3. **Calibração com histórico** — o Knowledge Engine corrige previsto×realizado por
-   talhão após cada safra (já existe; ganha força com mais safras).
-4. **Estação na lavoura** (versão futura) — chuva/umidade medidas no ponto.
+   no fim do ciclo; safra passada usa o realizado (`get_season_weather`).
+2. ✅ **Calibração com histórico** — correção previsto×realizado por talhão, aplicada como
+   fator transparente da cascata e refletida em todos os motores.
+3. **Solo por zonas de manejo** — múltiplas análises/zonas dentro do talhão.
+4. **ML (Nível 2)** — quando houver dezenas de talhões × safras, trocar o encolhimento por
+   CatBoost/LightGBM sobre os mesmos atributos (`season_features`), mantendo a interface.
+5. **Estação na lavoura** (versão futura) — chuva/umidade medidas no ponto.
