@@ -1,0 +1,135 @@
+{
+  "_meta": {
+    "descricao": "Base de EVIDÊNCIA CIENTÍFICA por manejo: para cada ação agronômica, o mecanismo (por que afeta a produtividade), o coeficiente de resposta que a ferramenta usa (referenciado em agronomic_responses.json, com fonte), e QUAIS atributos do talhão personalizam o impacto. É o que torna o número de cada manejo rastreável a estudo/literatura e específico do perfil daquela lavoura — não um valor solto.",
+    "principio": "O impacto exibido no manejo combina (1) o coeficiente de literatura com (2) o perfil real do talhão (cultivar, solo, clima, posição na janela). A calibração por talhão (Knowledge Engine) ajusta tudo isso com as safras reais.",
+    "fontes_base": [
+      "Embrapa Soja — Tecnologias de Produção de Soja (Sistemas de Produção)",
+      "Embrapa — Consórcio Antiferrugem / Rede de Ensaios de Fungicidas (eficiência de controle)",
+      "CQFS-RS/SC — Manual de Calagem e Adubação, 2016",
+      "ZARC/MAPA — Zoneamento Agrícola de Risco Climático",
+      "FAO-56 — Crop evapotranspiration"
+    ],
+    "atualizado_em": "2026-06"
+  },
+  "manejos": {
+    "fungicida": {
+      "alvo": "doencas",
+      "mecanismo": "Protege a área foliar contra ferrugem-asiática (Phakopsora pachyrhizi) e manchas foliares durante o enchimento de grãos, preservando fotossíntese e peso de grão. Quanto maior a pressão e menor a tolerância da cultivar, maior o retorno.",
+      "coeficiente": {"ref": "fitossanidade.disease_control_eff", "secundario": "fitossanidade.disease_pressure"},
+      "personaliza_por": ["tolerância da cultivar à ferrugem", "nº de aplicações e timing (R1–R5)", "qualidade da aplicação"],
+      "fonte": "Embrapa — Rede de Ensaios de Fungicidas para controle da ferrugem; eficiência média por aplicação"
+    },
+    "inseticida": {
+      "alvo": "pragas",
+      "mecanismo": "Controla percevejos (sucção de grãos em R) e lagartas (desfolha), evitando perda de vagens/grãos e grãos chochos. Decisão por monitoramento (nível de ação).",
+      "coeficiente": {"ref": "fitossanidade.pest_control_eff", "secundario": "fitossanidade.pest_pressure"},
+      "personaliza_por": ["pressão de pragas observada (monitoramento)", "estádio reprodutivo", "qualidade da aplicação"],
+      "fonte": "Embrapa Soja — Manejo Integrado de Pragas (MIP-Soja)"
+    },
+    "herbicida": {
+      "alvo": "daninhas",
+      "mecanismo": "Reduz a competição de plantas daninhas por água, luz e nutrientes no início do ciclo, preservando o estande e o potencial produtivo. Controle em pós-emergência (V2–V6).",
+      "coeficiente": {"ref": "fitossanidade.weed_control_eff", "secundario": "fitossanidade.weed_pressure"},
+      "personaliza_por": ["banco de sementes/infestação do talhão", "época de aplicação", "resistência (buva, capim-amargoso)"],
+      "fonte": "Embrapa Soja — manejo de plantas daninhas; competição em soja"
+    },
+    "herbicida_pre": {
+      "alvo": "daninhas",
+      "mecanismo": "Herbicida residual aplicado na semeadura mantém a lavoura no limpo no período crítico inicial, antes do fechamento das entrelinhas.",
+      "coeficiente": {"ref": "fitossanidade.weed_control_eff"},
+      "personaliza_por": ["infestação esperada", "textura/MO do solo (residual)"],
+      "fonte": "Embrapa Soja — pré-emergentes em sistema de produção"
+    },
+    "dessecacao": {
+      "alvo": "daninhas",
+      "mecanismo": "Limpa a área antes da semeadura no plantio direto, eliminando a 'comunidade infestante' que competiria com a soja na emergência.",
+      "coeficiente": {"ref": "fitossanidade.weed_control_eff"},
+      "personaliza_por": ["cobertura/palhada", "espécies presentes"],
+      "fonte": "Embrapa Soja — manejo de dessecação pré-semeadura"
+    },
+    "calagem": {
+      "alvo": "solo",
+      "mecanismo": "Eleva o pH e a saturação por bases (V%), neutraliza o alumínio tóxico e melhora a disponibilidade de nutrientes e o crescimento radicular. Investimento plurianual (residual 3–5 anos).",
+      "coeficiente": {"ref": "calagem.v_alvo_soja", "secundario": "amortizacao.calagem_anos"},
+      "personaliza_por": ["pH e V% atuais do talhão", "CTC (define a dose pela fórmula CQFS)", "PRNT do calcário"],
+      "fonte": "CQFS-RS/SC 2016 — método da saturação por bases (V2 = 65% para soja)"
+    },
+    "gessagem": {
+      "alvo": "solo",
+      "mecanismo": "Fornece Ca e S e reduz a saturação de alumínio em subsuperfície, aprofundando o sistema radicular — ajuda a cultura a 'buscar' água em veranicos. Não corrige pH.",
+      "coeficiente": {"ref": "nutricao.v_suficiente_pct"},
+      "personaliza_por": ["Al e Ca em subsuperfície", "textura", "histórico de déficit hídrico"],
+      "fonte": "Embrapa/CQFS — gessagem para ambiente radicular em subsuperfície"
+    },
+    "adubacao_p": {
+      "alvo": "nutricao",
+      "mecanismo": "Corrige/repõe fósforo, essencial para enraizamento, fixação biológica de N e formação de vagens. Resposta forte em solos abaixo do teor crítico.",
+      "coeficiente": {"ref": "adubacao.p2o5_por_ppm_deficit", "secundario": "nutricao.p_suficiente_ppm"},
+      "personaliza_por": ["P atual do talhão (Mehlich-1)", "teor de argila (classe de interpretação)", "meta de produtividade"],
+      "fonte": "CQFS-RS/SC 2016 — construção e manutenção de fósforo"
+    },
+    "adubacao_k": {
+      "alvo": "nutricao",
+      "mecanismo": "Repõe potássio, ligado à regulação hídrica, enchimento de grãos e tolerância a estresses. Solos abaixo do crítico respondem em produtividade.",
+      "coeficiente": {"ref": "adubacao.k2o_por_ppm_deficit", "secundario": "nutricao.k_suficiente_ppm"},
+      "personaliza_por": ["K atual do talhão", "CTC/textura", "exportação pela produtividade esperada"],
+      "fonte": "CQFS-RS/SC 2016 — reposição de potássio"
+    },
+    "adubacao_base": {
+      "alvo": "nutricao",
+      "mecanismo": "NPK no sulco de semeadura garante nutrientes disponíveis na fase inicial, quando o sistema radicular ainda é pequeno.",
+      "coeficiente": {"ref": "adubacao.p2o5_manutencao"},
+      "personaliza_por": ["análise de solo do talhão", "formulado escolhido"],
+      "fonte": "CQFS-RS/SC 2016 — adubação de manutenção"
+    },
+    "cobertura": {
+      "alvo": "nutricao",
+      "mecanismo": "Reforço de potássio em cobertura (V4–R1) quando a demanda cresce, evitando deficiência no enchimento — útil em solos arenosos/baixo K.",
+      "coeficiente": {"ref": "adubacao.k2o_manutencao"},
+      "personaliza_por": ["K e textura do talhão", "produtividade esperada"],
+      "fonte": "Embrapa/CQFS — parcelamento de K em solos de menor CTC"
+    },
+    "adubacao_foliar": {
+      "alvo": "nutricao",
+      "mecanismo": "Suprimento de micronutrientes (Mn, B, Co/Mo) em momentos de alta demanda; efeito situacional, maior quando há deficiência diagnosticada.",
+      "coeficiente": {"ref": "nutricao.v_suficiente_pct"},
+      "personaliza_por": ["diagnóstico foliar/sintomas", "pH (disponibilidade de micros)"],
+      "fonte": "Embrapa Soja — micronutrientes (uso situacional)"
+    },
+    "inoculacao": {
+      "alvo": "nutricao",
+      "mecanismo": "Bradyrhizobium fixa o N atmosférico, suprindo a maior parte da necessidade de nitrogênio da soja sem adubação nitrogenada — prática de altíssimo retorno por custo.",
+      "coeficiente": {"ref": "adubacao.p2o5_manutencao"},
+      "personaliza_por": ["histórico de soja na área", "qualidade do inoculante e da semente"],
+      "fonte": "Embrapa Soja — Fixação Biológica de Nitrogênio (FBN)"
+    },
+    "tratamento_sementes": {
+      "alvo": "populacao",
+      "mecanismo": "Protege a semente e a plântula contra patógenos e pragas iniciais, garantindo o estande (plantas/ha) — base do potencial produtivo.",
+      "coeficiente": {"ref": "populacao.otima_mil_por_ha"},
+      "personaliza_por": ["qualidade da semente", "condição do solo na semeadura"],
+      "fonte": "Embrapa Soja — tratamento de sementes e estabelecimento de estande"
+    },
+    "semeadura": {
+      "alvo": "janela",
+      "mecanismo": "A data de semeadura casa (ou não) o período crítico (florescimento/enchimento, R1–R5) com o melhor regime de radiação e chuva; fora da janela ZARC, o risco e a perda sobem.",
+      "coeficiente": {"ref": "semeadura.penalidade_sc_por_dia_fora_otimo"},
+      "personaliza_por": ["janela ZARC do município e tipo de solo", "ciclo da cultivar", "clima do ponto"],
+      "fonte": "ZARC/MAPA + curvas de época × produtividade (Embrapa)"
+    },
+    "regulador": {
+      "alvo": "populacao",
+      "mecanismo": "Bioestimulantes/reguladores ajustam arquitetura e enchimento em situações específicas; efeito variável, uso situacional.",
+      "coeficiente": {"ref": "populacao.otima_mil_por_ha"},
+      "personaliza_por": ["porte/acamamento", "população"],
+      "fonte": "Embrapa Soja — uso situacional de reguladores"
+    },
+    "colheita": {
+      "alvo": "janela",
+      "mecanismo": "Colher na umidade certa (~14%) minimiza perdas por debulha, deiscência de vagens e grãos avariados; atraso aumenta perdas a campo.",
+      "coeficiente": {"ref": "semeadura.penalidade_sc_por_dia_fora_otimo"},
+      "personaliza_por": ["regulagem da colhedora", "umidade do grão", "clima na colheita"],
+      "fonte": "Embrapa Soja — perdas na colheita (regulagem e umidade)"
+    }
+  }
+}

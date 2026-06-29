@@ -1,6 +1,11 @@
 "use client";
 
-import type { CropPlanOut, CropPlanPhase } from "@/lib/types";
+import type { CropPlanOut, CropPlanPhase, ManejoEvidence } from "@/lib/types";
+
+export interface ManejoHandlers {
+  onAdd: (kind: string, phase: CropPlanPhase) => void;
+  onRemove: (kind: string, opDate: string | null) => void;
+}
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -49,50 +54,101 @@ function labelOf(key: string): string {
   );
 }
 
-function Manejo({ m }: { m: CropPlanPhase["manejos"][number] }) {
+function EvidenceCard({ ev }: { ev: ManejoEvidence }) {
+  return (
+    <details className="mt-1 rounded-md bg-white/70 px-2 py-1.5">
+      <summary className="cursor-pointer text-[11px] font-medium text-stone-500">
+        📚 base científica e por que vale para o seu talhão
+      </summary>
+      <div className="mt-1.5 space-y-1.5 text-xs">
+        <p className="text-stone-600">{ev.mecanismo}</p>
+        <p className="rounded bg-leaf/5 px-2 py-1 text-stone-700">
+          <span className="font-medium">No seu talhão:</span> {ev.leitura_talhao}
+        </p>
+        {ev.coeficiente && (
+          <div className="text-[11px] text-stone-500">
+            Coeficiente usado: <span className="font-mono">{String(ev.coeficiente.value)}</span>
+            {ev.coeficiente.source && <> · fonte: {ev.coeficiente.source}</>}
+          </div>
+        )}
+        <div className="text-[11px] text-stone-400">Referência: {ev.fonte}</div>
+      </div>
+    </details>
+  );
+}
+
+function Manejo({
+  m,
+  phase,
+  h,
+}: {
+  m: CropPlanPhase["manejos"][number];
+  phase: CropPlanPhase;
+  h: ManejoHandlers;
+}) {
   if (m.planned) {
     return (
-      <div className="flex items-start justify-between gap-3 rounded-md bg-green-50/60 px-2.5 py-1.5">
-        <div className="min-w-0">
-          <span className="text-sm font-medium text-stone-800">{m.label}</span>
-          {m.op_date && <span className="ml-2 text-xs text-stone-400">{ddmm(m.op_date)}</span>}
-          {m.funcao && <div className="text-xs text-stone-500">{m.funcao}</div>}
-        </div>
-        <div className="shrink-0 text-right">
-          {m.impact_sc_ha != null && (
-            <div className="text-sm font-semibold text-leafdark">
-              +{m.impact_sc_ha.toFixed(1)} sc/ha
+      <div className="rounded-md bg-green-50/60 px-2.5 py-1.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-sm font-medium text-stone-800">{m.label}</span>
+            {m.product ? (
+              <span className="ml-1.5 rounded bg-leaf/15 px-1 py-0.5 text-[10px] font-medium text-leafdark">
+                {m.product}
+              </span>
+            ) : null}
+            {m.op_date && <span className="ml-2 text-xs text-stone-400">{ddmm(m.op_date)}</span>}
+            {m.funcao && <div className="text-xs text-stone-500">{m.funcao}</div>}
+          </div>
+          <div className="flex shrink-0 items-start gap-2">
+            <div className="text-right">
+              {m.impact_sc_ha != null && (
+                <div className="text-sm font-semibold text-leafdark">+{m.impact_sc_ha.toFixed(1)} sc/ha</div>
+              )}
+              {m.impact_rs != null && (
+                <div className={`text-xs ${m.impact_rs >= 0 ? "text-leaf" : "text-orange-700"}`}>
+                  {m.impact_rs >= 0 ? "+" : ""}
+                  {brl(m.impact_rs)}/ha líq.
+                </div>
+              )}
             </div>
-          )}
-          {m.impact_rs != null && (
-            <div className={`text-xs ${m.impact_rs >= 0 ? "text-leaf" : "text-orange-700"}`}>
-              {m.impact_rs >= 0 ? "+" : ""}
-              {brl(m.impact_rs)}/ha líq.
-            </div>
-          )}
+            <button
+              onClick={() => h.onRemove(m.kind, m.op_date)}
+              title="remover do plano"
+              className="text-stone-300 hover:text-orange-600"
+            >
+              ✕
+            </button>
+          </div>
         </div>
+        {m.evidencia && <EvidenceCard ev={m.evidencia} />}
       </div>
     );
   }
   return (
-    <div className="flex items-start justify-between gap-3 rounded-md border border-dashed border-amber-300 bg-amber-50/50 px-2.5 py-1.5">
-      <div className="min-w-0">
-        <span className="text-sm text-amber-900">
-          <span className="mr-1">＋</span>
-          {m.label}
-        </span>
-        <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-medium uppercase text-amber-700">
-          sugerido
-        </span>
-        {m.funcao && <div className="text-xs text-stone-500">{m.funcao}</div>}
-        {m.cost_reference && <div className="text-[11px] text-stone-400">ref.: {m.cost_reference}</div>}
+    <div className="rounded-md border border-dashed border-amber-300 bg-amber-50/50 px-2.5 py-1.5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-sm text-amber-900">{m.label}</span>
+          <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-medium uppercase text-amber-700">
+            sugerido
+          </span>
+          {m.funcao && <div className="text-xs text-stone-500">{m.funcao}</div>}
+          {m.cost_reference && <div className="text-[11px] text-stone-400">ref.: {m.cost_reference}</div>}
+        </div>
+        <button
+          onClick={() => h.onAdd(m.kind, phase)}
+          className="shrink-0 rounded-md border border-leaf px-2 py-0.5 text-[11px] font-medium text-leafdark hover:bg-green-50"
+        >
+          ＋ adicionar
+        </button>
       </div>
-      {m.janela && <div className="shrink-0 text-[11px] text-stone-400">{m.janela}</div>}
+      {m.evidencia && <EvidenceCard ev={m.evidencia} />}
     </div>
   );
 }
 
-function PhaseCard({ p }: { p: CropPlanPhase }) {
+function PhaseCard({ p, h }: { p: CropPlanPhase; h: ManejoHandlers }) {
   const b = STATUS_BADGE[p.status];
   const ring =
     p.status === "em_andamento" ? "border-leaf/50 bg-white shadow-sm" : "border-stone-200 bg-white";
@@ -125,7 +181,7 @@ function PhaseCard({ p }: { p: CropPlanPhase }) {
       {p.manejos.length > 0 && (
         <div className="space-y-1.5">
           {p.manejos.map((m, i) => (
-            <Manejo key={`${m.kind}-${i}`} m={m} />
+            <Manejo key={`${m.kind}-${i}`} m={m} phase={p} h={h} />
           ))}
         </div>
       )}
@@ -201,7 +257,15 @@ function WeatherSource({
   );
 }
 
-export function CropTimeline({ plan, loading }: { plan: CropPlanOut | undefined; loading: boolean }) {
+export function CropTimeline({
+  plan,
+  loading,
+  handlers,
+}: {
+  plan: CropPlanOut | undefined;
+  loading: boolean;
+  handlers: ManejoHandlers;
+}) {
   if (!plan) {
     return (
       <div className="animate-pulse rounded-xl border border-stone-200 bg-white p-5">
@@ -243,7 +307,7 @@ export function CropTimeline({ plan, loading }: { plan: CropPlanOut | undefined;
 
       <div className="space-y-3">
         {plan.phases.map((p) => (
-          <PhaseCard key={p.key} p={p} />
+          <PhaseCard key={p.key} p={p} h={handlers} />
         ))}
       </div>
     </div>

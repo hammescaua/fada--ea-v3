@@ -179,6 +179,17 @@ export interface AccuracyOut {
   resumo: string;
 }
 
+export interface ManejoEvidence {
+  kind: string;
+  alvo: string;
+  mecanismo: string;
+  coeficiente: { key: string; value: unknown; source: string | null } | null;
+  coeficiente_secundario: { key: string; value: unknown; source: string | null } | null;
+  personaliza_por: string[];
+  leitura_talhao: string;
+  fonte: string;
+}
+
 export interface CropPlanManejo {
   kind: string;
   label: string;
@@ -186,11 +197,13 @@ export interface CropPlanManejo {
   op_date: string | null;
   cost_per_ha: number | null;
   dose: number | null;
+  product?: string | null;
   funcao: string;
   janela?: string;
   cost_reference?: string | null;
   impact_sc_ha: number | null;
   impact_rs: number | null;
+  evidencia: ManejoEvidence | null;
 }
 
 export interface CropPlanPhase {

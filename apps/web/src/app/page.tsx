@@ -133,6 +133,36 @@ export default function Home() {
       ? sim.yield_result.expected_sc_ha - baseline.yield_result.expected_sc_ha
       : null;
 
+  // Custo de referência (R$/ha) ao adicionar um manejo sugerido pela timeline.
+  const MANEJO_COST: Record<string, number> = {
+    fungicida: 180, inseticida: 120, herbicida: 160, herbicida_pre: 140, dessecacao: 90,
+    cobertura: 220, adubacao_foliar: 80, calagem: 180, gessagem: 160,
+    adubacao_p: 240, adubacao_k: 200, adubacao_base: 260, inoculacao: 40,
+    tratamento_sementes: 60, regulador: 70,
+  };
+  const midDate = (start: string, end: string) => {
+    const mid = new Date((new Date(start).getTime() + new Date(end).getTime()) / 2);
+    return mid.toISOString().slice(0, 10);
+  };
+  const timelineHandlers = {
+    onAdd: (kind: string, phase: { start: string; end: string }) =>
+      setScenario((s) => ({
+        ...s,
+        operations: [
+          ...s.operations,
+          { kind, op_date: midDate(phase.start, phase.end), cost_per_ha: MANEJO_COST[kind] ?? 150, quality: 0.9 },
+        ],
+      })),
+    onRemove: (kind: string, opDate: string | null) =>
+      setScenario((s) => {
+        const i = s.operations.findIndex((o) => o.kind === kind && (!opDate || o.op_date === opDate));
+        if (i < 0) return s;
+        const ops = [...s.operations];
+        ops.splice(i, 1);
+        return { ...s, operations: ops };
+      }),
+  };
+
   const completeOnboarding = (patch: Partial<ScenarioIn>, soilInformed: boolean) => {
     setScenario((s) => ({ ...s, ...patch }));
     setSoilReal(soilInformed);
@@ -205,7 +235,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
           <div className="space-y-5">
             {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
-            <CropTimeline plan={cropPlan} loading={cropPlanLoading} />
+            <CropTimeline plan={cropPlan} loading={cropPlanLoading} handlers={timelineHandlers} />
           </div>
           <div className="space-y-5">
             <div className="rounded-xl border border-stone-200 bg-white p-4">

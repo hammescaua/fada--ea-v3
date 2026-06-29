@@ -62,6 +62,11 @@ def operations() -> dict:
     return _load("operations_catalog.json").get("operations", {})
 
 
+def manejo_evidence() -> dict:
+    """Evidência científica por manejo (mecanismo, coeficiente citado, personalização)."""
+    return _load("manejo_evidence.json").get("manejos", {})
+
+
 def param(path: str, default=None):
     """Lê um coeficiente por caminho pontilhado, ex.: ``'calagem.v_alvo_soja'``.
 

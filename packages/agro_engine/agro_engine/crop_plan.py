@@ -20,6 +20,7 @@ from datetime import date, timedelta
 from . import kb
 from .data_sources import accuracy_report
 from .decision import operations_impact
+from .manejo_science import manejo_evidence
 from .models import Scenario
 from .simulate import simulate
 
@@ -160,9 +161,11 @@ def crop_plan(
                 "op_date": op.op_date.isoformat(),
                 "cost_per_ha": op.cost_per_ha,
                 "dose": op.dose,
+                "product": op.product,
                 "funcao": catalog.get(op.kind, {}).get("funcao", ""),
                 "impact_sc_ha": imp.delta_yield_sc_ha if imp else None,
                 "impact_rs": imp.net_per_ha if imp else None,
+                "evidencia": manejo_evidence(scenario, op.kind),
             })
 
         # manejos recomendados do catálogo que NÃO estão no plano
@@ -181,11 +184,13 @@ def crop_plan(
                 "op_date": None,
                 "cost_per_ha": None,
                 "dose": None,
+                "product": None,
                 "funcao": cinfo.get("funcao", ""),
                 "janela": cinfo.get("janela", ""),
                 "cost_reference": _cost_ref(insumo),
                 "impact_sc_ha": None,
                 "impact_rs": None,
+                "evidencia": manejo_evidence(scenario, ck),
             })
 
         impact_sc = round(sum(m["impact_sc_ha"] or 0.0 for m in manejos if m["planned"]), 2)
