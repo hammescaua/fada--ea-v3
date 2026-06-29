@@ -21,9 +21,12 @@ from .models import (
 )
 from .briefing import season_briefing
 from .budget import season_budget
+from .counterfactual import run_counterfactuals
 from .crop_plan import crop_plan
 from .data_sources import accuracy_report, infer_provenance
+from .evidence import Observation, confidence_for, corroborate, data_quality
 from .manejo_science import manejo_evidence
+from .personality import FieldSeason, personality
 from .decision import operations_impact, recommend_decisions
 from .fertility import recommend_amendments
 from .knowledge import (
@@ -50,6 +53,8 @@ __all__ = [
     "Cultivar",
     "CostItem",
     "DailyWeather",
+    "FieldSeason",
+    "Observation",
     "EconomicsResult",
     "FactorContribution",
     "Operation",
@@ -66,11 +71,16 @@ __all__ = [
     "crop_plan",
     "calibrate",
     "compute_economics",
+    "confidence_for",
+    "corroborate",
+    "data_quality",
     "decompose_yield",
     "evaluate_sowing_window",
     "infer_provenance",
     "manejo_evidence",
     "operations_impact",
+    "personality",
+    "run_counterfactuals",
     "optimize_season",
     "recommend_amendments",
     "recommend_decisions",

@@ -12,6 +12,7 @@ from agro_engine import (
     crop_plan,
     infer_provenance,
     operations_impact,
+    run_counterfactuals,
     optimize_season,
     recommend_amendments,
     recommend_decisions,
@@ -37,6 +38,7 @@ from ..schemas import (
     AccuracyIn,
     AssistantIn,
     BriefingIn,
+    CounterfactualIn,
     CropPlanIn,
     DataQualityIn,
     MonteCarloIn,
@@ -196,6 +198,14 @@ def post_crop_plan(payload: CropPlanIn) -> dict:
         provenance=_with_climate_prov(scenario, payload.provenance),
         climate_known_fraction=_climate_known_fraction(scenario),
     )
+
+
+@router.post("/counterfactual")
+def post_counterfactual(payload: CounterfactualIn) -> dict:
+    """Counterfactual Engine: roda os 'universos paralelos' da safra ("e se eu não tivesse
+    aplicado o fungicida? e se tivesse plantado 8 dias antes?") e mede o Δ de cada um."""
+    scenario = _to_scenario(payload.scenario)
+    return run_counterfactuals(scenario)
 
 
 @router.get("/reference/inputs")

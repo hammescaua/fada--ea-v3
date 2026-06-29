@@ -101,6 +101,37 @@ class CropPlanIn(BaseModel):
     today: date | None = None
 
 
+class CounterfactualIn(BaseModel):
+    scenario: ScenarioIn
+
+
+class ObservationIn(BaseModel):
+    kind: str
+    source: str
+    observed_at: date
+    value: dict = Field(default_factory=dict)
+    unit: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    consequence: str | None = None
+    season_id: str | None = None
+    confidence: float | None = None  # se ausente, o Reality Engine deriva da fonte
+
+
+class ObservationOut(BaseModel):
+    id: str
+    field_id: str
+    observed_at: date
+    kind: str
+    source: str
+    value: dict
+    unit: str | None = None
+    confidence: float
+    latitude: float | None = None
+    longitude: float | None = None
+    consequence: str | None = None
+
+
 class SeasonOutcomeIn(BaseModel):
     crop_year: str
     predicted_sc_ha: float

@@ -133,6 +133,32 @@ class CostItem(Base):
     season: Mapped[Season] = relationship(back_populates="cost_items")
 
 
+class Observation(Base):
+    """Evidência: TUDO que acontece no talhão vira observação no tempo/espaço.
+
+    O ativo central do gêmeo orientado a eventos — cada chuva, NDVI, ferrugem,
+    emergência, aplicação, colheita ou relato é uma evidência com FONTE, LOCAL e
+    CONFIANÇA. Os motores aprendem com a sequência de eventos, não só com o resultado.
+    """
+
+    __tablename__ = "observations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    field_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("fields.id", ondelete="CASCADE"), index=True)
+    season_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("seasons.id", ondelete="SET NULL"), nullable=True)
+    observed_at: Mapped[date] = mapped_column(Date, index=True)
+    kind: Mapped[str] = mapped_column(String(40), index=True)   # chuva|ndvi|ferrugem|emergencia|aplicacao|colheita...
+    source: Mapped[str] = mapped_column(String(40))             # api_clima|satelite|drone|agronomo|nota_fiscal|gps...
+    value: Mapped[dict] = mapped_column(JSONB)                  # {'mm':21} | {'ndvi':0.74} | {'severidade':'baixa'}
+    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    confidence: Mapped[float] = mapped_column(Float, default=0.5)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    geom: Mapped[object | None] = mapped_column(Geometry(geometry_type="POINT", srid=4326), nullable=True)
+    consequence: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class WeatherCache(Base):
     """Cache de séries climáticas por célula de grade (evita reconsultar APIs)."""
 
