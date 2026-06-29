@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "descricao": "Ficha de PROVENIÊNCIA e ACURÁCIA de cada variável que alimenta o gêmeo digital. Para cada grupo de dados declara: o que ele governa no modelo, a hierarquia de fontes (do mais local/real ao mais genérico), quão específico é para o talhão/localidade e COMO torná-lo mais preciso. É a base honesta da ferramenta: a estimativa só é tão boa quanto o dado que a alimenta.",
+    "principio": "Personalizar por talhão e localidade, nunca médias regionais quando houver dado melhor disponível.",
+    "atualizado_em": "2026-06"
+  },
+  "groups": {
+    "clima": {
+      "label": "Clima",
+      "drives": ["graus-dia e datas dos estádios (fenologia)", "balanço hídrico por estádio (FAO-56)", "dias de calor no período reprodutivo"],
+      "locality": "ponto exato (lat/lon do talhão) quando real ou climatologia; regional quando sintético",
+      "tiers": [
+        {"id": "medido_lavoura", "label": "Chuva/temperatura medidos na própria lavoura", "quality": 1.0, "note": "pluviômetro/estação no talhão — o mais fiel à realidade local"},
+        {"id": "estacao_inmet", "label": "Estação INMET/automática próxima", "quality": 0.85, "note": "observado real da safra, a poucos km do talhão"},
+        {"id": "climatologia_real", "label": "Climatologia histórica do ponto (Open-Meteo ~10 anos)", "quality": 0.7, "note": "média do dia-do-ano para a coordenada exata do talhão, com ET0 real — específico do local, porém histórico (não a safra corrente)"},
+        {"id": "sintetico", "label": "Clima sintético regional do NO-RS", "quality": 0.3, "note": "distribuição típica da região — usado só quando não há clima do ponto"}
+      ],
+      "how_to_improve": "Ligar o clima histórico real do ponto (já disponível na ferramenta). Na safra corrente, registrar a chuva medida no talhão ou conectar a estação INMET mais próxima para sair da média histórica e usar o observado.",
+      "source": "Open-Meteo Historical (1940+, CC-BY); INMET/BDMEP; FAO-56 (ET0)"
+    },
+    "solo": {
+      "label": "Solo (fertilidade e física)",
+      "drives": ["fator nutrição (P, K, pH, V%)", "fator solo/CTC", "água disponível (textura × profundidade)"],
+      "locality": "específico do talhão quando há análise; default regional caso contrário — este é o MAIOR ganho de acurácia",
+      "tiers": [
+        {"id": "analise_talhao", "label": "Análise de solo do próprio talhão (laboratório)", "quality": 1.0, "note": "amostragem georreferenciada do talhão — base de toda recomendação de fertilidade"},
+        {"id": "analise_propriedade", "label": "Análise de outro talhão da mesma propriedade", "quality": 0.6, "note": "aproxima, mas solo varia entre talhões"},
+        {"id": "default_regional", "label": "Perfil default do NO-RS (Latossolo argiloso)", "quality": 0.2, "note": "suposição — não reflete o talhão específico"}
+      ],
+      "how_to_improve": "Fazer/importar a análise de solo do talhão (idealmente por zonas de manejo). É a única forma de personalizar P, K, pH e V% — e o item que mais muda a recomendação de calagem e adubação.",
+      "source": "CQFS-RS/SC 2016 (interpretação e recomendação); laboratório credenciado"
+    },
+    "cultivar": {
+      "label": "Cultivar",
+      "drives": ["teto produtivo (potencial genético)", "ciclo e datas dos estádios", "tolerância a doenças (ferrugem)"],
+      "locality": "específico quando informada a cultivar real; genérico caso contrário",
+      "tiers": [
+        {"id": "cultivar_real", "label": "Cultivar realmente usada (ficha da obtentora)", "quality": 1.0, "note": "GMR, ciclo, hábito e tolerâncias do material real"},
+        {"id": "grupo_maturacao", "label": "Apenas o grupo de maturação", "quality": 0.6, "note": "aproxima ciclo e janela, mas não o potencial/tolerância exatos"},
+        {"id": "generica", "label": "Cultivar genérica RR 5.5", "quality": 0.3, "note": "suposição de material médio da região"}
+      ],
+      "how_to_improve": "Informar a cultivar realmente semeada (a obtentora publica GMR, potencial e tolerância à ferrugem). Ajusta ciclo, janela ZARC e resposta a fungicida.",
+      "source": "Fichas técnicas das obtentoras; ensaios de VCU/Embrapa"
+    },
+    "data_semeadura": {
+      "label": "Data de semeadura",
+      "drives": ["posição na janela ZARC (penalidade por desvio)", "casamento do período crítico com o clima"],
+      "locality": "decisão do agricultor; risco avaliado por município (ZARC) + clima do ponto",
+      "tiers": [
+        {"id": "realizada", "label": "Data efetivamente semeada", "quality": 1.0, "note": "fato registrado"},
+        {"id": "planejada", "label": "Data planejada", "quality": 0.8, "note": "intenção — pode mudar com o clima"}
+      ],
+      "how_to_improve": "Confirmar a data real de semeadura. O ZARC do município define a janela; o clima do ponto define o risco dentro dela.",
+      "source": "ZARC/MAPA-Embrapa (portarias por município, solo e ciclo)"
+    },
+    "populacao": {
+      "label": "População / estande",
+      "drives": ["fator população (número de plantas/ha vs. ótimo)"],
+      "locality": "específico do talhão/semeadora quando aferido",
+      "tiers": [
+        {"id": "estande_aferido", "label": "Estande aferido a campo (plantas/m)", "quality": 1.0, "note": "contagem real após emergência"},
+        {"id": "regulagem", "label": "População de regulagem da semeadora", "quality": 0.7, "note": "alvo de semeadura, antes da emergência"},
+        {"id": "default", "label": "População típica (300 mil/ha)", "quality": 0.3, "note": "suposição"}
+      ],
+      "how_to_improve": "Informar a população de regulagem e, após a emergência, aferir o estande real (plantas/m × espaçamento) para corrigir o fator população.",
+      "source": "Embrapa Soja — Tecnologias de Produção (estande por GMR/época)"
+    },
+    "manejo": {
+      "label": "Programa de manejo",
+      "drives": ["fatores daninhas, pragas e doenças", "custos da safra"],
+      "locality": "específico do talhão quando registrado (datas, produtos, doses)",
+      "tiers": [
+        {"id": "registrado", "label": "Manejo registrado (datas, produtos, doses)", "quality": 1.0, "note": "histórico real de aplicações do talhão"},
+        {"id": "programa_padrao", "label": "Programa-padrão da região", "quality": 0.5, "note": "calendário típico, não o que foi feito"}
+      ],
+      "how_to_improve": "Registrar cada aplicação (data, produto, dose, condição). Melhora a estimativa de sanidade e o custo real por manejo.",
+      "source": "Embrapa Soja; catálogo canônico de manejos da ferramenta"
+    },
+    "preco": {
+      "label": "Preços (soja e insumos)",
+      "drives": ["receita, lucro, ROI, break-even", "custo de cada manejo/insumo"],
+      "locality": "regional/negociado pelo agricultor",
+      "tiers": [
+        {"id": "negociado", "label": "Preço real negociado pelo agricultor", "quality": 1.0, "note": "venda/compra efetiva — o mais fiel"},
+        {"id": "referencia", "label": "Preço de referência (CONAB/CEPEA, catálogo)", "quality": 0.6, "note": "mercado, pode divergir do negociado na praça"}
+      ],
+      "how_to_improve": "Informar o preço real de venda da soja e o preço negociado dos insumos. O catálogo traz referências de mercado como ponto de partida.",
+      "source": "CONAB/CEPEA (soja); catálogo de insumos (mercado BR/RS 2025)"
+    }
+  }
+}

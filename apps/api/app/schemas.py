@@ -86,6 +86,17 @@ class BriefingIn(BaseModel):
     provenance: dict[str, str] = Field(default_factory=dict)
 
 
+class AccuracyIn(BaseModel):
+    scenario: ScenarioIn
+    provenance: dict[str, str] = Field(default_factory=dict)
+
+
+class CropPlanIn(BaseModel):
+    scenario: ScenarioIn
+    provenance: dict[str, str] = Field(default_factory=dict)
+    today: date | None = None
+
+
 class SeasonOutcomeIn(BaseModel):
     crop_year: str
     predicted_sc_ha: float

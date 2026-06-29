@@ -52,6 +52,16 @@ def get_input(key: str) -> dict | None:
     return inputs().get(key)
 
 
+def data_sources() -> dict:
+    """Ficha de proveniência/acurácia por grupo de variável (de onde vem cada dado)."""
+    return _load("data_sources.json").get("groups", {})
+
+
+def operations() -> dict:
+    """Mapa canônico de manejos (janela, fator IPPD alvo, insumo associado)."""
+    return _load("operations_catalog.json").get("operations", {})
+
+
 def param(path: str, default=None):
     """Lê um coeficiente por caminho pontilhado, ex.: ``'calagem.v_alvo_soja'``.
 

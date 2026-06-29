@@ -7,7 +7,9 @@ from datetime import date, timedelta
 from fastapi import APIRouter
 
 from agro_engine import (
+    accuracy_report,
     assess_data_quality,
+    crop_plan,
     operations_impact,
     optimize_season,
     recommend_amendments,
@@ -31,13 +33,16 @@ from agro_engine.reference import NO_RS_MUNICIPALITIES
 from .. import weather
 from .. import assistant
 from ..schemas import (
+    AccuracyIn,
     AssistantIn,
     BriefingIn,
+    CropPlanIn,
     DataQualityIn,
     MonteCarloIn,
     ScenarioIn,
     SimulationOut,
 )
+from agro_engine import kb
 
 router = APIRouter(tags=["motor"])
 
@@ -125,12 +130,42 @@ def post_briefing(payload: BriefingIn) -> dict:
     ação e veracidade dos dados num veredito priorizado com status de saúde — o que o
     agricultor lê em segundos para decidir. Auto-detecta a fonte do clima."""
     scenario = _to_scenario(payload.scenario)
-    prov = dict(payload.provenance)
+    return season_briefing(scenario, _with_climate_prov(scenario, payload.provenance))
+
+
+def _with_climate_prov(scenario, provenance: dict) -> dict:
+    """Preenche a fonte do clima detectada pelo backend (real vs sintético)."""
+    prov = dict(provenance)
     prov.setdefault(
         "clima",
-        "real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado",
+        "climatologia_real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado",
     )
-    return season_briefing(scenario, prov)
+    return prov
+
+
+@router.post("/accuracy")
+def post_accuracy(payload: AccuracyIn) -> dict:
+    """Acurácia por talhão: para cada variável, a fonte em uso, quão local ela é, quanto
+    a estimativa pode mudar (sc/ha) e COMO torná-la mais precisa para este talhão/local."""
+    scenario = _to_scenario(payload.scenario)
+    return accuracy_report(scenario, _with_climate_prov(scenario, payload.provenance))
+
+
+@router.post("/crop-plan")
+def post_crop_plan(payload: CropPlanIn) -> dict:
+    """Plano de Safra ao Vivo: passo-a-passo por fase (preparo → semeadura → vegetativo →
+    reprodutivo → colheita), com manejos, impacto em sc/ha e R$, status vs. hoje e a
+    proveniência dos dados de cada etapa (de onde vêm e como melhorar)."""
+    scenario = _to_scenario(payload.scenario)
+    return crop_plan(scenario, today=payload.today, provenance=_with_climate_prov(scenario, payload.provenance))
+
+
+@router.get("/reference/inputs")
+def get_reference_inputs() -> dict:
+    """Catálogo de insumos com PREÇO DE REFERÊNCIA e fonte citada — a fidelidade dos
+    custos vem daqui (mercado BR/RS), não de números mágicos; o agricultor ajusta ao real."""
+    raw = kb._load("inputs_catalog.json")  # type: ignore[attr-defined]
+    return {"meta": raw.get("_meta", {}), "inputs": raw.get("inputs", {})}
 
 
 @router.post("/simulate/montecarlo")
@@ -163,10 +198,7 @@ def post_data_quality(payload: DataQualityIn) -> dict:
     """Veracidade dos dados do talhão: índice de confiança + lacunas ranqueadas por
     valor-da-informação (o que medir primeiro). Auto-detecta a fonte do clima."""
     scenario = _to_scenario(payload.scenario)
-    prov = dict(payload.provenance)
-    # fonte do clima é detectada pelo backend (climatologia real vs sintético)
-    prov.setdefault("clima", "real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado")
-    return assess_data_quality(scenario, prov)
+    return assess_data_quality(scenario, _with_climate_prov(scenario, payload.provenance))
 
 
 @router.post("/optimize-season")
