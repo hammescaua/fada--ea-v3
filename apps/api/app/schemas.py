@@ -31,6 +31,7 @@ class CultivarIn(BaseModel):
     base_potential_sc_ha: float = 95.0
     cycle_days: int = 130
     disease_tolerance: float = 0.5
+    nematode_tolerance: float = 0.5
 
 
 class OperationIn(BaseModel):
@@ -62,6 +63,8 @@ class ScenarioIn(BaseModel):
     soybean_price_per_sc: float = 120.0
     use_live_weather: bool = False  # se True, busca clima histórico real
     enso: str = "neutro"            # "el_nino" | "neutro" | "la_nina" — outlook climático da safra
+    nematode_pressure: str = "nenhuma"  # nenhuma | baixa | media | alta
+    previous_crop: str = "soja"         # soja | milho | trigo | cobertura | pousio
     # Calibração aprendida do talhão (a UI injeta a partir de /fields/{id}/calibration).
     calibration_bias_sc_ha: float = 0.0
     calibration_confidence: float = 0.0

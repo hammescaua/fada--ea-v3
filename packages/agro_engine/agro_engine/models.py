@@ -51,6 +51,7 @@ class Cultivar:
     base_potential_sc_ha: float = 95.0
     cycle_days: int = 130            # ciclo total aproximado (semeadura→R8)
     disease_tolerance: float = 0.5   # 0 (suscetível) .. 1 (tolerante) — ferrugem etc.
+    nematode_tolerance: float = 0.5  # 0 (suscetível) .. 1 (resistente) — cisto/galha
 
 
 @dataclass
@@ -126,6 +127,8 @@ class Scenario:
     # Fase ENSO esperada para a safra (El Niño/Neutro/La Niña) — driver climático nº1 no
     # NO-RS: La Niña puxa seca/quebra; El Niño tende a chuva abundante. Usado no risco.
     enso: str = "neutro"                 # "el_nino" | "neutro" | "la_nina"
+    nematode_pressure: str = "nenhuma"   # nenhuma | baixa | media | alta (análise/histórico)
+    previous_crop: str = "soja"          # cultura anterior: soja | milho | trigo | cobertura | pousio
     # Calibração aprendida do talhão (Knowledge Engine): correção aditiva previsto→real,
     # aplicada como fator transparente da cascata IPPD. 0 safras = talhão sem histórico.
     calibration_bias_sc_ha: float = 0.0

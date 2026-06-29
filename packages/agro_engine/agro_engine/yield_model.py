@@ -77,6 +77,33 @@ def _compaction_factor(soil: SoilProfile) -> tuple[float, float, str]:
     return m, 0.7, f"compactação {soil.compaction}"
 
 
+def _nematode_factor(scenario: Scenario) -> tuple[float, float, str]:
+    """Nematoides: perda por pressão, atenuada pela resistência da cultivar e pela rotação.
+
+    matriz crescente no NO-RS (cisto/galha/lesão). Rotação com não-hospedeiras (milho) ou
+    cobertura supressora reduz a população; cultivar resistente reduz a perda.
+    """
+    pressure = scenario.nematode_pressure
+    base = ref.NEMATODE_LOSS_BY_PRESSURE.get(pressure, 0.0)
+    if base <= 0:
+        return 1.0, 0.6, "sem pressão de nematoides informada"
+    suppression = ref.ROTATION_NEMATODE_SUPPRESSION.get(scenario.previous_crop, 1.0)
+    loss = base * (1.0 - ref.NEMATODE_TOLERANCE_FACTOR * scenario.cultivar.nematode_tolerance) * suppression
+    detail = (
+        f"pressão {pressure}; cultivar tol. {scenario.cultivar.nematode_tolerance:.0%}; "
+        f"rotação após {scenario.previous_crop}"
+    )
+    return _clamp(1.0 - loss, 0.6, 1.0), 0.6, detail
+
+
+def _rotation_factor(scenario: Scenario) -> tuple[float, float, str]:
+    """Cultura anterior: palhada/ciclagem/estrutura (efeito além do nematoide)."""
+    m = ref.ROTATION_STRUCTURE_BONUS.get(scenario.previous_crop, 1.0)
+    if scenario.previous_crop == "soja":
+        return m, 0.55, "monocultura de soja (sem benefício de rotação)"
+    return m, 0.55, f"cultura anterior: {scenario.previous_crop} (palhada/estrutura)"
+
+
 def _water_factor(overall_stress: float, critical_stage: str | None) -> tuple[float, float, str]:
     """Estresse hídrico ponderado (0..1) → multiplicador. Estresse total ~ -45%."""
     m = 1.0 - _clamp(overall_stress, 0, 1) * 0.45
@@ -157,7 +184,9 @@ def decompose(scenario: Scenario, water: dict, sowing: dict) -> YieldResult:
 
     apply("Solo", _soil_factor(scenario.soil))
     apply("Nutrição", _nutrition_factor(scenario.soil))
+    apply("Nematoides", _nematode_factor(scenario))
     apply("Compactação", _compaction_factor(scenario.soil))
+    apply("Rotação", _rotation_factor(scenario))
     apply("População", _population_factor(scenario))
 
     # Janela de semeadura: penalidade vem em sc/ha → vira multiplicador.

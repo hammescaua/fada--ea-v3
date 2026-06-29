@@ -19,6 +19,7 @@ export interface CultivarIn {
   base_potential_sc_ha: number;
   cycle_days: number;
   disease_tolerance: number;
+  nematode_tolerance?: number;
 }
 
 export interface OperationIn {
@@ -50,6 +51,8 @@ export interface ScenarioIn {
   soybean_price_per_sc: number;
   use_live_weather: boolean;
   enso?: "el_nino" | "neutro" | "la_nina";
+  nematode_pressure?: "nenhuma" | "baixa" | "media" | "alta";
+  previous_crop?: "soja" | "milho" | "trigo" | "cobertura" | "pousio";
   // Calibração aprendida do talhão (injetada ao carregar um talhão com histórico).
   calibration_bias_sc_ha?: number;
   calibration_confidence?: number;

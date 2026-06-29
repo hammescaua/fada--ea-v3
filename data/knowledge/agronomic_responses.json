@@ -51,5 +51,26 @@
   },
   "populacao": {
     "otima_mil_por_ha": {"value": [260.0, 340.0], "source": "Embrapa — indicações técnicas soja RS"}
+  },
+  "nematoides": {
+    "_nota": "Nematoides (cisto Heterodera glycines, galha Meloidogyne, lesão Pratylenchus) — infestação crescente no RS; perdas em reboleira variam com população, suscetibilidade da cultivar e rotação.",
+    "perda_potencial_por_pressao": {
+      "value": {"nenhuma": 0.0, "baixa": 0.06, "media": 0.15, "alta": 0.30},
+      "unit": "fração de perda potencial",
+      "source": "Embrapa Soja — manejo de nematoides (perdas por reboleira)"
+    },
+    "fator_tolerancia_cultivar": {"value": 0.6, "source": "Embrapa — cultivares resistentes/tolerantes reduzem a perda"},
+    "supressao_por_rotacao": {
+      "value": {"soja": 1.0, "milho": 0.7, "trigo": 0.9, "cobertura": 0.6, "pousio": 0.85},
+      "_nota": "multiplica a perda: <1 = rotação suprime (não-hospedeiras/cobertura); soja-soja mantém",
+      "source": "Embrapa — rotação com não-hospedeiras e plantas de cobertura supressoras"
+    }
+  },
+  "rotacao": {
+    "bonus_estrutura_palhada": {
+      "value": {"soja": 0.98, "milho": 1.02, "trigo": 1.0, "cobertura": 1.03, "pousio": 1.0},
+      "_nota": "efeito da cultura anterior na palhada/MO/estrutura (fora o efeito sobre nematoides)",
+      "source": "Embrapa — rotação de culturas e plantas de cobertura (palhada, ciclagem, estrutura)"
+    }
   }
 }

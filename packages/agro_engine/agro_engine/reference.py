@@ -119,6 +119,14 @@ WEED_CONTROL_EFF: float = 0.70   # herbicida bem manejado controla bem
 HEAT_THRESHOLD_C: float = 34.0
 HEAT_MAX_LOSS: float = 0.18      # perda máxima por calor extremo persistente
 
+# --- Nematoides e rotação (matrizes do NO-RS) --------------------------------
+# Perda potencial por nível de pressão, atenuada pela tolerância da cultivar e pela
+# supressão da rotação (não-hospedeiras/cobertura). Fallbacks; sincronizados da KB.
+NEMATODE_LOSS_BY_PRESSURE: dict[str, float] = {"nenhuma": 0.0, "baixa": 0.06, "media": 0.15, "alta": 0.30}
+NEMATODE_TOLERANCE_FACTOR: float = 0.6
+ROTATION_NEMATODE_SUPPRESSION: dict[str, float] = {"soja": 1.0, "milho": 0.7, "trigo": 0.9, "cobertura": 0.6, "pousio": 0.85}
+ROTATION_STRUCTURE_BONUS: dict[str, float] = {"soja": 0.98, "milho": 1.02, "trigo": 1.0, "cobertura": 1.03, "pousio": 1.0}
+
 # --- Defaults regionais Noroeste do RS ---------------------------------------
 DEFAULT_PRICE_PER_SC: float = 120.0
 NO_RS_MUNICIPALITIES: list[str] = [
@@ -159,11 +167,22 @@ def _sync_from_kb() -> None:
         "K_SUFFICIENT_PPM": "nutricao.k_suficiente_ppm",
         "V_SUFFICIENT_PCT": "nutricao.v_suficiente_pct",
         "SOWING_PENALTY_SC_PER_DAY": "semeadura.penalidade_sc_por_dia_fora_otimo",
+        "NEMATODE_TOLERANCE_FACTOR": "nematoides.fator_tolerancia_cultivar",
     }
     for const, path in mapping.items():
         val = kb.param(path)
         if isinstance(val, (int, float)):
             g[const] = float(val)
+    # parâmetros que são dicionários (perda/supressão por categoria)
+    dict_mapping = {
+        "NEMATODE_LOSS_BY_PRESSURE": "nematoides.perda_potencial_por_pressao",
+        "ROTATION_NEMATODE_SUPPRESSION": "nematoides.supressao_por_rotacao",
+        "ROTATION_STRUCTURE_BONUS": "rotacao.bonus_estrutura_palhada",
+    }
+    for const, path in dict_mapping.items():
+        val = kb.param(path)
+        if isinstance(val, dict) and val:
+            g[const] = {k: float(v) for k, v in val.items()}
 
 
 _sync_from_kb()

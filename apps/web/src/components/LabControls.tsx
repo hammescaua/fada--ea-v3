@@ -122,6 +122,16 @@ export function LabControls({ scenario, municipalities, onChange }: Props) {
               onChange={(e) => setCultivar({ disease_tolerance: Number(e.target.value) })}
             />
           </Field>
+          <Field label={`Resistência a nematoides (${((s.cultivar.nematode_tolerance ?? 0.5) * 100).toFixed(0)}%)`}>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={s.cultivar.nematode_tolerance ?? 0.5}
+              onChange={(e) => setCultivar({ nematode_tolerance: Number(e.target.value) })}
+            />
+          </Field>
           <Field label={`Aplicações de fungicida (${fungicidas})`}>
             <input
               type="range"
@@ -161,6 +171,31 @@ export function LabControls({ scenario, municipalities, onChange }: Props) {
               <option value="leve">Leve</option>
               <option value="moderada">Moderada</option>
               <option value="severa">Severa</option>
+            </select>
+          </Field>
+          <Field label="Nematoides (pressão)">
+            <select
+              className={input}
+              value={s.nematode_pressure ?? "nenhuma"}
+              onChange={(e) => set({ nematode_pressure: e.target.value as ScenarioIn["nematode_pressure"] })}
+            >
+              <option value="nenhuma">Nenhuma / não sei</option>
+              <option value="baixa">Baixa</option>
+              <option value="media">Média</option>
+              <option value="alta">Alta (reboleiras)</option>
+            </select>
+          </Field>
+          <Field label="Cultura anterior (rotação)">
+            <select
+              className={input}
+              value={s.previous_crop ?? "soja"}
+              onChange={(e) => set({ previous_crop: e.target.value as ScenarioIn["previous_crop"] })}
+            >
+              <option value="soja">Soja (monocultura)</option>
+              <option value="milho">Milho</option>
+              <option value="trigo">Trigo</option>
+              <option value="cobertura">Cobertura (aveia/nabo/ervilhaca)</option>
+              <option value="pousio">Pousio</option>
             </select>
           </Field>
           <Field label={`pH (${s.soil.ph.toFixed(1)})`}>

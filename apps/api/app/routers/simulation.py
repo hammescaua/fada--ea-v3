@@ -69,6 +69,7 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
         base_potential_sc_ha=payload.cultivar.base_potential_sc_ha,
         cycle_days=payload.cultivar.cycle_days,
         disease_tolerance=payload.cultivar.disease_tolerance,
+        nematode_tolerance=payload.cultivar.nematode_tolerance,
     )
     scenario = Scenario(
         soil=soil,
@@ -92,6 +93,8 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
         ],
         soybean_price_per_sc=payload.soybean_price_per_sc,
         enso=payload.enso,
+        nematode_pressure=payload.nematode_pressure,
+        previous_crop=payload.previous_crop,
         calibration_bias_sc_ha=payload.calibration_bias_sc_ha,
         calibration_confidence=payload.calibration_confidence,
         calibration_seasons=payload.calibration_seasons,

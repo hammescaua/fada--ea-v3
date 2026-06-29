@@ -124,6 +124,7 @@ export function defaultScenario(): ScenarioIn {
       base_potential_sc_ha: 95,
       cycle_days: 130,
       disease_tolerance: 0.6,
+      nematode_tolerance: 0.5,
     },
     sowing_date: "2025-11-05",
     municipality: "Santo Ângelo",
@@ -147,6 +148,8 @@ export function defaultScenario(): ScenarioIn {
     soybean_price_per_sc: 120,
     use_live_weather: true, // clima histórico REAL da localização (climatologia por talhão)
     enso: "neutro",
+    nematode_pressure: "nenhuma",
+    previous_crop: "soja",
     calibration_bias_sc_ha: 0,
     calibration_confidence: 0,
     calibration_seasons: 0,
