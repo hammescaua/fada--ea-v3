@@ -146,6 +146,7 @@ export function defaultScenario(): ScenarioIn {
     ],
     soybean_price_per_sc: 120,
     use_live_weather: true, // clima histórico REAL da localização (climatologia por talhão)
+    enso: "neutro",
     calibration_bias_sc_ha: 0,
     calibration_confidence: 0,
     calibration_seasons: 0,

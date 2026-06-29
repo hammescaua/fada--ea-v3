@@ -91,6 +91,7 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
             for c in payload.costs
         ],
         soybean_price_per_sc=payload.soybean_price_per_sc,
+        enso=payload.enso,
         calibration_bias_sc_ha=payload.calibration_bias_sc_ha,
         calibration_confidence=payload.calibration_confidence,
         calibration_seasons=payload.calibration_seasons,

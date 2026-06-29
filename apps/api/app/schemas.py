@@ -61,6 +61,7 @@ class ScenarioIn(BaseModel):
     costs: list[CostItemIn] = Field(default_factory=list)
     soybean_price_per_sc: float = 120.0
     use_live_weather: bool = False  # se True, busca clima histórico real
+    enso: str = "neutro"            # "el_nino" | "neutro" | "la_nina" — outlook climático da safra
     # Calibração aprendida do talhão (a UI injeta a partir de /fields/{id}/calibration).
     calibration_bias_sc_ha: float = 0.0
     calibration_confidence: float = 0.0

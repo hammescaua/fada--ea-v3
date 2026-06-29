@@ -26,11 +26,19 @@ TEMP_ANOMALY_SD = 1.5         # °C de anomalia térmica sazonal
 P_WET_DAY = 0.42              # probabilidade de dia com chuva
 OTHER_NOISE_SD = 0.04         # ruído multiplicativo (pragas/granizo/fatores não modelados)
 
+# Efeito ENSO no regime de chuva do verão do NO-RS (Berlato & Cordeiro; Embrapa Clima).
+# La Niña → déficit e maior variância (veranicos/quebra); El Niño → chuva acima da média.
+ENSO_RAIN_FACTOR = {"el_nino": 1.18, "neutro": 1.0, "la_nina": 0.74}
+ENSO_SD_FACTOR = {"el_nino": 1.0, "neutro": 1.0, "la_nina": 1.25}
+
 
 def _synth_weather(scenario: Scenario, rng: random.Random) -> WeatherSeries:
     """Gera uma série climática sintética para UMA safra possível."""
     cycle = scenario.cultivar.cycle_days + 25
-    total_rain = max(150.0, rng.gauss(SEASON_RAIN_MEAN_MM, SEASON_RAIN_SD_MM))
+    enso = getattr(scenario, "enso", "neutro")
+    rain_mean = SEASON_RAIN_MEAN_MM * ENSO_RAIN_FACTOR.get(enso, 1.0)
+    rain_sd = SEASON_RAIN_SD_MM * ENSO_SD_FACTOR.get(enso, 1.0)
+    total_rain = max(120.0, rng.gauss(rain_mean, rain_sd))
     temp_anom = rng.gauss(0.0, TEMP_ANOMALY_SD)
 
     expected_wet_days = max(1.0, cycle * P_WET_DAY)
@@ -124,6 +132,7 @@ def run_montecarlo(
 
     return {
         "iterations": n,
+        "enso": getattr(scenario, "enso", "neutro"),
         "yield": {
             "mean": round(mean_yield, 1),
             "p10": round(_percentile(ys, 0.10), 1),

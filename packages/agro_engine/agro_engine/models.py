@@ -123,6 +123,9 @@ class Scenario:
     operations: list[Operation] = field(default_factory=list)
     costs: list[CostItem] = field(default_factory=list)
     soybean_price_per_sc: float = 120.0  # R$ por saca de 60 kg
+    # Fase ENSO esperada para a safra (El Niño/Neutro/La Niña) — driver climático nº1 no
+    # NO-RS: La Niña puxa seca/quebra; El Niño tende a chuva abundante. Usado no risco.
+    enso: str = "neutro"                 # "el_nino" | "neutro" | "la_nina"
     # Calibração aprendida do talhão (Knowledge Engine): correção aditiva previsto→real,
     # aplicada como fator transparente da cascata IPPD. 0 safras = talhão sem histórico.
     calibration_bias_sc_ha: float = 0.0

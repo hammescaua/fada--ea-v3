@@ -12,9 +12,11 @@ baixa — a ferramenta nunca finge saber mais do que a evidência permite.
 from __future__ import annotations
 
 import statistics
+from collections import Counter
 from dataclasses import dataclass
 
 from .evidence import Observation
+from .interactions import detect_interactions
 from . import reference as ref
 
 
@@ -146,6 +148,47 @@ def _water_sensitivity(seasons: list[FieldSeason]) -> Trait | None:
     )
 
 
+# Recorrência de interações negativas vira um traço aprendido + viés de recomendação.
+_RECURRENCE_TRAITS = {
+    "lavagem_pos_aplicacao": (
+        "Propensão a lavagem de aplicação",
+        "Aplicações deste talhão são frequentemente lavadas por chuva — priorizar produtos com boa "
+        "resistência à chuva (rainfastness) e janelas de tempo seco; considerar repasse padrão.",
+    ),
+    "ferrugem_sem_protecao": (
+        "Histórico de ferrugem sem proteção",
+        "Ferrugem recorrente sem cobertura adequada — antecipar e reforçar o programa de fungicida.",
+    ),
+    "seca_pos_semeadura": (
+        "Risco de seca na implantação",
+        "Período seco recorrente após a semeadura — ajustar a época para casar com umidade e conferir estande.",
+    ),
+}
+
+
+def _interaction_traits(observations: list[Observation]) -> list[Trait]:
+    """Traços aprendidos da RECORRÊNCIA de interações negativas (a memória vira regra)."""
+    items = detect_interactions(observations)
+    counts = Counter(i.rule for i in items if not i.positive)
+    out: list[Trait] = []
+    for rule, n in counts.items():
+        if rule not in _RECURRENCE_TRAITS:
+            continue
+        label, recomendacao = _RECURRENCE_TRAITS[rule]
+        out.append(
+            Trait(
+                key=f"recorrencia_{rule}",
+                label=label,
+                level="recorrente" if n >= 2 else "observado 1x",
+                value=round(min(1.0, 0.4 + 0.2 * n), 2),
+                confidence=round(min(0.85, 0.4 + 0.15 * n), 2),
+                basis=f"{n} ocorrência(s) na história do talhão · {recomendacao}",
+                learning=n < 2,
+            )
+        )
+    return out
+
+
 def personality(seasons: list[FieldSeason], observations: list[Observation] | None = None) -> dict:
     """Deriva a personalidade aprendida do talhão a partir das safras e evidências."""
     observations = observations or []
@@ -158,6 +201,7 @@ def personality(seasons: list[FieldSeason], observations: list[Observation] | No
         _water_sensitivity(seasons),
     ]
     traits = [t for t in builders if t is not None]
+    traits.extend(_interaction_traits(observations))
     knowledge = _knowledge_pct(len(seasons), len(observations))
     return {
         "knowledge_pct": knowledge,

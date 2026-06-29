@@ -71,6 +71,20 @@ def test_personalidade_estabilidade_alta_quando_constante():
     assert est["level"] == "alta"
 
 
+def test_recorrencia_de_lavagem_vira_traco():
+    """Lavagem recorrente na história do talhão vira traço aprendido com recomendação."""
+    obs = []
+    for d in ("2024-01-10", "2025-01-12"):
+        obs.append(Observation("aplicacao", "nota_fiscal", d, {"tipo": "fungicida"}, 0.9))
+        rain_day = d[:-2] + str(int(d[-2:]) + 1)
+        obs.append(Observation("chuva", "api_clima", rain_day, {"mm": 25}, 0.9))
+    p = personality([_season("2024/25", 80, 82)], obs)
+    rec = next((t for t in p["traits"] if t["key"] == "recorrencia_lavagem_pos_aplicacao"), None)
+    assert rec is not None
+    assert rec["level"] == "recorrente"
+    assert "rainfast" in rec["basis"].lower() or "resistência à chuva" in rec["basis"].lower()
+
+
 # --- Counterfactual Engine ----------------------------------------------------
 def test_contrafactual_remover_fungicida_reduz(base_scenario):
     out = run_counterfactuals(base_scenario)

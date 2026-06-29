@@ -388,6 +388,20 @@ export default function Home() {
                         className="w-32 rounded-md border border-stone-300 px-2 py-1 text-sm focus:border-leaf focus:outline-none"
                       />
                     </label>
+                    <label className="flex flex-col gap-1 text-xs">
+                      <span className="font-medium text-stone-600">Outlook climático (ENSO)</span>
+                      <select
+                        value={scenario.enso ?? "neutro"}
+                        onChange={(e) =>
+                          setScenario((s) => ({ ...s, enso: e.target.value as ScenarioIn["enso"] }))
+                        }
+                        className="w-40 rounded-md border border-stone-300 px-2 py-1 text-sm focus:border-leaf focus:outline-none"
+                      >
+                        <option value="el_nino">El Niño (chuvoso)</option>
+                        <option value="neutro">Neutro</option>
+                        <option value="la_nina">La Niña (seca)</option>
+                      </select>
+                    </label>
                     <button
                       onClick={() => mc.mutate()}
                       disabled={mc.isPending}
