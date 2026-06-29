@@ -81,6 +81,13 @@ export const api = {
   fieldSeasons: (fieldId: string) => jget<SeasonSummaryOut[]>(`/api/fields/${fieldId}/seasons`),
   recordSeason: (fieldId: string, crop_year: string, scenario: ScenarioIn) =>
     jpost<{ id: string }>(`/api/fields/${fieldId}/seasons`, { crop_year, scenario }),
+  fieldCalibration: (fieldId: string) =>
+    jget<CalibrationOut>(`/api/fields/${fieldId}/calibration`),
+  recordHarvest: (seasonId: string, actual_yield_sc_ha: number) =>
+    jpost<{ id: string }>(
+      `/api/seasons/${seasonId}/harvest?actual_yield_sc_ha=${actual_yield_sc_ha}`,
+      {},
+    ),
 };
 
 // Cenário padrão (talhão argiloso típico do Noroeste do RS).
@@ -126,5 +133,8 @@ export function defaultScenario(): ScenarioIn {
     ],
     soybean_price_per_sc: 120,
     use_live_weather: true, // clima histórico REAL da localização (climatologia por talhão)
+    calibration_bias_sc_ha: 0,
+    calibration_confidence: 0,
+    calibration_seasons: 0,
   };
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { ScenarioIn } from "@/lib/types";
+import type { CalibrationOut, ScenarioIn } from "@/lib/types";
 
 interface Props {
   scenario: ScenarioIn;
@@ -54,6 +54,12 @@ export function FarmManager({ scenario, onLoadField }: Props) {
     enabled: !!fieldId,
     retry: false,
   });
+  const calibration = useQuery({
+    queryKey: ["fieldCalibration", fieldId],
+    queryFn: () => api.fieldCalibration(fieldId!),
+    enabled: !!fieldId,
+    retry: false,
+  });
 
   const offline = farms.isError;
 
@@ -97,8 +103,33 @@ export function FarmManager({ scenario, onLoadField }: Props) {
 
   const saveSeason = useMutation({
     mutationFn: () => api.recordSeason(fieldId!, cropYear, scenario),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["fieldSeasons", fieldId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fieldSeasons", fieldId] });
+      qc.invalidateQueries({ queryKey: ["fieldCalibration", fieldId] });
+    },
   });
+
+  const saveHarvest = useMutation({
+    mutationFn: ({ seasonId, actual }: { seasonId: string; actual: number }) =>
+      api.recordHarvest(seasonId, actual),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fieldSeasons", fieldId] });
+      qc.invalidateQueries({ queryKey: ["fieldCalibration", fieldId] });
+    },
+  });
+
+  // Injeta a calibração aprendida do talhão no cenário (corrige todas as previsões).
+  const applyCalibration = (cal: CalibrationOut | undefined) => {
+    onLoadField({
+      calibration_bias_sc_ha: cal?.n_seasons ? cal.bias_sc_ha : 0,
+      calibration_confidence: cal?.n_seasons ? cal.confidence : 0,
+      calibration_seasons: cal?.n_seasons ?? 0,
+    });
+  };
+  useEffect(() => {
+    if (calibration.data) applyCalibration(calibration.data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calibration.data]);
 
   // Carrega um talhão no laboratório: município, localização e solo salvo mais recente.
   const loadField = (id: string) => {
@@ -174,7 +205,7 @@ export function FarmManager({ scenario, onLoadField }: Props) {
         </button>
       </div>
 
-      {/* Talhões */}
+      {/* Talhões — render do histórico de safras usa HarvestEntry (abaixo). */}
       {farmId && (
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1.5">
@@ -234,17 +265,40 @@ export function FarmManager({ scenario, onLoadField }: Props) {
             </p>
           )}
 
+          {calibration.data && calibration.data.n_seasons > 0 && (
+            <div className="rounded-md bg-leaf/10 p-2 text-[11px] text-leafdark">
+              🧠 <span className="font-semibold">Modelo calibrado para este talhão</span> —{" "}
+              {calibration.data.n_seasons} safra(s). Correção aprendida{" "}
+              <span className="font-semibold">
+                {calibration.data.bias_sc_ha >= 0 ? "+" : ""}
+                {calibration.data.bias_sc_ha.toFixed(1)} sc/ha
+              </span>{" "}
+              (confiança {Math.round(calibration.data.confidence * 100)}%). Erro médio{" "}
+              {calibration.data.mae_before.toFixed(1)} → {calibration.data.mae_after.toFixed(1)} sc/ha.
+              Já aplicada nas previsões (veja "Calibração do talhão" no waterfall).
+            </div>
+          )}
+
           {seasons.data && seasons.data.length > 0 && (
             <div>
-              <div className="text-[11px] font-medium text-stone-500">Histórico de safras</div>
-              <ul className="mt-1 space-y-0.5 text-[11px] text-stone-600">
+              <div className="text-[11px] font-medium text-stone-500">
+                Histórico de safras — informe o colhido para o talhão aprender
+              </div>
+              <ul className="mt-1 space-y-1 text-[11px] text-stone-600">
                 {seasons.data.map((s) => (
-                  <li key={s.id} className="flex justify-between">
-                    <span>{s.crop_year}</span>
-                    <span>
-                      previsto {s.predicted_yield_sc_ha?.toFixed(0) ?? "—"} sc/ha
-                      {s.actual_yield_sc_ha != null && ` · colhido ${s.actual_yield_sc_ha.toFixed(0)}`}
+                  <li key={s.id} className="flex items-center justify-between gap-2">
+                    <span className="shrink-0">{s.crop_year}</span>
+                    <span className="text-stone-500">
+                      previsto {s.predicted_yield_sc_ha?.toFixed(0) ?? "—"}
                     </span>
+                    {s.actual_yield_sc_ha != null ? (
+                      <span className="font-medium text-leafdark">colhido {s.actual_yield_sc_ha.toFixed(0)} sc/ha</span>
+                    ) : (
+                      <HarvestEntry
+                        onSave={(actual) => saveHarvest.mutate({ seasonId: s.id, actual })}
+                        pending={saveHarvest.isPending}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>
@@ -253,5 +307,28 @@ export function FarmManager({ scenario, onLoadField }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+function HarvestEntry({ onSave, pending }: { onSave: (v: number) => void; pending: boolean }) {
+  const [v, setV] = useState("");
+  return (
+    <span className="flex items-center gap-1">
+      <input
+        type="number"
+        step={1}
+        placeholder="colhido"
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        className="w-20 rounded-md border border-stone-300 px-1.5 py-0.5 text-[11px]"
+      />
+      <button
+        disabled={!v || pending}
+        onClick={() => onSave(Number(v))}
+        className="rounded-md bg-leaf px-2 py-0.5 text-[11px] font-medium text-white hover:bg-leafdark disabled:opacity-50"
+      >
+        ✓
+      </button>
+    </span>
   );
 }

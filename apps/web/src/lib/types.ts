@@ -49,6 +49,10 @@ export interface ScenarioIn {
   costs: CostItemIn[];
   soybean_price_per_sc: number;
   use_live_weather: boolean;
+  // Calibração aprendida do talhão (injetada ao carregar um talhão com histórico).
+  calibration_bias_sc_ha?: number;
+  calibration_confidence?: number;
+  calibration_seasons?: number;
 }
 
 export interface FactorOut {

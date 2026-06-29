@@ -53,6 +53,12 @@ def record_season(field_id: str, payload: SeasonRecordIn, db: Session = Depends(
         raise HTTPException(404, "talhão não encontrado")
 
     scenario = _to_scenario(payload.scenario)
+    # O previsto registrado deve ser a saída do modelo BRUTO (sem a calibração do
+    # talhão), senão o loop de aprendizado se realimentaria: a correção é aprendida do
+    # resíduo (colhido − previsto-bruto).
+    scenario.calibration_bias_sc_ha = 0.0
+    scenario.calibration_confidence = 0.0
+    scenario.calibration_seasons = 0
     sim = simulate(scenario)
     feats = season_features(scenario, sim)
 
