@@ -30,8 +30,8 @@ GROUP_WEIGHT = {
     "populacao": 0.07,
     "preco": 0.08,
 }
-# Quão "real" é cada nível de fonte.
-SOURCE_SCORE = {"real": 1.0, "parcial": 0.6, "estimado": 0.2, "default": 0.2}
+# Quão "real" é cada nível de fonte (sensor na lavoura é o teto).
+SOURCE_SCORE = {"sensor": 1.0, "real": 0.9, "parcial": 0.6, "estimado": 0.2, "default": 0.2}
 
 _HOW_TO = {
     "clima": "Ligar o clima histórico real da localização (NASA POWER / Open-Meteo / estação INMET).",

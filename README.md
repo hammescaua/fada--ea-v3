@@ -104,6 +104,8 @@ docs/                 arquitetura, modelo de dados, motores, fontes, roadmap, ca
 ## Documentação
 
 - [`docs/modelo-canonico.md`](docs/modelo-canonico.md) — **o método único** (um padrão para todo manejo/variável) + a taxonomia fechada (catálogo de manejos e de variáveis) + o motor de cenários.
+- [`docs/proveniencia-dados.md`](docs/proveniencia-dados.md) — **de onde vem cada variável** (fonte, resolução, tier) e como torná-la local.
+- [`docs/estacao-diy.md`](docs/estacao-diy.md) — **miniestação na lavoura** (hardware + contrato de ingestão de sensores).
 - [`docs/base-conhecimento.md`](docs/base-conhecimento.md) — **de onde vêm os números** (coeficientes com fonte + catálogo de insumos/preços + motor de fertilidade).
 - [`docs/arquitetura.md`](docs/arquitetura.md) — camadas, decisões e os 5 motores.
 - [`docs/motores-agronomicos.md`](docs/motores-agronomicos.md) — fórmulas e referências.

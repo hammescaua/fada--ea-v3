@@ -60,7 +60,8 @@ class ScenarioIn(BaseModel):
     operations: list[OperationIn] = Field(default_factory=list)
     costs: list[CostItemIn] = Field(default_factory=list)
     soybean_price_per_sc: float = 120.0
-    use_live_weather: bool = False  # se True, busca clima histórico real
+    use_live_weather: bool = True  # clima histórico real (climatologia da localização)
+    field_id: str | None = None    # se informado, usa dados medidos da lavoura (sensores)
 
 
 class MonteCarloIn(ScenarioIn):

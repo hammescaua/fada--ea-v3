@@ -30,6 +30,7 @@ from .knowledge import (
     season_features,
 )
 from .montecarlo import run_montecarlo
+from .observations import daily_mean, daily_sum, overlay_observed_rain
 from .phenology import stage_dates
 from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
@@ -60,7 +61,10 @@ __all__ = [
     "assess_data_quality",
     "calibrate",
     "compute_economics",
+    "daily_mean",
+    "daily_sum",
     "decompose_yield",
+    "overlay_observed_rain",
     "evaluate_sowing_window",
     "operations_impact",
     "optimize_season",

@@ -47,6 +47,8 @@ class Field(Base):
     geom: Mapped[object | None] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=4326), nullable=True
     )
+    # token para a miniestação/sensores da lavoura enviarem leituras (ingestão autenticada)
+    ingest_token: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), default=_uuid, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     farm: Mapped[Farm] = relationship(back_populates="fields")
@@ -131,6 +133,26 @@ class CostItem(Base):
     cost_per_ha: Mapped[float] = mapped_column(Float)
 
     season: Mapped[Season] = relationship(back_populates="cost_items")
+
+
+class SensorReading(Base):
+    """Leitura de sensor da lavoura (miniestação WiFi, pluviômetro, sonda de umidade).
+
+    ``variable``: 'rain_mm' (chuva acumulada), 'soil_moisture' (fração 0..1 ou %),
+    'temp_c', 'rh_pct'... ``depth_cm`` opcional para umidade do solo.
+    """
+
+    __tablename__ = "sensor_readings"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    field_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("fields.id", ondelete="CASCADE"), index=True)
+    measured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    variable: Mapped[str] = mapped_column(String(40), index=True)
+    value: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    depth_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    station_id: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class WeatherCache(Base):
