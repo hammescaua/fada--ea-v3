@@ -1,7 +1,9 @@
 import type {
+  AccuracyOut,
   AssistantOut,
   BriefingOut,
   CalibrationOut,
+  CropPlanOut,
   DataQualityOut,
   DecisionOut,
   FarmOut,
@@ -46,6 +48,10 @@ export const api = {
   optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
   briefing: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<BriefingOut>("/api/briefing", { scenario, provenance }),
+  cropPlan: (scenario: ScenarioIn, provenance: Record<string, string>, today?: string) =>
+    jpost<CropPlanOut>("/api/crop-plan", { scenario, provenance, today: today ?? null }),
+  accuracy: (scenario: ScenarioIn, provenance: Record<string, string>) =>
+    jpost<AccuracyOut>("/api/accuracy", { scenario, provenance }),
   dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<DataQualityOut>("/api/data-quality", { scenario, provenance }),
   calibration: (records: SeasonOutcome[]) =>
@@ -111,9 +117,10 @@ export function defaultScenario(): ScenarioIn {
       { kind: "fungicida", op_date: "2026-01-10", cost_per_ha: 180, quality: 0.9 },
       { kind: "fungicida", op_date: "2026-01-24", cost_per_ha: 180, quality: 0.9 },
     ],
+    // Custos de referência (mercado BR/RS 2025 — ver /reference/inputs); o agricultor ajusta ao real.
     costs: [
-      { category: "semente", description: "Semente RR", cost_per_ha: 520 },
-      { category: "fertilizante", description: "MAP + KCl", cost_per_ha: 1450 },
+      { category: "semente", description: "Semente RR (≈2,4 sc/ha)", cost_per_ha: 520 },
+      { category: "fertilizante", description: "MAP + KCl (base, ref. catálogo)", cost_per_ha: 1450 },
       { category: "diesel", description: "Operações mecanizadas", cost_per_ha: 380 },
       { category: "outros", description: "Frete + secagem + admin", cost_per_ha: 620 },
     ],

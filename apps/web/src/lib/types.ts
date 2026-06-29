@@ -151,6 +151,80 @@ export interface BriefingOut {
   alertas: string[];
 }
 
+export interface AccuracyVariable {
+  group: string;
+  label: string;
+  drives: string[];
+  current_tier: string;
+  current_label: string;
+  current_note: string;
+  quality: number;
+  is_local: boolean;
+  locality: string;
+  leverage_sc_ha: number;
+  how_to_improve: string;
+  source: string;
+  tiers: { id: string; label: string; quality: number; note: string }[];
+}
+
+export interface AccuracyOut {
+  precision_index: number;
+  precision_label: string;
+  variables: AccuracyVariable[];
+  top_improvements: AccuracyVariable[];
+  resumo: string;
+}
+
+export interface CropPlanManejo {
+  kind: string;
+  label: string;
+  planned: boolean;
+  op_date: string | null;
+  cost_per_ha: number | null;
+  dose: number | null;
+  funcao: string;
+  janela?: string;
+  cost_reference?: string | null;
+  impact_sc_ha: number | null;
+  impact_rs: number | null;
+}
+
+export interface CropPlanPhase {
+  key: string;
+  label: string;
+  factor: string;
+  orientacao: string;
+  start: string;
+  end: string;
+  status: "concluida" | "em_andamento" | "futura";
+  manejos: CropPlanManejo[];
+  impact_sc_ha: number;
+  impact_rs: number;
+  water_stress: number | null;
+  data_basis: {
+    group: string;
+    label: string;
+    current_label: string;
+    is_local: boolean;
+    leverage_sc_ha: number;
+    how_to_improve: string;
+  }[];
+}
+
+export interface CropPlanOut {
+  today: string;
+  sowing_date: string;
+  harvest_date: string;
+  cycle_days: number;
+  progress_pct: number;
+  current_phase: string | null;
+  expected_sc_ha: number;
+  profit_per_ha: number;
+  precision_index: number;
+  phases: CropPlanPhase[];
+  stages: { stage: string; date: string; status: string }[];
+}
+
 export interface OptimizeOut {
   combinacoes_avaliadas: number;
   atual: { expected_sc_ha: number; profit_per_ha: number };
