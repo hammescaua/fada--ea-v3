@@ -123,9 +123,6 @@ class Scenario:
     operations: list[Operation] = field(default_factory=list)
     costs: list[CostItem] = field(default_factory=list)
     soybean_price_per_sc: float = 120.0  # R$ por saca de 60 kg
-    # Dados medidos NA LAVOURA (miniestação/sensores) — a fonte mais verídica.
-    # umidade do solo observada: {data: fração de água disponível 0..1} (1 = capacidade de campo)
-    soil_moisture_obs: Optional[dict] = None
 
     @property
     def total_cost_per_ha(self) -> float:

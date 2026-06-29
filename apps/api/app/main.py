@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import farms, learning, sensors, simulation
+from .routers import farms, learning, simulation
 
 app = FastAPI(
     title="FADA EA v3 — Gêmeo Digital da Soja",
@@ -29,7 +29,6 @@ app.add_middleware(
 app.include_router(simulation.router, prefix="/api")
 app.include_router(farms.router, prefix="/api")
 app.include_router(learning.router, prefix="/api")
-app.include_router(sensors.router, prefix="/api")
 
 
 @app.get("/api/health")

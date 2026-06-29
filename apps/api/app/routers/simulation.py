@@ -84,35 +84,10 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
             scenario.weather = weather.get_climatology(
                 payload.latitude, payload.longitude, payload.sowing_date, end
             )
-            scenario._weather_source = "reanalise"  # type: ignore[attr-defined]
+            scenario._weather_source = "climatologia_real"  # type: ignore[attr-defined]
         except Exception:  # noqa: BLE001 — degrada para clima sintético
             scenario.weather = None
-
-    # Dados medidos na lavoura (sensores) — a fonte mais verídica, sobrepõe a reanálise.
-    if payload.field_id:
-        _apply_field_observations(scenario, payload.field_id)
     return scenario
-
-
-def _apply_field_observations(scenario: Scenario, field_id: str) -> None:
-    """Se o talhão tem leituras de sensores, sobrepõe a chuva e ancora a umidade do solo."""
-    from agro_engine import overlay_observed_rain
-
-    from ..db import session_scope
-    from .sensors import _field_observations
-
-    try:
-        with session_scope() as db:
-            obs = _field_observations(field_id, db)
-    except Exception:  # noqa: BLE001 — sem banco/sensores, segue com a reanálise
-        return
-
-    if obs["rain"] and scenario.weather is not None:
-        scenario.weather = overlay_observed_rain(scenario.weather, obs["rain"])
-    if obs["soil_moisture"]:
-        scenario.soil_moisture_obs = obs["soil_moisture"]
-    if obs["rain"] or obs["soil_moisture"]:
-        scenario._weather_source = "sensor_lavoura"  # type: ignore[attr-defined]
 
 
 @router.post("/simulate", response_model=SimulationOut)
@@ -167,9 +142,8 @@ def post_data_quality(payload: DataQualityIn) -> dict:
     valor-da-informação (o que medir primeiro). Auto-detecta a fonte do clima."""
     scenario = _to_scenario(payload.scenario)
     prov = dict(payload.provenance)
-    # fonte do clima detectada pelo backend (sensor da lavoura > reanálise > sintético)
-    tier = getattr(scenario, "_weather_source", "sintetico")
-    prov.setdefault("clima", {"sensor_lavoura": "sensor", "reanalise": "real"}.get(tier, "estimado"))
+    # fonte do clima é detectada pelo backend (climatologia real vs sintético)
+    prov.setdefault("clima", "real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado")
     return assess_data_quality(scenario, prov)
 
 

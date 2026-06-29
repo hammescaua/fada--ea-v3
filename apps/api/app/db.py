@@ -7,7 +7,6 @@ disponível (o endpoint de simulação é stateless). Os endpoints de CRUD exige
 from __future__ import annotations
 
 from collections.abc import Generator
-from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -31,19 +30,6 @@ def get_engine():
 
 
 def get_session() -> Generator[Session, None, None]:
-    if _SessionLocal is None:
-        get_engine()
-    assert _SessionLocal is not None
-    session = _SessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
-
-
-@contextmanager
-def session_scope() -> Generator[Session, None, None]:
-    """Sessão para uso fora do ciclo de dependências do FastAPI."""
     if _SessionLocal is None:
         get_engine()
     assert _SessionLocal is not None

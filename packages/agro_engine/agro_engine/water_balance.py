@@ -55,8 +55,6 @@ def water_stress(
     """
     soil: SoilProfile = scenario.soil
     weather = weather or scenario.weather
-    moisture_obs = scenario.soil_moisture_obs or {}  # {data: fração de água disponível 0..1}
-    measured_days = 0
 
     taw = ref.AWC_MM_PER_M[soil.texture] * soil.rooting_depth_m
     raw = ref.DEPLETION_FRACTION_P * taw
@@ -77,16 +75,6 @@ def water_stress(
         infiltration = max(0.0, rec.rain_mm * 0.9)  # 10% de escoamento/perda
         dr = dr + etc - infiltration
         dr = min(max(dr, 0.0), taw)  # limita entre 0 e TAW
-
-        # ÂNCORA DE REALIDADE: se há umidade do solo MEDIDA neste dia, o estado do
-        # balanço vem do sensor, não do modelo (a fonte mais verídica da água).
-        obs = moisture_obs.get(day) if moisture_obs else None
-        if obs is None and isinstance(moisture_obs, dict):
-            obs = moisture_obs.get(day.isoformat())
-        if obs is not None:
-            frac = max(0.0, min(1.0, float(obs)))
-            dr = (1.0 - frac) * taw
-            measured_days += 1
 
         if dr > raw and taw > raw:
             ks = (taw - dr) / (taw - raw)
@@ -118,7 +106,6 @@ def water_stress(
         "taw_mm": round(taw, 1),
         "raw_mm": round(raw, 1),
         "hot_days_reproductive": hot_days_reproductive,
-        "soil_moisture_measured_days": measured_days,
     }
 
 
