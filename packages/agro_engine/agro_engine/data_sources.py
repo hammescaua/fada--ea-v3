@@ -30,6 +30,8 @@ from .provenance import (
 _TIER_BY_PROV = {
     "clima": {
         "real": "estacao_inmet",
+        "safra_realizada": "safra_realizada",
+        "safra_corrente": "safra_corrente",
         "climatologia_real": "climatologia_real",
         "parcial": "climatologia_real",
         "estimado": "sintetico",
@@ -62,12 +64,19 @@ def _tier(group: str, prov_value: str) -> dict:
     return tiers[-1] if tiers else {"id": prov_value, "label": prov_value, "quality": 0.2, "note": ""}
 
 
-def accuracy_report(scenario: Scenario, provenance: dict | None = None) -> dict:
+def accuracy_report(
+    scenario: Scenario,
+    provenance: dict | None = None,
+    climate_known_fraction: float | None = None,
+) -> dict:
     """Relatório de acurácia do talhão: por variável, fonte atual, especificidade,
     alavancagem (sc/ha) e como melhorar — mais um índice de precisão ponderado.
 
-    ``provenance``: {grupo: fonte} ('real'|'parcial'|'estimado'|'climatologia_real').
-    Ausente => 'estimado' (postura honesta/conservadora).
+    ``provenance``: {grupo: fonte} ('real'|'parcial'|'estimado'|'climatologia_real'|
+    'safra_corrente'|'safra_realizada'). Ausente => 'estimado' (postura honesta).
+    ``climate_known_fraction``: fração do ciclo já conhecida (observada+prevista). Quando
+    informada, encolhe a alavancagem do clima — uma safra já realizada não tem mais
+    incerteza climática a "medir".
     """
     prov = {g: "estimado" for g in GROUP_WEIGHT}
     prov.update(provenance or {})
@@ -85,6 +94,8 @@ def accuracy_report(scenario: Scenario, provenance: dict | None = None) -> dict:
 
         lev_fn = _LEVERAGE_FN.get(group)
         leverage = lev_fn(scenario) if (lev_fn and quality < 1.0) else 0.0
+        if group == "clima" and climate_known_fraction is not None:
+            leverage = round(leverage * max(0.0, 1.0 - climate_known_fraction), 1)
 
         variables.append(
             {

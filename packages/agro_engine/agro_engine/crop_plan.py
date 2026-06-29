@@ -116,7 +116,12 @@ def _phase_of_op(kind: str, op_date: date, windows: dict[str, tuple[date, date]]
     return "vegetativo"
 
 
-def crop_plan(scenario: Scenario, today: date | None = None, provenance: dict | None = None) -> dict:
+def crop_plan(
+    scenario: Scenario,
+    today: date | None = None,
+    provenance: dict | None = None,
+    climate_known_fraction: float | None = None,
+) -> dict:
     """Monta o plano de safra ao vivo (passo-a-passo por fase) para o talhão."""
     today = today or date.today()
     sim = simulate(scenario)
@@ -130,7 +135,7 @@ def crop_plan(scenario: Scenario, today: date | None = None, provenance: dict | 
 
     catalog = kb.operations()
     inputs = kb.inputs()
-    acc = accuracy_report(scenario, provenance)
+    acc = accuracy_report(scenario, provenance, climate_known_fraction)
     acc_by_group = {v["group"]: v for v in acc["variables"]}
 
     water_by_stage = sim.water.get("by_stage", {})
@@ -227,6 +232,8 @@ def crop_plan(scenario: Scenario, today: date | None = None, provenance: dict | 
         "expected_sc_ha": round(sim.yield_result.expected_sc_ha, 1),
         "profit_per_ha": round(sim.economics.profit_per_ha, 0),
         "precision_index": acc["precision_index"],
+        "weather_source": getattr(scenario, "_weather_source", "sintetico"),
+        "weather_meta": getattr(scenario, "_weather_meta", {}) or {},
         "phases": phases_out,
         "stages": [
             {"stage": k, "date": stages[k].isoformat(), "status": _stage_status(stages[k], today)}

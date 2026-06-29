@@ -221,6 +221,13 @@ export interface CropPlanOut {
   expected_sc_ha: number;
   profit_per_ha: number;
   precision_index: number;
+  weather_source: string;
+  weather_meta: {
+    observed_days?: number;
+    forecast_days?: number;
+    climatology_days?: number;
+    source?: string;
+  };
   phases: CropPlanPhase[];
   stages: { stage: string; date: string; status: string }[];
 }

@@ -174,6 +174,33 @@ function PhaseCard({ p }: { p: CropPlanPhase }) {
   );
 }
 
+const WEATHER_LABEL: Record<string, { txt: string; cls: string }> = {
+  safra_realizada: { txt: "Clima realizado da safra (observado do ponto)", cls: "text-leaf" },
+  safra_corrente: { txt: "Clima da safra: observado até hoje + previsão", cls: "text-leaf" },
+  climatologia_real: { txt: "Clima: climatologia histórica do ponto (safra futura)", cls: "text-amber-600" },
+  sintetico: { txt: "Clima sintético regional (ligue o clima real)", cls: "text-orange-600" },
+};
+
+function WeatherSource({
+  source,
+  meta,
+}: {
+  source: string;
+  meta: CropPlanOut["weather_meta"];
+}) {
+  const l = WEATHER_LABEL[source] ?? WEATHER_LABEL.sintetico;
+  const parts: string[] = [];
+  if (meta.observed_days) parts.push(`${meta.observed_days} d observados`);
+  if (meta.forecast_days) parts.push(`${meta.forecast_days} d previstos`);
+  if (meta.climatology_days) parts.push(`${meta.climatology_days} d climatologia`);
+  return (
+    <div className={`mt-1 text-center text-[11px] ${l.cls}`}>
+      🌦 {l.txt}
+      {parts.length > 0 && <span className="text-stone-400"> ({parts.join(" · ")})</span>}
+    </div>
+  );
+}
+
 export function CropTimeline({ plan, loading }: { plan: CropPlanOut | undefined; loading: boolean }) {
   if (!plan) {
     return (
@@ -211,6 +238,7 @@ export function CropTimeline({ plan, loading }: { plan: CropPlanOut | undefined;
         <div className="mt-2 text-center text-[11px] text-stone-400">
           semeadura {ddmm(plan.sowing_date)} · colheita prevista {ddmm(plan.harvest_date)} · ciclo {plan.cycle_days} dias
         </div>
+        <WeatherSource source={plan.weather_source} meta={plan.weather_meta} />
       </div>
 
       <div className="space-y-3">

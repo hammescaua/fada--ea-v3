@@ -30,9 +30,18 @@ GROUP_WEIGHT = {
     "populacao": 0.07,
     "preco": 0.08,
 }
-# Quão "real" é cada nível de fonte. 'climatologia_real' = série histórica do ponto
-# exato (boa e local, porém histórica — não a safra corrente), entre 'parcial' e 'real'.
-SOURCE_SCORE = {"real": 1.0, "climatologia_real": 0.7, "parcial": 0.6, "estimado": 0.2, "default": 0.2}
+# Quão "real" é cada nível de fonte. Para o clima há uma escala própria: 'safra_realizada'
+# (observado de toda a safra) > 'safra_corrente' (observado+previsão+climatologia) >
+# 'climatologia_real' (média histórica do ponto, não a safra corrente) > 'estimado'.
+SOURCE_SCORE = {
+    "real": 1.0,
+    "safra_realizada": 0.95,
+    "safra_corrente": 0.85,
+    "climatologia_real": 0.7,
+    "parcial": 0.6,
+    "estimado": 0.2,
+    "default": 0.2,
+}
 
 _HOW_TO = {
     "clima": "Ligar o clima histórico real da localização (NASA POWER / Open-Meteo / estação INMET).",

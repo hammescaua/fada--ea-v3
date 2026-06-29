@@ -91,13 +91,16 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
     )
 
     scenario._weather_source = "sintetico"  # type: ignore[attr-defined]
+    scenario._weather_meta = {}  # type: ignore[attr-defined]
     if payload.use_live_weather:
         end = payload.sowing_date + timedelta(days=cultivar.cycle_days + 20)
         try:
-            scenario.weather = weather.get_climatology(
+            series, meta = weather.get_season_weather(
                 payload.latitude, payload.longitude, payload.sowing_date, end
             )
-            scenario._weather_source = "climatologia_real"  # type: ignore[attr-defined]
+            scenario.weather = series
+            scenario._weather_source = meta.get("source", "climatologia_real")  # type: ignore[attr-defined]
+            scenario._weather_meta = meta  # type: ignore[attr-defined]
         except Exception:  # noqa: BLE001 — degrada para clima sintético
             scenario.weather = None
     return scenario
@@ -133,14 +136,30 @@ def post_briefing(payload: BriefingIn) -> dict:
     return season_briefing(scenario, _with_climate_prov(scenario, payload.provenance))
 
 
+_CLIMATE_PROV = {
+    "safra_realizada": "safra_realizada",
+    "safra_corrente": "safra_corrente",
+    "climatologia_real": "climatologia_real",
+    "sintetico": "estimado",
+}
+
+
 def _with_climate_prov(scenario, provenance: dict) -> dict:
-    """Preenche a fonte do clima detectada pelo backend (real vs sintético)."""
+    """Preenche a fonte do clima detectada pelo backend (realizado/corrente/histórico)."""
     prov = dict(provenance)
-    prov.setdefault(
-        "clima",
-        "climatologia_real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado",
-    )
+    src = getattr(scenario, "_weather_source", "sintetico")
+    prov.setdefault("clima", _CLIMATE_PROV.get(src, "estimado"))
     return prov
+
+
+def _climate_known_fraction(scenario) -> float | None:
+    """Fração do ciclo já conhecida (observada + prevista) — encolhe a incerteza do clima."""
+    meta = getattr(scenario, "_weather_meta", {}) or {}
+    obs = meta.get("observed_days", 0)
+    fc = meta.get("forecast_days", 0)
+    clim = meta.get("climatology_days", 0)
+    total = obs + fc + clim
+    return (obs + fc) / total if total else None
 
 
 @router.post("/accuracy")
@@ -148,7 +167,11 @@ def post_accuracy(payload: AccuracyIn) -> dict:
     """Acurácia por talhão: para cada variável, a fonte em uso, quão local ela é, quanto
     a estimativa pode mudar (sc/ha) e COMO torná-la mais precisa para este talhão/local."""
     scenario = _to_scenario(payload.scenario)
-    return accuracy_report(scenario, _with_climate_prov(scenario, payload.provenance))
+    return accuracy_report(
+        scenario,
+        _with_climate_prov(scenario, payload.provenance),
+        _climate_known_fraction(scenario),
+    )
 
 
 @router.post("/crop-plan")
@@ -157,7 +180,12 @@ def post_crop_plan(payload: CropPlanIn) -> dict:
     reprodutivo → colheita), com manejos, impacto em sc/ha e R$, status vs. hoje e a
     proveniência dos dados de cada etapa (de onde vêm e como melhorar)."""
     scenario = _to_scenario(payload.scenario)
-    return crop_plan(scenario, today=payload.today, provenance=_with_climate_prov(scenario, payload.provenance))
+    return crop_plan(
+        scenario,
+        today=payload.today,
+        provenance=_with_climate_prov(scenario, payload.provenance),
+        climate_known_fraction=_climate_known_fraction(scenario),
+    )
 
 
 @router.get("/reference/inputs")

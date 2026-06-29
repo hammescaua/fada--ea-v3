@@ -26,16 +26,21 @@ O salto vem de personalizar o que é local: solo, clima do ponto e cultivar real
 ## De onde vem cada variável
 
 ### Clima → governa fenologia (graus-dia), balanço hídrico (FAO-56) e calor reprodutivo
-- **Hierarquia de fontes:** medido na lavoura (1.0) › estação INMET próxima (0.85) ›
-  **climatologia histórica do ponto** (Open-Meteo ~10 anos, com ET0 real) (0.7) ›
-  clima sintético regional (0.3).
-- **Hoje na ferramenta:** ao ligar "clima real", buscamos a série histórica do
-  Open-Meteo para a **coordenada exata do talhão** (verificado: ~148 dias/ciclo, ~654 mm,
-  ET0 real). É local, porém **histórico** — não a safra corrente. Por isso o clima ainda
-  carrega ±6 sc/ha de incerteza mesmo no melhor tier (anos secos × úmidos), e o Monte
-  Carlo amostra essa distribuição. Isso é honesto, não escondido.
-- **Como melhorar:** registrar a chuva medida no talhão durante a safra, ou conectar a
-  estação INMET mais próxima, para sair da média histórica e usar o observado.
+- **Hierarquia de fontes:** medido na lavoura (1.0) › **clima realizado da safra**
+  (observado do ponto) (0.95) › **safra corrente** (observado até hoje + previsão 16 d +
+  climatologia para o resto) (0.85) › estação INMET próxima (0.85) › climatologia
+  histórica do ponto (0.7) › sintético regional (0.3).
+- **Hoje na ferramenta — o clima se adapta ao momento da safra** (`get_season_weather`):
+  - **safra no passado** → série **realizada** observada do ponto (Open-Meteo Archive);
+    é o que de fato ocorreu, então a incerteza climática a "medir" cai a **0**;
+  - **safra corrente** (hoje dentro do ciclo) → **observado até hoje + previsão de 16
+    dias + climatologia** só para o fim do ciclo (verificado: ex. 60 d obs + 15 prev +
+    63 clim). A alavancagem do clima encolhe na proporção do que já é conhecido;
+  - **safra futura** → climatologia do ponto (ano típico observado, ET0 FAO real).
+- **Honestidade mantida à mostra:** só o trecho ainda não observado carrega incerteza, e
+  o Monte Carlo amostra essa faixa. Nada de chamar "100% real" o que é média histórica.
+- **Como melhorar ainda mais:** registrar a chuva medida no talhão ou conectar a estação
+  INMET mais próxima fecha o pouco que resta de climatologia no fim do ciclo.
 
 ### Solo → governa nutrição (P, K, pH, V%), fator solo/CTC e água disponível
 - **Hierarquia:** análise do próprio talhão (1.0) › análise de outro talhão da
@@ -79,8 +84,8 @@ O salto vem de personalizar o que é local: solo, clima do ponto e cultivar real
 
 ## Roadmap de acurácia (próximos ganhos)
 
-1. **Clima da safra corrente** — combinar o observado até hoje + previsão para o restante
-   do ciclo, em vez de só climatologia histórica (sai de 0.7 para perto do real).
+1. ✅ **Clima da safra corrente** — observado até hoje + previsão (16 d) + climatologia só
+   no fim do ciclo; safra passada usa o realizado. Implementado (`get_season_weather`).
 2. **Solo por zonas de manejo** — múltiplas análises/zonas dentro do talhão.
 3. **Calibração com histórico** — o Knowledge Engine corrige previsto×realizado por
    talhão após cada safra (já existe; ganha força com mais safras).

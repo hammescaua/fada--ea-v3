@@ -70,6 +70,110 @@ def get_weather(lat: float, lon: float, start: date, end: date) -> WeatherSeries
     return series
 
 
+def fetch_forecast(lat: float, lon: float, past_days: int, forecast_days: int = 16) -> list[DailyWeather]:
+    """Observado recente (até ``past_days``, máx. 92) + previsão (até 16 dias) numa só
+    chamada ao Forecast API do Open-Meteo. Mesmas variáveis do Archive (inclui ET0 FAO)."""
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "past_days": max(0, min(92, past_days)),
+        "forecast_days": max(1, min(16, forecast_days)),
+        "daily": ",".join(
+            [
+                "temperature_2m_max",
+                "temperature_2m_min",
+                "precipitation_sum",
+                "shortwave_radiation_sum",
+                "et0_fao_evapotranspiration",
+            ]
+        ),
+        "timezone": "America/Sao_Paulo",
+    }
+    with httpx.Client(timeout=30) as client:
+        resp = client.get(url, params=params)
+        resp.raise_for_status()
+        data = resp.json()["daily"]
+    days: list[DailyWeather] = []
+    for i, day_str in enumerate(data["time"]):
+        days.append(
+            DailyWeather(
+                day=date.fromisoformat(day_str),
+                tmin=data["temperature_2m_min"][i],
+                tmax=data["temperature_2m_max"][i],
+                rain_mm=data["precipitation_sum"][i] or 0.0,
+                radiation_mj=(data["shortwave_radiation_sum"][i] or 18.0),
+                et0_mm=data["et0_fao_evapotranspiration"][i],
+            )
+        )
+    return days
+
+
+def get_season_weather(
+    lat: float, lon: float, start: date, end: date, today: date | None = None
+) -> tuple[WeatherSeries, dict]:
+    """Clima da SAFRA, o mais fiel possível ao que de fato ocorre/ocorreu no ciclo.
+
+    - Safra no passado (end < hoje): série **realizada** observada do ponto (Archive).
+    - Safra corrente (hoje dentro do ciclo): **observado até hoje + previsão (16 d) +
+      climatologia** para o restante — anula a média histórica onde já se sabe o real.
+    - Safra futura (start > hoje): climatologia do ponto (ano típico observado).
+
+    Retorna a série e um ``meta`` com a contagem de dias observados/previstos/climatologia
+    e o ``source`` (define o nível de confiança do clima na ficha de acurácia).
+    """
+    today = today or date.today()
+    meta = {"observed_days": 0, "forecast_days": 0, "climatology_days": 0}
+
+    # Safra inteiramente no passado → clima realizado (o mais preciso).
+    if end < today:
+        series = fetch_open_meteo(lat, lon, start, end)
+        meta["observed_days"] = len(series.days)
+        meta["source"] = "safra_realizada"
+        return series, meta
+
+    # Base climatológica para todo o ciclo; depois sobrepomos o que já é conhecido.
+    base = get_climatology(lat, lon, start, end)
+    by_day = {d.day: d for d in base.days}
+    meta["climatology_days"] = len(by_day)
+
+    # Safra futura → só climatologia.
+    if start > today:
+        meta["source"] = "climatologia_real"
+        return base, meta
+
+    # Safra corrente → sobrepõe observado recente + previsão.
+    past_days = (today - start).days
+    try:
+        recent = fetch_forecast(lat, lon, past_days=past_days, forecast_days=16)
+    except Exception:  # noqa: BLE001 — degrada para a base climatológica
+        meta["source"] = "climatologia_real"
+        return base, meta
+
+    # Para a parte do ciclo anterior à janela do forecast (>92 d atrás), usa Archive real.
+    if past_days > 92:
+        try:
+            deep = fetch_open_meteo(lat, lon, start, today - timedelta(days=90))
+            for d in deep.days:
+                if d.day in by_day:
+                    by_day[d.day] = d
+        except Exception:  # noqa: BLE001
+            pass
+
+    for d in recent:
+        if d.day in by_day:
+            by_day[d.day] = d
+    obs = sum(1 for d in recent if d.day <= today)
+    fc = sum(1 for d in recent if d.day > today)
+    deep_obs = max(0, past_days - 92) if past_days > 92 else 0
+    meta["observed_days"] = obs + deep_obs
+    meta["forecast_days"] = fc
+    meta["climatology_days"] = max(0, len(by_day) - meta["observed_days"] - meta["forecast_days"])
+    meta["source"] = "safra_corrente"
+    series = WeatherSeries(days=sorted(by_day.values(), key=lambda x: x.day))
+    return series, meta
+
+
 def _archive(lat: float, lon: float, years: int = 10) -> list[DailyWeather]:
     """Histórico diário (~N anos) da localização — buscado UMA vez e cacheado."""
     key = (round(lat, 2), round(lon, 2))

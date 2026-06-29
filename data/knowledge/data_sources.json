@@ -11,11 +11,13 @@
       "locality": "ponto exato (lat/lon do talhão) quando real ou climatologia; regional quando sintético",
       "tiers": [
         {"id": "medido_lavoura", "label": "Chuva/temperatura medidos na própria lavoura", "quality": 1.0, "note": "pluviômetro/estação no talhão — o mais fiel à realidade local"},
+        {"id": "safra_realizada", "label": "Clima realizado da safra (observado do ponto)", "quality": 0.95, "note": "série diária observada de toda a safra para a coordenada exata — o que de fato ocorreu"},
+        {"id": "safra_corrente", "label": "Observado até hoje + previsão (16 d) + climatologia", "quality": 0.85, "note": "ancorado no que já ocorreu na safra e na previsão de curto prazo; só o fim do ciclo usa média histórica"},
         {"id": "estacao_inmet", "label": "Estação INMET/automática próxima", "quality": 0.85, "note": "observado real da safra, a poucos km do talhão"},
         {"id": "climatologia_real", "label": "Climatologia histórica do ponto (Open-Meteo ~10 anos)", "quality": 0.7, "note": "média do dia-do-ano para a coordenada exata do talhão, com ET0 real — específico do local, porém histórico (não a safra corrente)"},
         {"id": "sintetico", "label": "Clima sintético regional do NO-RS", "quality": 0.3, "note": "distribuição típica da região — usado só quando não há clima do ponto"}
       ],
-      "how_to_improve": "Ligar o clima histórico real do ponto (já disponível na ferramenta). Na safra corrente, registrar a chuva medida no talhão ou conectar a estação INMET mais próxima para sair da média histórica e usar o observado.",
+      "how_to_improve": "Para a safra corrente, o gêmeo já ancora no observado até hoje + previsão de 16 dias (resta só o fim do ciclo na média histórica). Para fechar o gap, registrar a chuva medida no talhão ou conectar a estação INMET mais próxima.",
       "source": "Open-Meteo Historical (1940+, CC-BY); INMET/BDMEP; FAO-56 (ET0)"
     },
     "solo": {
