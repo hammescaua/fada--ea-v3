@@ -9,6 +9,9 @@ import { SeasonBriefing } from "@/components/SeasonBriefing";
 import { CropTimeline } from "@/components/CropTimeline";
 import { AccuracyPanel } from "@/components/AccuracyPanel";
 import { Onboarding } from "@/components/Onboarding";
+import { PersonalityPanel } from "@/components/PersonalityPanel";
+import { CounterfactualPanel } from "@/components/CounterfactualPanel";
+import { ObservationLog } from "@/components/ObservationLog";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
@@ -45,6 +48,7 @@ export default function Home() {
   const [soilReal, setSoilReal] = useState(false);
   const [view, setView] = useState<View>("acompanhamento");
   const [onboarding, setOnboarding] = useState(false);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const debounced = useDebounced(scenario, 350);
 
   // Onboarding na primeira visita (sem talhão configurado).
@@ -241,11 +245,21 @@ export default function Home() {
             <div className="rounded-xl border border-stone-200 bg-white p-4">
               <FarmManager
                 scenario={scenario}
+                onFieldChange={setSelectedFieldId}
                 onLoadField={(patch) => {
                   setScenario((s) => ({ ...s, ...patch }));
                   if (patch.soil) setSoilReal(true);
                 }}
               />
+            </div>
+            <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+              <PersonalityPanel fieldId={selectedFieldId} />
+            </div>
+            <div className="rounded-xl border border-stone-200 bg-white p-4">
+              <CounterfactualPanel scenario={debounced} />
+            </div>
+            <div className="rounded-xl border border-stone-200 bg-white p-4">
+              <ObservationLog fieldId={selectedFieldId} />
             </div>
             <div className="rounded-xl border border-stone-200 bg-white p-4">
               <AccuracyPanel acc={accuracy} />
@@ -258,6 +272,7 @@ export default function Home() {
           <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
             <FarmManager
               scenario={scenario}
+              onFieldChange={setSelectedFieldId}
               onLoadField={(patch) => {
                 setScenario((s) => ({ ...s, ...patch }));
                 if (patch.soil) setSoilReal(true);

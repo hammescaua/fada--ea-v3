@@ -249,6 +249,64 @@ export interface CropPlanOut {
   stages: { stage: string; date: string; status: string }[];
 }
 
+export interface PersonalityTrait {
+  key: string;
+  label: string;
+  level: string;
+  value: number;
+  confidence: number;
+  basis: string;
+  learning: boolean;
+}
+
+export interface PersonalityOut {
+  knowledge_pct: number;
+  n_seasons: number;
+  n_observations: number;
+  traits: PersonalityTrait[];
+  resumo: string;
+  data_quality: Record<string, number>;
+}
+
+export interface CounterfactualItem {
+  key: string;
+  label: string;
+  delta_yield_sc_ha: number;
+  delta_profit_per_ha: number;
+  expected_sc_ha: number;
+  profit_per_ha: number;
+  narrative: string;
+}
+
+export interface CounterfactualOut {
+  base_expected_sc_ha: number;
+  base_profit_per_ha: number;
+  counterfactuals: CounterfactualItem[];
+}
+
+export interface ObservationOut {
+  id: string;
+  field_id: string;
+  observed_at: string;
+  kind: string;
+  source: string;
+  value: Record<string, unknown>;
+  unit: string | null;
+  confidence: number;
+  latitude: number | null;
+  longitude: number | null;
+  consequence: string | null;
+}
+
+export interface ObservationIn {
+  kind: string;
+  source: string;
+  observed_at: string;
+  value: Record<string, unknown>;
+  unit?: string | null;
+  consequence?: string | null;
+}
+
 export interface OptimizeOut {
   combinacoes_avaliadas: number;
   atual: { expected_sc_ha: number; profit_per_ha: number };

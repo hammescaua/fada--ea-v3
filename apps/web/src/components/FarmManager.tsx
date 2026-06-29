@@ -8,13 +8,14 @@ import type { CalibrationOut, ScenarioIn } from "@/lib/types";
 interface Props {
   scenario: ScenarioIn;
   onLoadField: (patch: Partial<ScenarioIn>) => void;
+  onFieldChange?: (fieldId: string | null) => void;
 }
 
 // Persistência simples da seleção (sem auth no Marco atual).
 const FARM_KEY = "fada.farmId";
 const FIELD_KEY = "fada.fieldId";
 
-export function FarmManager({ scenario, onLoadField }: Props) {
+export function FarmManager({ scenario, onLoadField, onFieldChange }: Props) {
   const qc = useQueryClient();
   const [farmId, setFarmId] = useState<string | null>(null);
   const [fieldId, setFieldId] = useState<string | null>(null);
@@ -24,7 +25,10 @@ export function FarmManager({ scenario, onLoadField }: Props) {
 
   useEffect(() => {
     setFarmId(localStorage.getItem(FARM_KEY));
-    setFieldId(localStorage.getItem(FIELD_KEY));
+    const f = localStorage.getItem(FIELD_KEY);
+    setFieldId(f);
+    onFieldChange?.(f);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const selectFarm = (id: string | null) => {
     setFarmId(id);
@@ -32,6 +36,7 @@ export function FarmManager({ scenario, onLoadField }: Props) {
   };
   const selectField = (id: string | null) => {
     setFieldId(id);
+    onFieldChange?.(id);
     id ? localStorage.setItem(FIELD_KEY, id) : localStorage.removeItem(FIELD_KEY);
   };
 

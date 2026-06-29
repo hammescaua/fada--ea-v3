@@ -3,8 +3,12 @@ import type {
   AssistantOut,
   BriefingOut,
   CalibrationOut,
+  CounterfactualOut,
   CropPlanOut,
   DataQualityOut,
+  ObservationIn,
+  ObservationOut,
+  PersonalityOut,
   DecisionOut,
   FarmOut,
   FertilityRec,
@@ -52,6 +56,12 @@ export const api = {
     jpost<CropPlanOut>("/api/crop-plan", { scenario, provenance, today: today ?? null }),
   accuracy: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<AccuracyOut>("/api/accuracy", { scenario, provenance }),
+  counterfactual: (scenario: ScenarioIn) =>
+    jpost<CounterfactualOut>("/api/counterfactual", { scenario }),
+  personality: (fieldId: string) => jget<PersonalityOut>(`/api/fields/${fieldId}/personality`),
+  observations: (fieldId: string) => jget<ObservationOut[]>(`/api/fields/${fieldId}/observations`),
+  addObservation: (fieldId: string, obs: ObservationIn) =>
+    jpost<ObservationOut>(`/api/fields/${fieldId}/observations`, obs),
   dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<DataQualityOut>("/api/data-quality", { scenario, provenance }),
   calibration: (records: SeasonOutcome[]) =>
