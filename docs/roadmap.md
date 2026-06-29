@@ -12,6 +12,14 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
   de solo e safras (linha do tempo) e carregar o talhão de volta no laboratório — fecha
   o loop do gêmeo digital na interface.
 - **Entregue:** simular manejos e ver impacto em produtividade ± incerteza e lucro.
+- ✅ **Resumo da Safra (Briefing)** — a *resposta única* do gêmeo para o agricultor.
+  Compõe os motores já existentes (simulação, Monte Carlo, decisão, janela ZARC,
+  veracidade dos dados) num **veredito priorizado** com **status de saúde**
+  (verde/amarelo/vermelho), os 4 números que importam (colho, ganho, risco, janela),
+  alertas e a **lista de ações ordenada por retorno** — em linguagem de produtor.
+  Não inventa nada: só orquestra os números dos motores. Motor (`briefing.py`, com
+  testes), endpoint `/briefing` e painel-herói no topo do cockpit; os demais painéis
+  passam a ser o *detalhamento* (auditar cada número).
 
 ## Fase 2 — Motor agronômico completo  *(em andamento)*
 

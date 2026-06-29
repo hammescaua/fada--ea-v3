@@ -118,6 +118,39 @@ export interface DataQualityOut {
   resumo: string;
 }
 
+export interface BriefingAction {
+  rank: number;
+  key: string;
+  label: string;
+  delta_yield_sc_ha: number;
+  delta_profit_per_ha: number;
+  action_roi: number | null;
+  probability_positive: number;
+  justification: string;
+}
+
+export interface BriefingOut {
+  status: "saudavel" | "atencao" | "critico";
+  status_label: string;
+  municipality: string;
+  sowing_date: string;
+  expected_sc_ha: number;
+  uncertainty_sc_ha: number;
+  p10_sc_ha: number;
+  p90_sc_ha: number;
+  profit_per_ha: number;
+  roi: number;
+  breakeven_yield_sc_ha: number;
+  prob_loss: number;
+  sowing_position: string;
+  sowing_penalty_sc_ha: number;
+  data_confidence: number;
+  top_data_gap: { group: string; leverage_sc_ha: number; como_obter: string } | null;
+  actions: BriefingAction[];
+  veredito: string;
+  alertas: string[];
+}
+
 export interface OptimizeOut {
   combinacoes_avaliadas: number;
   atual: { expected_sc_ha: number; profit_per_ha: number };

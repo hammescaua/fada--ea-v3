@@ -16,9 +16,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
-from . import run_montecarlo
 from .decision import _profit_and_yield
 from .models import Scenario
+from .montecarlo import run_montecarlo
 
 # Peso de cada grupo na confiança (≈ influência na produtividade/decisão).
 GROUP_WEIGHT = {

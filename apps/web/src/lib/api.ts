@@ -1,5 +1,6 @@
 import type {
   AssistantOut,
+  BriefingOut,
   CalibrationOut,
   DataQualityOut,
   DecisionOut,
@@ -43,6 +44,8 @@ export const api = {
   seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
   fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
   optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
+  briefing: (scenario: ScenarioIn, provenance: Record<string, string>) =>
+    jpost<BriefingOut>("/api/briefing", { scenario, provenance }),
   dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<DataQualityOut>("/api/data-quality", { scenario, provenance }),
   calibration: (records: SeasonOutcome[]) =>

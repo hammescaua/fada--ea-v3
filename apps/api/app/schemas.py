@@ -81,6 +81,11 @@ class DataQualityIn(BaseModel):
     provenance: dict[str, str] = Field(default_factory=dict)
 
 
+class BriefingIn(BaseModel):
+    scenario: ScenarioIn
+    provenance: dict[str, str] = Field(default_factory=dict)
+
+
 class SeasonOutcomeIn(BaseModel):
     crop_year: str
     predicted_sc_ha: float

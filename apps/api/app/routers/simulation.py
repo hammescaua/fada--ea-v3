@@ -14,6 +14,7 @@ from agro_engine import (
     recommend_decisions,
     recommend_sowing_window,
     run_montecarlo,
+    season_briefing,
     season_budget,
     simulate,
 )
@@ -29,7 +30,14 @@ from agro_engine.reference import NO_RS_MUNICIPALITIES
 
 from .. import weather
 from .. import assistant
-from ..schemas import AssistantIn, DataQualityIn, MonteCarloIn, ScenarioIn, SimulationOut
+from ..schemas import (
+    AssistantIn,
+    BriefingIn,
+    DataQualityIn,
+    MonteCarloIn,
+    ScenarioIn,
+    SimulationOut,
+)
 
 router = APIRouter(tags=["motor"])
 
@@ -109,6 +117,20 @@ def post_simulate(payload: ScenarioIn) -> SimulationOut:
         water=water,
         sowing_window=result.sowing_window,
     )
+
+
+@router.post("/briefing")
+def post_briefing(payload: BriefingIn) -> dict:
+    """Resumo da Safra: a resposta única do gêmeo. Compõe simulação, risco, melhor
+    ação e veracidade dos dados num veredito priorizado com status de saúde — o que o
+    agricultor lê em segundos para decidir. Auto-detecta a fonte do clima."""
+    scenario = _to_scenario(payload.scenario)
+    prov = dict(payload.provenance)
+    prov.setdefault(
+        "clima",
+        "real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado",
+    )
+    return season_briefing(scenario, prov)
 
 
 @router.post("/simulate/montecarlo")

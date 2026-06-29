@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { api, defaultScenario } from "@/lib/api";
 import type { ScenarioIn, SimulationOut } from "@/lib/types";
+import { SeasonBriefing } from "@/components/SeasonBriefing";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
@@ -51,6 +52,12 @@ export default function Home() {
   const { data: dataQuality } = useQuery({
     queryKey: ["data-quality", debounced, provenance],
     queryFn: () => api.dataQuality(debounced, provenance),
+    placeholderData: (prev) => prev,
+  });
+
+  const { data: briefing, isFetching: briefingLoading } = useQuery({
+    queryKey: ["briefing", debounced, provenance],
+    queryFn: () => api.briefing(debounced, provenance),
     placeholderData: (prev) => prev,
   });
 
@@ -173,17 +180,28 @@ export default function Home() {
             </div>
           )}
 
+          {(briefing || sim) && (
+            <SeasonBriefing b={briefing} loading={briefingLoading} />
+          )}
+
           {sim && (
             <>
-              <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
-                <AssistantPanel scenario={debounced} />
-              </div>
-
               <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
                 <BestPlanPanel
                   scenario={debounced}
                   onApply={(patch) => setScenario((s) => ({ ...s, ...patch }))}
                 />
+              </div>
+
+              <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+                <AssistantPanel scenario={debounced} />
+              </div>
+
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-xs font-semibold uppercase tracking-wide text-stone-400">
+                  Detalhamento — auditar cada número
+                </span>
+                <span className="h-px flex-1 bg-stone-200" />
               </div>
 
               {dataQuality && (

@@ -19,6 +19,7 @@ from .models import (
     WeatherSeries,
     YieldResult,
 )
+from .briefing import season_briefing
 from .budget import season_budget
 from .decision import operations_impact, recommend_decisions
 from .fertility import recommend_amendments
@@ -67,6 +68,7 @@ __all__ = [
     "recommend_amendments",
     "recommend_decisions",
     "recommend_sowing_window",
+    "season_briefing",
     "season_budget",
     "run_montecarlo",
     "season_features",
