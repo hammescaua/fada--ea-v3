@@ -17,6 +17,7 @@ from agro_engine import (
     Observation as EvidenceObs,
     SeasonRecord,
     calibrate,
+    apply_interactions,
     confidence_for,
     data_quality,
     interactions_report,
@@ -33,6 +34,7 @@ from ..schemas import (
     ObservationIn,
     ObservationOut,
     SeasonRecordIn,
+    SeasonReviewIn,
 )
 from .simulation import _to_scenario
 
@@ -176,6 +178,40 @@ def field_personality(field_id: str, db: Session = Depends(get_session)) -> dict
     result["data_quality"] = data_quality(evid)
     result["interactions"] = interactions_report(evid)
     return result
+
+
+@router.post("/fields/{field_id}/season-review")
+def season_review(field_id: str, payload: SeasonReviewIn, db: Session = Depends(get_session)) -> dict:
+    """Plano vs. Realidade: pega o plano (cenário) e o que DE FATO aconteceu (evidências do
+    talhão), realimenta as consequências no modelo (aplicação lavada vale menos, estande
+    observado etc.) e mostra como o resultado mudou — e por quê, com fonte."""
+    if not db.get(Field, field_id):
+        raise HTTPException(404, "talhão não encontrado")
+    scenario = _to_scenario(payload.scenario)
+    obs_rows = db.scalars(select(Observation).where(Observation.field_id == field_id)).all()
+    evid = [
+        EvidenceObs(kind=o.kind, source=o.source, observed_at=o.observed_at.isoformat(),
+                    value=o.value or {}, confidence=o.confidence)
+        for o in obs_rows
+    ]
+    plano = simulate(scenario)
+    adjusted, adjustments = apply_interactions(scenario, evid)
+    realidade = simulate(adjusted)
+    return {
+        "plano": {
+            "expected_sc_ha": round(plano.yield_result.expected_sc_ha, 1),
+            "profit_per_ha": round(plano.economics.profit_per_ha, 0),
+        },
+        "realidade": {
+            "expected_sc_ha": round(realidade.yield_result.expected_sc_ha, 1),
+            "profit_per_ha": round(realidade.economics.profit_per_ha, 0),
+        },
+        "delta_sc_ha": round(realidade.yield_result.expected_sc_ha - plano.yield_result.expected_sc_ha, 1),
+        "delta_profit_per_ha": round(realidade.economics.profit_per_ha - plano.economics.profit_per_ha, 0),
+        "adjustments": adjustments,
+        "interactions": interactions_report(evid),
+        "n_observations": len(evid),
+    }
 
 
 @router.get("/fields/{field_id}/calibration", response_model=CalibrationOut)

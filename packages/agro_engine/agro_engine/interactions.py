@@ -13,11 +13,12 @@ honesto sobre o que de fato foi observado.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 
 from . import kb
 from .evidence import Observation
+from .models import Scenario
 
 # Ordem de severidade para comparações ("baixa" < "media" < "alta" < "severa").
 _SEV_ORDER = {"baixa": 1, "media": 2, "média": 2, "alta": 3, "severa": 4}
@@ -34,6 +35,8 @@ class Interaction:
     confidence: float       # herda a confiança das evidências envolvidas
     efficacy_loss: float | None
     source: str
+    effect: dict | None = None       # como a interação muda o modelo (efficacy_loss/population_loss)
+    trigger_tipo: str | None = None  # tipo do manejo-gatilho (ex.: 'fungicida'), p/ casar com a operação
 
 
 def _d(iso: str) -> date:
@@ -126,7 +129,83 @@ def _mk(key: str, r: dict, t: Observation, conf: float, detail: str) -> Interact
         confidence=conf,
         efficacy_loss=r.get("efficacy_loss"),
         source=r.get("source", ""),
+        effect=r.get("effect"),
+        trigger_tipo=str((t.value or {}).get("tipo", "")) or None,
     )
+
+
+_FACTOR_OF_KIND = {"fungicida": "Doenças", "inseticida": "Pragas", "herbicida": "Daninhas", "dessecacao": "Daninhas"}
+
+
+def _factor_of(kind: str) -> str:
+    return _FACTOR_OF_KIND.get(kind.lower(), kind)
+
+
+def _match_op_index(ops: list, when: str, tipo: str | None) -> int | None:
+    """Índice da operação mais próxima da data do gatilho (±3 dias), casando o tipo se houver."""
+    target = _d(when)
+    best, best_dist = None, 4
+    for i, op in enumerate(ops):
+        if tipo and op.kind.lower() != tipo.lower():
+            continue
+        dist = abs((op.op_date - target).days)
+        if dist <= 3 and dist < best_dist:
+            best, best_dist = i, dist
+    return best
+
+
+def apply_interactions(scenario: Scenario, observations: list[Observation]) -> tuple[Scenario, list[dict]]:
+    """Realimenta as consequências observadas NO MODELO: uma aplicação lavada vale menos
+    (qualidade efetiva menor → menos proteção na cascata), o estande observado sobrepõe o
+    planejado, etc. Devolve o cenário ajustado à REALIDADE + o log de ajustes (com fonte).
+
+    Cada ajuste é escalado pela CONFIANÇA da evidência — dado fraco move pouco o número.
+    """
+    interactions = detect_interactions(observations)
+    ops = list(scenario.operations)
+    pop = scenario.population_k_per_ha
+    adjustments: list[dict] = []
+
+    # 1) estande observado (emergência) sobrepõe a população planejada
+    for o in observations:
+        if o.kind == "emergencia":
+            v = o.value or {}
+            obs_pop = v.get("plantas_mil") or v.get("populacao_mil")
+            if obs_pop and abs(float(obs_pop) - pop) > 1:
+                adjustments.append(_adj("População", "estande", pop, float(obs_pop),
+                                        "Estande medido na emergência difere do planejado.",
+                                        "Embrapa Soja — estande e componentes de produtividade", o.confidence))
+                pop = float(obs_pop)
+
+    # 2) interações da linha do tempo que alteram o modelo
+    for it in interactions:
+        eff = it.effect or {}
+        if eff.get("type") == "efficacy_loss":
+            loss = float(eff.get("value", 0.0)) * it.confidence
+            idx = _match_op_index(ops, it.when, it.trigger_tipo)
+            if idx is not None and loss > 0:
+                old = ops[idx]
+                new_q = round(max(0.0, old.quality * (1.0 - loss)), 3)
+                ops[idx] = replace(old, quality=new_q)
+                adjustments.append(_adj(_factor_of(old.kind), old.kind, old.quality, new_q,
+                                        it.description, it.source, it.confidence))
+        elif eff.get("type") == "population_loss":
+            loss = float(eff.get("value", 0.0)) * it.confidence
+            if loss > 0:
+                new_pop = round(pop * (1.0 - loss), 1)
+                adjustments.append(_adj("População", "estande", pop, new_pop, it.description, it.source, it.confidence))
+                pop = new_pop
+
+    adjusted = replace(scenario, operations=ops, population_k_per_ha=pop)
+    return adjusted, adjustments
+
+
+def _adj(factor: str, manejo: str, before: float, after: float, reason: str, source: str, confidence: float) -> dict:
+    return {
+        "factor": factor, "manejo": manejo,
+        "before": round(before, 3), "after": round(after, 3),
+        "reason": reason, "source": source, "confidence": round(confidence, 3),
+    }
 
 
 def interactions_report(observations: list[Observation]) -> dict:

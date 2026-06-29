@@ -61,6 +61,26 @@ mensagem, recomendação e fonte, e alimenta a personalidade do talhão ("este t
 lavagem de fungicida com frequência"). É a "memória" da lavoura: cada decisão + contexto
 gera aprendizado.
 
+### A consequência realimenta o NÚMERO (`apply_interactions`)
+
+Não basta detectar — o aprendizado corrige a simulação daquele talhão/safra, de forma
+**transparente e citada**:
+- uma **aplicação lavada** vira *qualidade efetiva menor* da operação → menos proteção no
+  fator correspondente da cascata IPPD (Doenças/Pragas/Daninhas conforme o produto);
+- um **estande observado** na emergência **sobrepõe** a população planejada (fator
+  População);
+- um **período seco após a semeadura** reduz o estande efetivo.
+
+Cada ajuste é **escalado pela confiança da evidência** (dado fraco move pouco o número) e
+registrado com `{fator, antes→depois, motivo, fonte, confiança}`. O endpoint
+`/fields/{id}/season-review` e o painel **"Plano vs. Realidade"** mostram o plano, a
+realidade ajustada e o porquê de cada mudança. *Verificado: fungicida lavado (qualidade
+0,90→0,576) + estande 300→250 → −1,6 sc/ha, −R$ 192/ha, com as fontes Embrapa.*
+
+O mecanismo é **geral**: vale para qualquer aplicação (fungicida/herbicida/inseticida,
+casada por tipo e data) e para o estande — e novas regras evento→efeito entram como dado
+em `interaction_rules.json`, não como código.
+
 ## Counterfactual Engine (`counterfactual.py`)
 
 Os "universos paralelos" da safra: *e se eu não tivesse aplicado o fungicida? e se tivesse

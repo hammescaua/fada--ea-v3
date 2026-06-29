@@ -249,6 +249,25 @@ export interface CropPlanOut {
   stages: { stage: string; date: string; status: string }[];
 }
 
+export interface RealityAdjustment {
+  factor: string;
+  manejo: string;
+  before: number;
+  after: number;
+  reason: string;
+  source: string;
+  confidence: number;
+}
+
+export interface SeasonReviewOut {
+  plano: { expected_sc_ha: number; profit_per_ha: number };
+  realidade: { expected_sc_ha: number; profit_per_ha: number };
+  delta_sc_ha: number;
+  delta_profit_per_ha: number;
+  adjustments: RealityAdjustment[];
+  n_observations: number;
+}
+
 export interface PersonalityTrait {
   key: string;
   label: string;

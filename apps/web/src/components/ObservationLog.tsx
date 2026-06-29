@@ -10,8 +10,9 @@ const KINDS = [
   ["ndvi", "NDVI (satélite/drone)"],
   ["ferrugem", "Ferrugem (severidade)"],
   ["praga", "Praga (nível)"],
-  ["emergencia", "Emergência"],
-  ["aplicacao", "Aplicação realizada"],
+  ["plantio", "Plantio (data)"],
+  ["emergencia", "Estande (mil plantas/ha)"],
+  ["aplicacao", "Aplicação (fungicida/herbicida/inseticida)"],
   ["colheita", "Colheita (sc/ha)"],
 ] as const;
 
@@ -27,9 +28,23 @@ function buildValue(kind: string, raw: string): Record<string, unknown> {
   if (kind === "chuva") return { mm: isNaN(n) ? raw : n };
   if (kind === "ndvi") return { ndvi: isNaN(n) ? raw : n };
   if (kind === "colheita") return { sc_ha: isNaN(n) ? raw : n };
+  if (kind === "emergencia") return { plantas_mil: isNaN(n) ? raw : n };
+  if (kind === "plantio") return { marco: "plantio" };
+  if (kind === "aplicacao") return { tipo: raw || "fungicida" };
   if (kind === "ferrugem" || kind === "praga") return { severidade: raw };
   return { valor: isNaN(n) ? raw : n };
 }
+
+// dica do que digitar no campo "valor", por tipo de evidência
+const HINT: Record<string, string> = {
+  chuva: "mm",
+  ndvi: "0-1",
+  ferrugem: "baixa/media/alta",
+  praga: "baixa/media/alta",
+  emergencia: "mil/ha",
+  aplicacao: "fungicida/herbicida/inseticida",
+  colheita: "sc/ha",
+};
 
 export function ObservationLog({ fieldId }: { fieldId: string | null }) {
   const qc = useQueryClient();
@@ -85,8 +100,8 @@ export function ObservationLog({ fieldId }: { fieldId: string | null }) {
           ))}
         </select>
         <input
-          className={`${input} w-24`}
-          placeholder="valor"
+          className={`${input} w-28`}
+          placeholder={HINT[kind] ?? "valor"}
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
         />
@@ -98,7 +113,7 @@ export function ObservationLog({ fieldId }: { fieldId: string | null }) {
         <input type="date" className={input} value={obsDate} onChange={(e) => setObsDate(e.target.value)} />
         <button
           onClick={() => add.mutate()}
-          disabled={!raw || add.isPending}
+          disabled={(!raw && kind !== "plantio" && kind !== "aplicacao") || add.isPending}
           className="rounded-md bg-leaf px-2.5 py-1 text-xs font-medium text-white hover:bg-leafdark disabled:opacity-50"
         >
           registrar

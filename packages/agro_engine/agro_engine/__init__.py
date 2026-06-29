@@ -25,7 +25,7 @@ from .counterfactual import run_counterfactuals
 from .crop_plan import crop_plan
 from .data_sources import accuracy_report, infer_provenance
 from .evidence import Observation, confidence_for, corroborate, data_quality
-from .interactions import detect_interactions, interactions_report
+from .interactions import apply_interactions, detect_interactions, interactions_report
 from .manejo_science import manejo_evidence
 from .personality import FieldSeason, personality
 from .decision import operations_impact, recommend_decisions
@@ -68,6 +68,7 @@ __all__ = [
     "YieldResult",
     "accuracy_report",
     "apply_correction",
+    "apply_interactions",
     "assess_data_quality",
     "crop_plan",
     "calibrate",

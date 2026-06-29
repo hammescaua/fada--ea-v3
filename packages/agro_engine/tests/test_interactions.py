@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from agro_engine import Observation, interactions_report
+from dataclasses import replace
+
+from agro_engine import Observation, apply_interactions, interactions_report, simulate
 from agro_engine.interactions import detect_interactions
 
 
@@ -65,6 +67,43 @@ def test_confianca_herda_das_evidencias():
     ]
     lav = next(i for i in detect_interactions(obs) if i.rule == "lavagem_pos_aplicacao")
     assert lav.confidence == 0.5  # limitada pela evidência mais fraca
+
+
+def test_lavagem_reduz_qualidade_e_produtividade(base_scenario):
+    """A consequência realimenta o NÚMERO: fungicida lavado -> menos proteção -> menos sc/ha."""
+    fung = next(o for o in base_scenario.operations if o.kind == "fungicida")
+    obs = [
+        Observation("aplicacao", "nota_fiscal", fung.op_date.isoformat(), {"tipo": "fungicida"}, 0.95),
+        Observation("chuva", "api_clima", (fung.op_date.replace(day=fung.op_date.day + 1)).isoformat(), {"mm": 25}, 0.9),
+    ]
+    adjusted, adj = apply_interactions(base_scenario, obs)
+    assert any(a["factor"] == "Doenças" for a in adj)
+    # a aplicação lavada (a casada com o gatilho) teve a qualidade efetiva reduzida
+    q_before = min(o.quality for o in base_scenario.operations if o.kind == "fungicida")
+    q_after = min(o.quality for o in adjusted.operations if o.kind == "fungicida")
+    assert q_after < q_before
+    # e isso derruba a produtividade simulada
+    assert simulate(adjusted).yield_result.expected_sc_ha < simulate(base_scenario).yield_result.expected_sc_ha
+
+
+def test_estande_observado_sobrepoe_populacao(base_scenario):
+    obs = [Observation("emergencia", "agronomo", "2025-11-20", {"plantas_mil": 240}, 0.95)]
+    adjusted, adj = apply_interactions(replace(base_scenario, population_k_per_ha=300), obs)
+    assert adjusted.population_k_per_ha == 240
+    assert any(a["factor"] == "População" for a in adj)
+
+
+def test_ajuste_escala_pela_confianca(base_scenario):
+    """Evidência fraca move menos o número do que evidência forte."""
+    fung = next(o for o in base_scenario.operations if o.kind == "fungicida")
+    d_rain = fung.op_date.replace(day=fung.op_date.day + 1).isoformat()
+    forte = [Observation("aplicacao", "nota_fiscal", fung.op_date.isoformat(), {"tipo": "fungicida"}, 0.95),
+             Observation("chuva", "api_clima", d_rain, {"mm": 25}, 0.95)]
+    fraca = [Observation("aplicacao", "manual", fung.op_date.isoformat(), {"tipo": "fungicida"}, 0.5),
+             Observation("chuva", "produtor", d_rain, {"mm": 25}, 0.5)]
+    qf = min(o.quality for o in apply_interactions(base_scenario, forte)[0].operations if o.kind == "fungicida")
+    qw = min(o.quality for o in apply_interactions(base_scenario, fraca)[0].operations if o.kind == "fungicida")
+    assert qf < qw  # confiança alta reduz mais a qualidade efetiva
 
 
 def test_report_resumo():

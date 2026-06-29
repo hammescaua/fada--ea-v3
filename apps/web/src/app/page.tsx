@@ -12,6 +12,7 @@ import { Onboarding } from "@/components/Onboarding";
 import { PersonalityPanel } from "@/components/PersonalityPanel";
 import { CounterfactualPanel } from "@/components/CounterfactualPanel";
 import { ObservationLog } from "@/components/ObservationLog";
+import { SeasonReviewPanel } from "@/components/SeasonReviewPanel";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
 import { EconomicsCard } from "@/components/EconomicsCard";
 import { LabControls } from "@/components/LabControls";
@@ -260,6 +261,9 @@ export default function Home() {
             </div>
             <div className="rounded-xl border border-stone-200 bg-white p-4">
               <ObservationLog fieldId={selectedFieldId} />
+            </div>
+            <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+              <SeasonReviewPanel fieldId={selectedFieldId} scenario={debounced} />
             </div>
             <div className="rounded-xl border border-stone-200 bg-white p-4">
               <AccuracyPanel acc={accuracy} />

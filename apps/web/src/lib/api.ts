@@ -9,6 +9,7 @@ import type {
   ObservationIn,
   ObservationOut,
   PersonalityOut,
+  SeasonReviewOut,
   DecisionOut,
   FarmOut,
   FertilityRec,
@@ -60,6 +61,8 @@ export const api = {
     jpost<CounterfactualOut>("/api/counterfactual", { scenario }),
   personality: (fieldId: string) => jget<PersonalityOut>(`/api/fields/${fieldId}/personality`),
   observations: (fieldId: string) => jget<ObservationOut[]>(`/api/fields/${fieldId}/observations`),
+  seasonReview: (fieldId: string, scenario: ScenarioIn) =>
+    jpost<SeasonReviewOut>(`/api/fields/${fieldId}/season-review`, { scenario }),
   addObservation: (fieldId: string, obs: ObservationIn) =>
     jpost<ObservationOut>(`/api/fields/${fieldId}/observations`, obs),
   dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>

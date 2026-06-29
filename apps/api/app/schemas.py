@@ -105,6 +105,10 @@ class CounterfactualIn(BaseModel):
     scenario: ScenarioIn
 
 
+class SeasonReviewIn(BaseModel):
+    scenario: ScenarioIn
+
+
 class ObservationIn(BaseModel):
     kind: str
     source: str
