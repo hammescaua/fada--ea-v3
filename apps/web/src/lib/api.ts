@@ -1,6 +1,7 @@
 import type {
   AssistantOut,
   CalibrationOut,
+  DataQualityOut,
   DecisionOut,
   FarmOut,
   FertilityRec,
@@ -42,6 +43,8 @@ export const api = {
   seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
   fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
   optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
+  dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>
+    jpost<DataQualityOut>("/api/data-quality", { scenario, provenance }),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
   assistant: (question: string, scenario: ScenarioIn) =>
@@ -112,6 +115,6 @@ export function defaultScenario(): ScenarioIn {
       { category: "outros", description: "Frete + secagem + admin", cost_per_ha: 620 },
     ],
     soybean_price_per_sc: 120,
-    use_live_weather: false,
+    use_live_weather: true, // clima histórico REAL da localização (climatologia por talhão)
   };
 }

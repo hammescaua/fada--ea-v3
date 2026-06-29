@@ -34,6 +34,26 @@ Registrar "aplicou fungicida" não basta. O sistema captura **condições da apl
 (temperatura, vento, umidade) e deriva uma `quality` (0..1) — pois uma aplicação a
 36 °C com vento de 18 km/h rende menos. Isso já existe no modelo (`operations.quality`).
 
+## Veracidade explícita: o Índice de Confiança dos Dados (implementado)
+
+A plataforma é **honesta sobre o que sabe**. O motor `provenance.py` calcula, por talhão:
+
+- um **índice de confiança dos dados** (0–100%) ponderado pela influência de cada grupo
+  (clima, solo, cultivar, manejo, população, preço) e por sua **fonte** (real / parcial /
+  estimado);
+- a lista de **lacunas ranqueadas por valor-da-informação** — quanto a estimativa pode
+  oscilar (±sc/ha) se aquele dado fosse o real, calculado perturbando a entrada e medindo
+  o swing no próprio modelo. Isso responde objetivamente *"o que medir primeiro"*.
+
+Exibido no painel "Confiança dos dados deste talhão". Exemplo: *"Confiança 64%. O dado que
+mais aumentaria a precisão é o clima (±6 sc/ha): ligar o histórico real da localização."*
+
+**Clima real por padrão.** O balanço hídrico usa a **climatologia real da localização**
+(histórico ~10 anos do Open-Meteo/NASA POWER, média por dia-do-ano, com ET0 FAO real) —
+não um fallback genérico. Assim a água/calor são específicos de cada talhão (ex.: Santo
+Ângelo e Cruz Alta dão estresses diferentes). A fonte é sinalizada (`climatologia_real`
+vs `sintetico`).
+
 ## Lidando com dados ausentes (estratégia de defaults)
 
 Quando falta um dado-chave, o motor **não trava**: usa um default regional explícito

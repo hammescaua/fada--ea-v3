@@ -31,6 +31,7 @@ from .knowledge import (
 )
 from .montecarlo import run_montecarlo
 from .phenology import stage_dates
+from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
 from .simulate import simulate
 from .sowing_window import evaluate as evaluate_sowing_window
@@ -56,6 +57,7 @@ __all__ = [
     "WeatherSeries",
     "YieldResult",
     "apply_correction",
+    "assess_data_quality",
     "calibrate",
     "compute_economics",
     "decompose_yield",

@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from fastapi import APIRouter
 
 from agro_engine import (
+    assess_data_quality,
     operations_impact,
     optimize_season,
     recommend_amendments,
@@ -28,7 +29,7 @@ from agro_engine.reference import NO_RS_MUNICIPALITIES
 
 from .. import weather
 from .. import assistant
-from ..schemas import AssistantIn, MonteCarloIn, ScenarioIn, SimulationOut
+from ..schemas import AssistantIn, DataQualityIn, MonteCarloIn, ScenarioIn, SimulationOut
 
 router = APIRouter(tags=["motor"])
 
@@ -76,13 +77,15 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
         soybean_price_per_sc=payload.soybean_price_per_sc,
     )
 
+    scenario._weather_source = "sintetico"  # type: ignore[attr-defined]
     if payload.use_live_weather:
         end = payload.sowing_date + timedelta(days=cultivar.cycle_days + 20)
         try:
-            scenario.weather = weather.get_weather(
+            scenario.weather = weather.get_climatology(
                 payload.latitude, payload.longitude, payload.sowing_date, end
             )
-        except Exception:  # noqa: BLE001 — degrada para clima climatológico
+            scenario._weather_source = "climatologia_real"  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001 — degrada para clima sintético
             scenario.weather = None
     return scenario
 
@@ -92,6 +95,7 @@ def post_simulate(payload: ScenarioIn) -> SimulationOut:
     """Roda o pipeline completo (fenologia→água→ZARC→IPPD→econômico)."""
     scenario = _to_scenario(payload)
     result = simulate(scenario)
+    water = {**result.water, "source": getattr(scenario, "_weather_source", "sintetico")}
     return SimulationOut(
         yield_result={
             "base_potential_sc_ha": result.yield_result.base_potential_sc_ha,
@@ -102,7 +106,7 @@ def post_simulate(payload: ScenarioIn) -> SimulationOut:
         },
         economics=result.economics.__dict__,
         phenology=result.phenology,
-        water=result.water,
+        water=water,
         sowing_window=result.sowing_window,
     )
 
@@ -130,6 +134,17 @@ def post_assistant(payload: AssistantIn) -> dict:
     quando não há ANTHROPIC_API_KEY."""
     scenario = _to_scenario(payload.scenario)
     return assistant.ask(payload.question, scenario)
+
+
+@router.post("/data-quality")
+def post_data_quality(payload: DataQualityIn) -> dict:
+    """Veracidade dos dados do talhão: índice de confiança + lacunas ranqueadas por
+    valor-da-informação (o que medir primeiro). Auto-detecta a fonte do clima."""
+    scenario = _to_scenario(payload.scenario)
+    prov = dict(payload.provenance)
+    # fonte do clima é detectada pelo backend (climatologia real vs sintético)
+    prov.setdefault("clima", "real" if getattr(scenario, "_weather_source", "") == "climatologia_real" else "estimado")
+    return assess_data_quality(scenario, prov)
 
 
 @router.post("/optimize-season")

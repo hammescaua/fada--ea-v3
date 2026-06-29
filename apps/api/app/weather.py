@@ -7,13 +7,14 @@ tabela ``weather_cache`` (PostGIS). Open-Meteo é CC-BY (uso comercial ok, sem c
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import httpx
 
 from agro_engine.models import DailyWeather, WeatherSeries
 
 _CACHE: dict[str, WeatherSeries] = {}
+_ARCHIVE_CACHE: dict[tuple[float, float], list[DailyWeather]] = {}
 
 
 def _grid_key(lat: float, lon: float, start: date, end: date) -> str:
@@ -67,3 +68,55 @@ def get_weather(lat: float, lon: float, start: date, end: date) -> WeatherSeries
     series = fetch_open_meteo(lat, lon, start, end)
     _CACHE[key] = series
     return series
+
+
+def _archive(lat: float, lon: float, years: int = 10) -> list[DailyWeather]:
+    """Histórico diário (~N anos) da localização — buscado UMA vez e cacheado."""
+    key = (round(lat, 2), round(lon, 2))
+    if key in _ARCHIVE_CACHE:
+        return _ARCHIVE_CACHE[key]
+    end = date.today().replace(month=1, day=1) - timedelta(days=1)  # último 31/dez completo
+    start = end.replace(year=end.year - years) + timedelta(days=1)
+    series = fetch_open_meteo(lat, lon, start, end)
+    _ARCHIVE_CACHE[key] = series.days
+    return series.days
+
+
+def get_climatology(lat: float, lon: float, start: date, end: date) -> WeatherSeries:
+    """Ano climatológico REAL da localização para a janela [start, end].
+
+    Constrói a média por dia-do-ano a partir do histórico (real, específico do local).
+    Apropriado para planejar uma safra futura: usa o "ano típico" observado, não um
+    fallback genérico. O Monte Carlo cobre a variabilidade em torno dessa média.
+    """
+    archive = _archive(lat, lon)
+    if not archive:
+        raise RuntimeError("sem histórico climático")
+
+    acc: dict[tuple[int, int], list[DailyWeather]] = {}
+    for d in archive:
+        acc.setdefault((d.day.month, d.day.day), []).append(d)
+
+    def _avg(md: tuple[int, int]) -> tuple[float, float, float, float, float | None]:
+        recs = acc.get(md) or acc.get((md[0], min(md[1], 28)))
+        if not recs:
+            return 18.0, 30.0, 5.0, 20.0, None
+        n = len(recs)
+        et0_vals = [r.et0_mm for r in recs if r.et0_mm is not None]
+        return (
+            sum(r.tmin for r in recs) / n,
+            sum(r.tmax for r in recs) / n,
+            sum(r.rain_mm for r in recs) / n,
+            sum(r.radiation_mj for r in recs) / n,
+            (sum(et0_vals) / len(et0_vals)) if et0_vals else None,  # ET0 FAO real (média)
+        )
+
+    days: list[DailyWeather] = []
+    cur = start
+    while cur <= end:
+        tmin, tmax, rain, rad, et0 = _avg((cur.month, cur.day))
+        days.append(
+            DailyWeather(day=cur, tmin=tmin, tmax=max(tmax, tmin + 2), rain_mm=rain, radiation_mj=rad, et0_mm=et0)
+        )
+        cur += timedelta(days=1)
+    return WeatherSeries(days=days)

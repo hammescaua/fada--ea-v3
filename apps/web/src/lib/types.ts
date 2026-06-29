@@ -111,6 +111,13 @@ export interface MonteCarloOut {
   };
 }
 
+export interface DataQualityOut {
+  data_confidence: number;
+  sources: Record<string, string>;
+  gaps: { group: string; current_source: string; leverage_sc_ha: number; como_obter: string }[];
+  resumo: string;
+}
+
 export interface OptimizeOut {
   combinacoes_avaliadas: number;
   atual: { expected_sc_ha: number; profit_per_ha: number };

@@ -16,6 +16,7 @@ import { FarmManager } from "@/components/FarmManager";
 import { SeasonPlanPanel } from "@/components/SeasonPlanPanel";
 import { FertilityPanel } from "@/components/FertilityPanel";
 import { BestPlanPanel } from "@/components/BestPlanPanel";
+import { DataQualityPanel } from "@/components/DataQualityPanel";
 
 // Mapa só no cliente (MapLibre acessa window).
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
@@ -39,7 +40,19 @@ export default function Home() {
   const [scenario, setScenario] = useState<ScenarioIn>(defaultScenario);
   const [baseline, setBaseline] = useState<SimulationOut | null>(null);
   const [profitTarget, setProfitTarget] = useState(3500);
+  const [soilReal, setSoilReal] = useState(false); // verdadeiro quando um talhão com análise é carregado
   const debounced = useDebounced(scenario, 350);
+
+  const provenance = useMemo(
+    () => ({ solo: soilReal ? "real" : "estimado" }),
+    [soilReal],
+  );
+
+  const { data: dataQuality } = useQuery({
+    queryKey: ["data-quality", debounced, provenance],
+    queryFn: () => api.dataQuality(debounced, provenance),
+    placeholderData: (prev) => prev,
+  });
 
   const mc = useMutation({
     mutationFn: () =>
@@ -133,7 +146,10 @@ export default function Home() {
         <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
           <FarmManager
             scenario={scenario}
-            onLoadField={(patch) => setScenario((s) => ({ ...s, ...patch }))}
+            onLoadField={(patch) => {
+              setScenario((s) => ({ ...s, ...patch }));
+              if (patch.soil) setSoilReal(true);
+            }}
           />
           <hr className="border-stone-100" />
           <FieldMap
@@ -169,6 +185,12 @@ export default function Home() {
                   onApply={(patch) => setScenario((s) => ({ ...s, ...patch }))}
                 />
               </div>
+
+              {dataQuality && (
+                <div className="rounded-xl border border-stone-200 bg-white p-4">
+                  <DataQualityPanel dq={dataQuality} />
+                </div>
+              )}
 
               <div className="rounded-xl border border-stone-200 bg-white p-4">
                 <YieldWaterfall y={sim.yield_result} />
