@@ -1,6 +1,7 @@
 "use client";
 
 import type { BriefingOut } from "@/lib/types";
+import { InfoTip } from "@/components/InfoTip";
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -18,10 +19,13 @@ const POSITION: Record<string, { txt: string; cls: string }> = {
   depois_da_janela: { txt: "Depois da janela ⚠", cls: "text-orange-700" },
 };
 
-function Metric({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: string }) {
+function Metric({ label, value, hint, tone, info }: { label: string; value: string; hint?: string; tone?: string; info?: string }) {
   return (
     <div className="min-w-0">
-      <div className="text-[11px] font-medium uppercase tracking-wide text-stone-400">{label}</div>
+      <div className="flex items-center text-[11px] font-medium uppercase tracking-wide text-stone-400">
+        {label}
+        {info && <InfoTip text={info} />}
+      </div>
       <div className={`text-lg font-bold leading-tight ${tone ?? "text-stone-800"}`}>{value}</div>
       {hint && <div className="truncate text-[11px] text-stone-500">{hint}</div>}
     </div>
@@ -62,24 +66,28 @@ export function SeasonBriefing({ b, loading }: { b: BriefingOut | undefined; loa
           label="Deve colher"
           value={`${b.expected_sc_ha.toFixed(0)} sc/ha`}
           hint={`entre ${b.p10_sc_ha.toFixed(0)} e ${b.p90_sc_ha.toFixed(0)}`}
+          info="Sacas de 60 kg por hectare. A faixa mostra onde o resultado deve cair na maioria das safras parecidas, conforme o clima."
         />
         <Metric
           label={b.profit_per_ha > 0 ? "Lucro" : "Prejuízo"}
           value={`${brl(b.profit_per_ha)}/ha`}
           hint={`ROI ${b.roi.toFixed(1)}x · empata em ${b.breakeven_yield_sc_ha.toFixed(0)} sc/ha`}
           tone={profitTone}
+          info="Lucro por hectare ao preço informado. ROI = quantas vezes o lucro cobre o custo. 'Empata em' = produtividade mínima para não ter prejuízo."
         />
         <Metric
           label="Risco de prejuízo"
           value={`${Math.round(b.prob_loss * 100)}%`}
           hint="das safras simuladas"
           tone={riskTone}
+          info="De cada 100 safras possíveis (variando clima e preço), em quantas o resultado seria negativo."
         />
         <Metric
           label="Semeadura"
           value={pos.txt}
           hint={b.sowing_penalty_sc_ha > 0 ? `−${b.sowing_penalty_sc_ha.toFixed(1)} sc/ha por desvio` : "no período recomendado"}
           tone={pos.cls}
+          info="Se a data está dentro da janela recomendada pelo ZARC para o município — fora dela, sobe o risco e cai o potencial."
         />
       </div>
 

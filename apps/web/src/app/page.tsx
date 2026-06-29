@@ -86,6 +86,7 @@ export default function Home() {
     queryKey: ["crop-plan", debounced, provenance],
     queryFn: () => api.cropPlan(debounced, provenance),
     placeholderData: (prev) => prev,
+    enabled: view === "acompanhamento",
   });
 
   const { data: accuracy } = useQuery({
@@ -94,22 +95,27 @@ export default function Home() {
     placeholderData: (prev) => prev,
   });
 
+  // Painéis do Laboratório: só consultam quando essa aba está ativa (eficiência).
+  const inLab = view === "laboratorio";
   const { data: decisions, isFetching: decisionsLoading } = useQuery({
     queryKey: ["decisions", debounced],
     queryFn: () => api.decisions(debounced),
     placeholderData: (prev) => prev,
+    enabled: inLab,
   });
 
   const { data: plan } = useQuery({
     queryKey: ["season-plan", debounced],
     queryFn: () => api.seasonPlan(debounced),
     placeholderData: (prev) => prev,
+    enabled: inLab,
   });
 
   const { data: fertility, isFetching: fertilityLoading } = useQuery({
     queryKey: ["fertility", debounced],
     queryFn: () => api.fertility(debounced),
     placeholderData: (prev) => prev,
+    enabled: inLab,
   });
 
   const mc = useMutation({
@@ -206,6 +212,12 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           {(isFetching || cropPlanLoading) && <span className="text-xs text-stone-400">atualizando…</span>}
+          <a
+            href="/guia"
+            className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            ❔ Como funciona
+          </a>
           <button
             onClick={() => window.print()}
             className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"

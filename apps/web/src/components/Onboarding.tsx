@@ -29,6 +29,9 @@ export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Pro
   const [sowing, setSowing] = useState(scenario.sowing_date);
   const [price, setPrice] = useState(scenario.soybean_price_per_sc);
   const [pop, setPop] = useState(scenario.population_k_per_ha);
+  const [prevCrop, setPrevCrop] = useState<NonNullable<ScenarioIn["previous_crop"]>>(scenario.previous_crop ?? "soja");
+  const [nematode, setNematode] = useState<NonNullable<ScenarioIn["nematode_pressure"]>>(scenario.nematode_pressure ?? "nenhuma");
+  const [enso, setEnso] = useState<NonNullable<ScenarioIn["enso"]>>(scenario.enso ?? "neutro");
 
   const finish = () => {
     const cultivar = CULTIVARS[cultivarIdx];
@@ -42,6 +45,9 @@ export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Pro
         sowing_date: sowing,
         soybean_price_per_sc: price,
         population_k_per_ha: pop,
+        previous_crop: prevCrop,
+        nematode_pressure: nematode,
+        enso,
         use_live_weather: true,
       },
       hasSoil === true,
@@ -206,10 +212,38 @@ export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Pro
               <span className="font-medium text-stone-600">Preço da soja (R$/saca)</span>
               <input type="number" className={input} value={price} onChange={(e) => setPrice(Number(e.target.value))} />
             </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-medium text-stone-600">Cultura anterior (rotação)</span>
+              <select className={input} value={prevCrop} onChange={(e) => setPrevCrop(e.target.value as typeof prevCrop)}>
+                <option value="soja">Soja (monocultura)</option>
+                <option value="milho">Milho</option>
+                <option value="trigo">Trigo</option>
+                <option value="cobertura">Cobertura (aveia/nabo/ervilhaca)</option>
+                <option value="pousio">Pousio</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-medium text-stone-600">Nematoides no talhão?</span>
+              <select className={input} value={nematode} onChange={(e) => setNematode(e.target.value as typeof nematode)}>
+                <option value="nenhuma">Não sei / nenhum</option>
+                <option value="baixa">Baixa</option>
+                <option value="media">Média</option>
+                <option value="alta">Alta (reboleiras)</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-medium text-stone-600">Previsão climática (ENSO)</span>
+              <select className={input} value={enso} onChange={(e) => setEnso(e.target.value as typeof enso)}>
+                <option value="el_nino">El Niño (chuvoso)</option>
+                <option value="neutro">Neutro / não sei</option>
+                <option value="la_nina">La Niña (seca)</option>
+              </select>
+            </label>
           </div>
           <p className="text-xs text-stone-500">
-            Pronto. Geramos o resumo da safra e o passo-a-passo dos manejos — e você poderá ajustar
-            qualquer coisa no Laboratório depois.
+            Esses três últimos personalizam o risco e a produtividade ao seu talhão: rotação e
+            nematoides entram na conta; o clima (La Niña = ano seco) ajusta o risco. Pode ajustar
+            tudo depois. Geramos o resumo e o passo-a-passo na sequência.
           </p>
           <div className="flex justify-between">
             <button onClick={() => setStep(2)} className="text-sm text-stone-500">
