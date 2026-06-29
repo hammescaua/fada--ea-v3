@@ -12,6 +12,17 @@ ouro: **sem dados de qualidade, nenhuma IA é boa** — por isso a base vem prim
   de solo e safras (linha do tempo) e carregar o talhão de volta no laboratório — fecha
   o loop do gêmeo digital na interface.
 - **Entregue:** simular manejos e ver impacto em produtividade ± incerteza e lucro.
+- ✅ **Acompanhamento da Safra ao Vivo** (`crop_plan.py`) — passo-a-passo por fase
+  (preparo → semeadura → vegetativo → reprodutivo → colheita) ancorado na fenologia GDD
+  e no mapa canônico de manejos: janela, status vs. hoje, manejos planejados (impacto
+  sc/ha e R$) + sugeridos faltantes (custo de referência da KB), estresse hídrico e a
+  proveniência dos dados de cada etapa. Tela "Acompanhamento" + **onboarding guiado** de
+  3 passos.
+- ✅ **Acurácia por talhão** (`data_sources.py` + `data_sources.json`) — de onde vem cada
+  variável, quão local é, alavancagem (sc/ha) e como melhorar; índice de precisão do
+  talhão (medido: 37% só com defaults → 89% com dados reais). Ver
+  [acuracia-por-talhao.md](acuracia-por-talhao.md). Endpoints `/accuracy`, `/crop-plan`,
+  `/reference/inputs` (preços de insumo com fonte citada).
 - ✅ **Resumo da Safra (Briefing)** — a *resposta única* do gêmeo para o agricultor.
   Compõe os motores já existentes (simulação, Monte Carlo, decisão, janela ZARC,
   veracidade dos dados) num **veredito priorizado** com **status de saúde**
