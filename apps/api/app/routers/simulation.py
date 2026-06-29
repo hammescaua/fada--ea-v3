@@ -10,6 +10,7 @@ from agro_engine import (
     accuracy_report,
     assess_data_quality,
     crop_plan,
+    infer_provenance,
     operations_impact,
     optimize_season,
     recommend_amendments,
@@ -88,6 +89,9 @@ def _to_scenario(payload: ScenarioIn) -> Scenario:
             for c in payload.costs
         ],
         soybean_price_per_sc=payload.soybean_price_per_sc,
+        calibration_bias_sc_ha=payload.calibration_bias_sc_ha,
+        calibration_confidence=payload.calibration_confidence,
+        calibration_seasons=payload.calibration_seasons,
     )
 
     scenario._weather_source = "sintetico"  # type: ignore[attr-defined]
@@ -145,10 +149,16 @@ _CLIMATE_PROV = {
 
 
 def _with_climate_prov(scenario, provenance: dict) -> dict:
-    """Preenche a fonte do clima detectada pelo backend (realizado/corrente/histórico)."""
-    prov = dict(provenance)
+    """Proveniência efetiva: o que a UI declarou (explícito) SOBRE o que o cenário deixa
+    inferir (cultivar/data/manejo reais), e o clima detectado pelo backend por cima.
+
+    É assim que as variáveis ficam verídicas conforme o agricultor preenche: informou a
+    cultivar real, registrou o manejo feito, a data já realizada — o sistema reconhece.
+    """
+    inferred = infer_provenance(scenario)        # do conteúdo do cenário
+    prov = {**inferred, **provenance}            # explícito (UI) vence o inferido
     src = getattr(scenario, "_weather_source", "sintetico")
-    prov.setdefault("clima", _CLIMATE_PROV.get(src, "estimado"))
+    prov["clima"] = _CLIMATE_PROV.get(src, "estimado")  # clima sempre do backend
     return prov
 
 

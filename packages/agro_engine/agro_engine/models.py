@@ -123,6 +123,11 @@ class Scenario:
     operations: list[Operation] = field(default_factory=list)
     costs: list[CostItem] = field(default_factory=list)
     soybean_price_per_sc: float = 120.0  # R$ por saca de 60 kg
+    # Calibração aprendida do talhão (Knowledge Engine): correção aditiva previsto→real,
+    # aplicada como fator transparente da cascata IPPD. 0 safras = talhão sem histórico.
+    calibration_bias_sc_ha: float = 0.0
+    calibration_confidence: float = 0.0
+    calibration_seasons: int = 0
 
     @property
     def total_cost_per_ha(self) -> float:

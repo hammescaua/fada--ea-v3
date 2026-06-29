@@ -15,6 +15,8 @@ explicada e rastreável.
 
 from __future__ import annotations
 
+from datetime import date
+
 from . import kb
 from .models import Scenario
 from .provenance import (
@@ -51,6 +53,39 @@ _LEVERAGE_FN = {
     "cultivar": _cultivar_leverage,
     "populacao": _population_leverage,
 }
+
+
+_GENERIC_CULTIVAR_HINTS = ("genéric", "generic", "")
+
+
+def infer_provenance(scenario: Scenario, today: date | None = None) -> dict:
+    """Deriva a proveniência das variáveis a partir do que o cenário JÁ traz preenchido.
+
+    É como o agricultor "torna as variáveis verdadeiras": ao informar a cultivar real,
+    registrar o manejo de fato feito (produto/dose) e a data já realizada, o sistema
+    reconhece e eleva a proveniência — sem precisar de toggle manual. Solo/preço/população
+    ficam de fora aqui (vêm de sinal explícito da UI/registro), e o clima é detectado no
+    backend. O que esta função preenche é mesclado SOB a proveniência explícita.
+    """
+    today = today or date.today()
+    prov: dict[str, str] = {}
+
+    nm = (scenario.cultivar.name or "").lower()
+    cultivar_real = bool(nm.strip()) and not any(h and h in nm for h in _GENERIC_CULTIVAR_HINTS)
+    prov["cultivar"] = "real" if cultivar_real else "estimado"
+
+    # data: 'real' (realizada) se a semeadura já ocorreu; 'parcial' (planejada) se futura.
+    prov["data_semeadura"] = "real" if scenario.sowing_date < today else "parcial"
+
+    ops = scenario.operations
+    if ops and any((o.product or "").strip() for o in ops):
+        prov["manejo"] = "real"           # registrado com produto/dose reais
+    elif ops:
+        prov["manejo"] = "parcial"        # apenas um programa planejado
+    else:
+        prov["manejo"] = "estimado"
+
+    return prov
 
 
 def _tier(group: str, prov_value: str) -> dict:

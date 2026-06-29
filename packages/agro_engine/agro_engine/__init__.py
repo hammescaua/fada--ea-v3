@@ -22,7 +22,7 @@ from .models import (
 from .briefing import season_briefing
 from .budget import season_budget
 from .crop_plan import crop_plan
-from .data_sources import accuracy_report
+from .data_sources import accuracy_report, infer_provenance
 from .decision import operations_impact, recommend_decisions
 from .fertility import recommend_amendments
 from .knowledge import (
@@ -67,6 +67,7 @@ __all__ = [
     "compute_economics",
     "decompose_yield",
     "evaluate_sowing_window",
+    "infer_provenance",
     "operations_impact",
     "optimize_season",
     "recommend_amendments",

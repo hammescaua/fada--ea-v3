@@ -174,10 +174,28 @@ def decompose(scenario: Scenario, water: dict, sowing: dict) -> YieldResult:
     apply("Pragas", _pest_factor(scenario))
     apply("Doenças", _disease_factor(scenario))
 
+    # Calibração do talhão: correção aprendida das safras passadas (previsto vs. real),
+    # aplicada como fator ADITIVO transparente — aparece no waterfall, não escondida.
+    if scenario.calibration_seasons > 0 and scenario.calibration_bias_sc_ha != 0.0:
+        before = running
+        running = before + scenario.calibration_bias_sc_ha
+        contributions.append(
+            FactorContribution(
+                label="Calibração do talhão",
+                delta_sc_ha=round(running - before, 2),
+                confidence=round(0.5 + 0.5 * scenario.calibration_confidence, 2),
+                detail=f"{scenario.calibration_seasons} safra(s) registrada(s) neste talhão",
+            )
+        )
+        confidences.append(0.5 + 0.5 * scenario.calibration_confidence)
+
     expected = round(running, 1)
     # Incerteza: combina a confiança média com o nº de fatores limitantes.
     mean_conf = sum(confidences) / len(confidences) if confidences else 0.6
     spread = (1.0 - mean_conf) * expected * 0.5 + 2.0
+    # Talhão calibrado encurta a incerteza (até -50% conforme a confiança aprendida).
+    if scenario.calibration_seasons > 0:
+        spread *= 1.0 - 0.5 * scenario.calibration_confidence
     return YieldResult(
         base_potential_sc_ha=potential,
         contributions=contributions,
