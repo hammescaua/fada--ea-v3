@@ -13,6 +13,7 @@ from agro_engine import (
     infer_provenance,
     operations_impact,
     run_counterfactuals,
+    season_radar,
     optimize_season,
     recommend_amendments,
     recommend_decisions,
@@ -202,6 +203,14 @@ def post_crop_plan(payload: CropPlanIn) -> dict:
         provenance=_with_climate_prov(scenario, payload.provenance),
         climate_known_fraction=_climate_known_fraction(scenario),
     )
+
+
+@router.post("/radar")
+def post_radar(payload: ScenarioIn) -> dict:
+    """Radar da Safra (copiloto): índice geral + 6 dimensões (Solo/Clima/Sanidade/Nutrição/
+    Mercado/Execução), o gargalo, a oportunidade e o investimento de maior retorno, e as 4
+    respostas-chave (maior risco / melhor decisão / quanto vale / por quê + confiança)."""
+    return season_radar(_to_scenario(payload))
 
 
 @router.post("/counterfactual")

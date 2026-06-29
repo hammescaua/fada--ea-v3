@@ -39,6 +39,8 @@ from .knowledge import (
 )
 from .montecarlo import run_montecarlo
 from .phenology import stage_dates
+from .priorities import prioritized_actions
+from .radar import season_radar
 from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
 from .simulate import simulate
@@ -84,7 +86,9 @@ __all__ = [
     "manejo_evidence",
     "operations_impact",
     "personality",
+    "prioritized_actions",
     "run_counterfactuals",
+    "season_radar",
     "optimize_season",
     "recommend_amendments",
     "recommend_decisions",

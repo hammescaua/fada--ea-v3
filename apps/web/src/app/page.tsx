@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { api, defaultScenario } from "@/lib/api";
 import type { ScenarioIn, SimulationOut } from "@/lib/types";
+import { SeasonRadar } from "@/components/SeasonRadar";
 import { SeasonBriefing } from "@/components/SeasonBriefing";
 import { CropTimeline } from "@/components/CropTimeline";
 import { AccuracyPanel } from "@/components/AccuracyPanel";
@@ -74,6 +75,13 @@ export default function Home() {
     queryKey: ["simulate", debounced],
     queryFn: () => api.simulate(debounced),
     placeholderData: (prev) => prev,
+  });
+
+  const { data: radar, isFetching: radarLoading } = useQuery({
+    queryKey: ["radar", debounced],
+    queryFn: () => api.radar(debounced),
+    placeholderData: (prev) => prev,
+    enabled: view === "acompanhamento",
   });
 
   const { data: briefing, isFetching: briefingLoading } = useQuery({
@@ -260,6 +268,7 @@ export default function Home() {
       {view === "acompanhamento" ? (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
           <div className="space-y-5">
+            {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
             {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
             <CropTimeline plan={cropPlan} loading={cropPlanLoading} handlers={timelineHandlers} />
           </div>

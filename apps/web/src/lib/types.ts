@@ -253,6 +253,33 @@ export interface CropPlanOut {
   stages: { stage: string; date: string; status: string }[];
 }
 
+export interface PriorityAction {
+  rank: number;
+  key: string;
+  acao: string;
+  categoria: string;
+  impacto_sc_ha: number;
+  impacto_rs: number;
+  custo_per_ha: number;
+  roi: number | null;
+  probabilidade: number;
+  prazo: string;
+  porque: string;
+}
+
+export interface RadarOut {
+  score: number;
+  score_label: "saudável" | "atenção" | "crítico";
+  dimensions: { key: string; label: string; score: number }[];
+  maior_risco: { dimensao: string; fator: string; perda_sc_ha: number; perda_rs_ha: number; detalhe: string } | null;
+  maior_oportunidade: PriorityAction | null;
+  maior_investimento: PriorityAction | null;
+  actions: PriorityAction[];
+  respostas: { maior_risco: string; melhor_decisao: string; quanto_vale: string; por_que: string };
+  expected_sc_ha: number;
+  profit_per_ha: number;
+}
+
 export interface RealityAdjustment {
   factor: string;
   manejo: string;

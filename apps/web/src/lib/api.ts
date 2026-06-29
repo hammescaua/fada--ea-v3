@@ -9,6 +9,7 @@ import type {
   ObservationIn,
   ObservationOut,
   PersonalityOut,
+  RadarOut,
   SeasonReviewOut,
   DecisionOut,
   FarmOut,
@@ -51,6 +52,7 @@ export const api = {
   seasonPlan: (scenario: ScenarioIn) => jpost<SeasonPlanOut>("/api/season-plan", scenario),
   fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
   optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
+  radar: (scenario: ScenarioIn) => jpost<RadarOut>("/api/radar", scenario),
   briefing: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<BriefingOut>("/api/briefing", { scenario, provenance }),
   cropPlan: (scenario: ScenarioIn, provenance: Record<string, string>, today?: string) =>
