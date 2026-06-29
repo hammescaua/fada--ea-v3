@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "descricao": "Regras de INTERAÇÃO evento→consequência: padrões na linha do tempo de evidências que mudam o efeito de um manejo (ex.: chuva logo após a aplicação lava o produto e reduz a eficácia). Cada regra é agronomicamente fundamentada e citada. O motor de interações (interactions.py) varre as observações do talhão e aprende o que de fato aconteceu — não só o resultado final.",
+    "resolucao": "As observações são diárias; janelas em dias. Para 'chuva X horas após' usamos o mesmo dia ou o dia seguinte com chuva acima do limiar — aproximação honesta dado o dado diário.",
+    "fontes": [
+      "Embrapa Soja / bulas — período de resistência à chuva (rainfastness) de fungicidas e herbicidas",
+      "Embrapa — Consórcio Antiferrugem (janela de proteção do fungicida)",
+      "Embrapa — umidade na semeadura e estabelecimento de estande"
+    ],
+    "atualizado_em": "2026-06"
+  },
+  "rules": {
+    "lavagem_pos_aplicacao": {
+      "label": "Lavagem por chuva após a aplicação",
+      "trigger_kind": "aplicacao",
+      "followed_by": "chuva",
+      "window_days": 1,
+      "rain_mm_threshold": 15.0,
+      "efficacy_loss": 0.4,
+      "mensagem": "Choveu forte logo após a aplicação — parte do produto pode ter sido lavada antes de secar, reduzindo a eficácia.",
+      "recomendacao": "Avaliar repasse e, no futuro, priorizar produtos com boa resistência à chuva (rainfastness) e janela de tempo seco após a pulverização.",
+      "source": "Embrapa Soja / bulas — rainfastness de fungicidas e herbicidas",
+      "positive": false
+    },
+    "ferrugem_controlada": {
+      "label": "Ferrugem sob controle após o fungicida",
+      "trigger_kind": "aplicacao",
+      "followed_by": "ferrugem",
+      "window_days": 21,
+      "severity_max": "baixa",
+      "mensagem": "Ferrugem permaneceu baixa na janela de proteção após a aplicação — indício de bom controle neste talhão.",
+      "recomendacao": "Manter o programa; o registro reforça a resposta positiva do talhão ao fungicida.",
+      "source": "Embrapa — Consórcio Antiferrugem (janela de proteção do fungicida)",
+      "positive": true
+    },
+    "ferrugem_sem_protecao": {
+      "label": "Ferrugem alta sem aplicação recente",
+      "trigger_kind": "ferrugem",
+      "severity_min": "media",
+      "requires_absence_of": "aplicacao",
+      "absence_direction": "before",
+      "window_days": 21,
+      "mensagem": "Ferrugem em nível relevante sem aplicação de fungicida na janela anterior — risco de perda no enchimento de grãos.",
+      "recomendacao": "Aplicar fungicida com urgência e reforçar o monitoramento; ferrugem não controlada derruba produtividade rápido.",
+      "source": "Embrapa — Consórcio Antiferrugem; perdas por ferrugem não controlada",
+      "positive": false
+    },
+    "seca_pos_semeadura": {
+      "label": "Período seco após a semeadura",
+      "trigger_kind": "plantio",
+      "requires_absence_of": "chuva",
+      "window_days": 12,
+      "rain_mm_threshold": 10.0,
+      "mensagem": "Semeadura seguida de período seco — risco de germinação irregular e falhas de estande.",
+      "recomendacao": "Conferir o estande real a campo; em falhas severas, avaliar replantio.",
+      "source": "Embrapa — umidade na semeadura e estabelecimento de estande",
+      "positive": false
+    }
+  }
+}

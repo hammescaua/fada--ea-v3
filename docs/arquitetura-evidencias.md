@@ -43,6 +43,24 @@ estabilidade produtiva, viés vs. modelo, resposta ao fósforo, risco de ferruge
 sensibilidade ao atraso no plantio, resiliência hídrica. Com poucas safras, os traços
 vêm como "aprendendo" — a ferramenta nunca finge saber mais do que a evidência permite.
 
+## Motor de Interações — a consequência conectada (`interactions.py`)
+
+O gêmeo aprende com a **sequência de eventos**, não só com o resultado. O motor varre a
+linha do tempo de evidências e detecta padrões agronômicos fundamentados (regras citadas
+em `interaction_rules.json`):
+
+- **Lavagem por chuva após a aplicação** — aplicação seguida de chuva ≥ 15 mm em ~1 dia →
+  provável perda de eficácia (rainfastness). *Verificado: "aplicou fungicida → choveu
+  22 mm no dia seguinte → eficácia reduzida → avaliar repasse"* (Embrapa/bulas).
+- **Ferrugem sob controle após o fungicida** (consequência positiva).
+- **Ferrugem alta sem aplicação na janela anterior** (alerta de proteção em falta).
+- **Período seco após a semeadura** (risco de estande).
+
+Cada interação herda a **confiança das evidências** envolvidas (a mais fraca limita), traz
+mensagem, recomendação e fonte, e alimenta a personalidade do talhão ("este talhão sofre
+lavagem de fungicida com frequência"). É a "memória" da lavoura: cada decisão + contexto
+gera aprendizado.
+
 ## Counterfactual Engine (`counterfactual.py`)
 
 Os "universos paralelos" da safra: *e se eu não tivesse aplicado o fungicida? e se tivesse

@@ -259,6 +259,24 @@ export interface PersonalityTrait {
   learning: boolean;
 }
 
+export interface Interaction {
+  rule: string;
+  label: string;
+  when: string;
+  positive: boolean;
+  description: string;
+  recomendacao: string;
+  confidence: number;
+  efficacy_loss: number | null;
+  source: string;
+}
+
+export interface InteractionsReport {
+  n_interactions: number;
+  interactions: Interaction[];
+  resumo: string;
+}
+
 export interface PersonalityOut {
   knowledge_pct: number;
   n_seasons: number;
@@ -266,6 +284,7 @@ export interface PersonalityOut {
   traits: PersonalityTrait[];
   resumo: string;
   data_quality: Record<string, number>;
+  interactions?: InteractionsReport;
 }
 
 export interface CounterfactualItem {

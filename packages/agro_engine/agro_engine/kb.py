@@ -67,6 +67,11 @@ def manejo_evidence() -> dict:
     return _load("manejo_evidence.json").get("manejos", {})
 
 
+def interaction_rules() -> dict:
+    """Regras de interação evento→consequência (linha do tempo de evidências), com fonte."""
+    return _load("interaction_rules.json").get("rules", {})
+
+
 def param(path: str, default=None):
     """Lê um coeficiente por caminho pontilhado, ex.: ``'calagem.v_alvo_soja'``.
 

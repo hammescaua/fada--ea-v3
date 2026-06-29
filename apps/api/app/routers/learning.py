@@ -19,6 +19,7 @@ from agro_engine import (
     calibrate,
     confidence_for,
     data_quality,
+    interactions_report,
     personality,
     season_features,
     simulate,
@@ -173,6 +174,7 @@ def field_personality(field_id: str, db: Session = Depends(get_session)) -> dict
     ]
     result = personality(fseasons, evid)
     result["data_quality"] = data_quality(evid)
+    result["interactions"] = interactions_report(evid)
     return result
 
 

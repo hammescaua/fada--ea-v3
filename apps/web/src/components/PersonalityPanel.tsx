@@ -81,6 +81,36 @@ export function PersonalityPanel({ fieldId }: { fieldId: string | null }) {
         </div>
       )}
 
+      {data.interactions && data.interactions.n_interactions > 0 && (
+        <div className="mt-3">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+            🧠 Aprendizados da linha do tempo (evento → consequência)
+          </div>
+          <ul className="space-y-1.5">
+            {data.interactions.interactions.map((i, idx) => (
+              <li
+                key={idx}
+                className={`rounded-lg border p-2 text-xs ${
+                  i.positive ? "border-leaf/30 bg-green-50/40" : "border-amber-300 bg-amber-50/50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-stone-800">
+                    {i.positive ? "✓" : "⚠"} {i.label}
+                  </span>
+                  <span className="shrink-0 text-[10px] text-stone-400">
+                    {new Date(i.when).toLocaleDateString("pt-BR")} · conf {Math.round(i.confidence * 100)}%
+                  </span>
+                </div>
+                <p className="mt-0.5 text-stone-600">{i.description}</p>
+                <p className="mt-0.5 text-stone-500">→ {i.recomendacao}</p>
+                <p className="mt-0.5 text-[10px] text-stone-400">fonte: {i.source}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="mt-3">
         <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
           Qualidade dos dados (0–100) — quando confiar
