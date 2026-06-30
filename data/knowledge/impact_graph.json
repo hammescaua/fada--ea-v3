@@ -1,114 +1,165 @@
 {
   "_meta": {
-    "descricao": "Impact Graph — as CADEIAS DE IMPACTO da soja (causa → efeito → … → produtividade). O sistema não conhece só variáveis; conhece como elas se relacionam. Cada cadeia explica o PORQUÊ de uma limitação, diz qual observação a confirma e qual ação a corrige. É o núcleo científico do Motor de Raciocínio: o Hypothesis Engine usa estas cadeias para diagnosticar como um agrônomo pensa.",
-    "fontes": ["Embrapa Soja — fisiologia e ecofisiologia da soja", "CQFS-RS/SC 2016", "FAO-56", "literatura de fisiologia vegetal (raiz/água/enchimento de grãos)"],
+    "descricao": "Impact Graph PONDERADO — as cadeias de impacto da soja deixam de ser texto e viram MODELO. Cada limitação tem uma cadeia causa→efeito→…→produtividade em que cada ligação tem uma FORÇA (peso 0..1); a cadeia tem CONDIÇÃO de validade (ex.: só vale em argila >45%), NÍVEL DE EVIDÊNCIA, CONFIANÇA CIENTÍFICA e CONTROLABILIDADE. O Hypothesis Engine usa esses pesos/condições para diagnosticar como um agrônomo.",
+    "controlabilidade": "sim = o agricultor age direto; parcial = mitigável/preventível; nao = clima (só adaptação)",
+    "fontes": ["Embrapa Soja", "CQFS-RS/SC 2016", "FAO-56", "fisiologia da soja"],
     "atualizado_em": "2026-06"
   },
   "cadeias": {
     "baixo_fosforo": {
-      "label": "Deficiência de fósforo",
-      "fator": "Nutrição",
-      "grupo_dado": "solo",
-      "cadeia": ["baixo P no solo", "raiz menor e menos nódulos", "menor absorção de água e N", "maior estresse hídrico", "menor enchimento de grãos", "menor peso de grãos", "queda de produtividade"],
+      "label": "Deficiência de fósforo", "fator": "Nutrição", "grupo_dado": "solo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.9,
+      "condicao": {"campo": "soil.clay_pct", "op": ">", "valor": 45, "nota": "fixação de P maior em solos argilosos"},
+      "cadeia": [
+        {"passo": "baixo P no solo", "peso": 0.85},
+        {"passo": "raiz menor e menos nódulos", "peso": 0.8},
+        {"passo": "menor absorção de água e N", "peso": 0.75},
+        {"passo": "menor enchimento de grãos", "peso": 0.8},
+        {"passo": "queda de produtividade", "peso": 1.0}
+      ],
       "confirma_se": "análise de solo do talhão (P Mehlich-1 abaixo do crítico ~12 mg/dm³)",
       "acao": "Adubação fosfatada (construção/manutenção) — método CQFS",
       "fonte": "CQFS-RS/SC 2016; Embrapa — P e desenvolvimento radicular/FBN"
     },
     "baixo_potassio": {
-      "label": "Deficiência de potássio",
-      "fator": "Nutrição",
-      "grupo_dado": "solo",
-      "cadeia": ["baixo K no solo", "menor regulação estomática", "menor eficiência hídrica", "menor enchimento", "grãos mais leves"],
+      "label": "Deficiência de potássio", "fator": "Nutrição", "grupo_dado": "solo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.85,
+      "cadeia": [
+        {"passo": "baixo K no solo", "peso": 0.8},
+        {"passo": "menor regulação estomática", "peso": 0.7},
+        {"passo": "menor eficiência hídrica", "peso": 0.75},
+        {"passo": "grãos mais leves", "peso": 0.9}
+      ],
       "confirma_se": "análise de solo (K abaixo de ~120 mg/dm³) e sintomas em folhas baixeiras",
       "acao": "Adubação potássica (reposição), possivelmente parcelada",
       "fonte": "CQFS-RS/SC 2016"
     },
     "acidez": {
-      "label": "Acidez / baixa saturação por bases",
-      "fator": "Solo",
-      "grupo_dado": "solo",
-      "cadeia": ["pH baixo e Al tóxico", "raiz limitada em profundidade", "menor disponibilidade de P e bases", "menor absorção de água/nutrientes", "queda de potencial"],
+      "label": "Acidez / baixa saturação por bases", "fator": "Solo", "grupo_dado": "solo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.9,
+      "cadeia": [
+        {"passo": "pH baixo e Al tóxico", "peso": 0.85},
+        {"passo": "raiz limitada em profundidade", "peso": 0.8},
+        {"passo": "menor disponibilidade de P e bases", "peso": 0.75},
+        {"passo": "queda de potencial", "peso": 0.9}
+      ],
       "confirma_se": "análise de solo (pH < 5,5 ou V% < 65)",
       "acao": "Calagem pela saturação por bases (V% alvo 65%)",
       "fonte": "CQFS-RS/SC 2016 — método da saturação por bases"
     },
     "compactacao": {
-      "label": "Compactação do solo",
-      "fator": "Compactação",
-      "grupo_dado": "solo",
-      "cadeia": ["camada compactada", "raiz não aprofunda", "menor volume de solo explorado", "menos água em veranico", "estresse no enchimento", "queda de produtividade"],
+      "label": "Compactação do solo", "fator": "Compactação", "grupo_dado": "solo",
+      "controlabilidade": "parcial", "nivel_evidencia": "medio", "confianca_cientifica": 0.7,
+      "cadeia": [
+        {"passo": "camada compactada", "peso": 0.8},
+        {"passo": "raiz não aprofunda", "peso": 0.8},
+        {"passo": "menos água em veranico", "peso": 0.75},
+        {"passo": "queda de produtividade", "peso": 0.85}
+      ],
       "confirma_se": "avaliação de perfil (trincheira/penetrômetro); raízes 'em pé de galinha'",
       "acao": "Descompactação mecânica e/ou plantas de cobertura com raiz agressiva",
       "fonte": "Embrapa — manejo físico do solo em plantio direto"
     },
     "deficit_hidrico": {
-      "label": "Déficit hídrico (veranico)",
-      "fator": "Água",
-      "grupo_dado": "clima",
-      "cadeia": ["chuva insuficiente em R1–R6", "fechamento estomático", "queda de fotossíntese", "abortamento de vagens / menor enchimento", "menor peso de grãos", "quebra de produtividade"],
+      "label": "Déficit hídrico (veranico)", "fator": "Água", "grupo_dado": "clima",
+      "controlabilidade": "parcial", "nivel_evidencia": "alto", "confianca_cientifica": 0.92,
+      "cadeia": [
+        {"passo": "chuva insuficiente em R1–R6", "peso": 0.9},
+        {"passo": "fechamento estomático", "peso": 0.85},
+        {"passo": "queda de fotossíntese", "peso": 0.85},
+        {"passo": "abortamento de vagens / menor enchimento", "peso": 0.9},
+        {"passo": "quebra de produtividade", "peso": 1.0}
+      ],
       "confirma_se": "balanço hídrico do ciclo (déficit em R3–R5) e chuva medida no talhão",
       "acao": "Antecipar/ajustar a época, cultivar de ciclo adequado, palhada; irrigação onde houver",
       "fonte": "FAO-56; Embrapa — déficit hídrico é a maior causa de quebra no RS"
     },
     "calor": {
-      "label": "Estresse térmico (calor extremo)",
-      "fator": "Calor",
-      "grupo_dado": "clima",
-      "cadeia": ["dias > 34 °C em R1–R6", "abortamento de flores/vagens", "menor número de grãos", "queda de produtividade"],
+      "label": "Estresse térmico (calor extremo)", "fator": "Calor", "grupo_dado": "clima",
+      "controlabilidade": "nao", "nivel_evidencia": "medio", "confianca_cientifica": 0.7,
+      "cadeia": [
+        {"passo": "dias > 34 °C em R1–R6", "peso": 0.7},
+        {"passo": "abortamento de flores/vagens", "peso": 0.8},
+        {"passo": "menor número de grãos", "peso": 0.85}
+      ],
       "confirma_se": "temperatura máxima do ciclo nos estádios reprodutivos",
       "acao": "Ajuste de época para fugir do pico de calor no florescimento",
       "fonte": "Embrapa/literatura — abortamento por calor na soja"
     },
     "ferrugem": {
-      "label": "Ferrugem-asiática",
-      "fator": "Doenças",
-      "grupo_dado": "manejo",
-      "cadeia": ["esporos + folha molhada", "lesões na área foliar", "menor fotossíntese no enchimento", "menor peso de grãos", "perda de 10–80%"],
+      "label": "Ferrugem-asiática", "fator": "Doenças", "grupo_dado": "manejo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.9,
+      "cadeia": [
+        {"passo": "esporos + folha molhada", "peso": 0.85},
+        {"passo": "lesões na área foliar", "peso": 0.85},
+        {"passo": "menor fotossíntese no enchimento", "peso": 0.9},
+        {"passo": "perda de 10–80%", "peso": 1.0}
+      ],
       "confirma_se": "monitoramento de campo (pústulas) e histórico do talhão",
       "acao": "Fungicida no momento certo (R1–R5); cultivar tolerante; produto rainfast",
       "fonte": "Embrapa — Consórcio Antiferrugem"
     },
     "populacao_baixa": {
-      "label": "Estande/população abaixo do ideal",
-      "fator": "População",
-      "grupo_dado": "populacao",
-      "cadeia": ["estande baixo", "menos plantas/área", "menor número de vagens por área", "menor teto produtivo"],
+      "label": "Estande/população abaixo do ideal", "fator": "População", "grupo_dado": "populacao",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.85,
+      "cadeia": [
+        {"passo": "estande baixo", "peso": 0.8},
+        {"passo": "menos plantas/área", "peso": 0.85},
+        {"passo": "menor número de vagens por área", "peso": 0.85},
+        {"passo": "menor teto produtivo", "peso": 0.9}
+      ],
       "confirma_se": "contagem de estande a campo (plantas/m)",
       "acao": "Ajustar população/regulagem; tratamento de sementes para garantir o estande",
       "fonte": "Embrapa — população e componentes de produtividade"
     },
     "janela": {
-      "label": "Semeadura fora da janela",
-      "fator": "Janela de semeadura",
-      "grupo_dado": "data_semeadura",
-      "cadeia": ["data fora do núcleo ZARC", "descasamento do período crítico com clima/radiação", "maior risco de déficit/calor em R", "queda de potencial"],
+      "label": "Semeadura fora da janela", "fator": "Janela de semeadura", "grupo_dado": "data_semeadura",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.85,
+      "cadeia": [
+        {"passo": "data fora do núcleo ZARC", "peso": 0.8},
+        {"passo": "descasamento do período crítico com clima", "peso": 0.8},
+        {"passo": "maior risco de déficit/calor em R", "peso": 0.85},
+        {"passo": "queda de potencial", "peso": 0.9}
+      ],
       "confirma_se": "posição da data na janela ZARC do município",
       "acao": "Antecipar a semeadura para o núcleo ótimo do ZARC",
       "fonte": "ZARC/MAPA; curvas de época × produtividade (Embrapa)"
     },
     "nematoides": {
-      "label": "Nematoides",
-      "fator": "Nematoides",
-      "grupo_dado": "solo",
-      "cadeia": ["população de nematoides", "lesões/galhas nas raízes", "menor absorção de água e nutrientes", "reboleiras de baixa produtividade"],
+      "label": "Nematoides", "fator": "Nematoides", "grupo_dado": "solo",
+      "controlabilidade": "parcial", "nivel_evidencia": "medio", "confianca_cientifica": 0.75,
+      "cadeia": [
+        {"passo": "população de nematoides", "peso": 0.8},
+        {"passo": "lesões/galhas nas raízes", "peso": 0.8},
+        {"passo": "menor absorção de água e nutrientes", "peso": 0.8},
+        {"passo": "reboleiras de baixa produtividade", "peso": 0.9}
+      ],
       "confirma_se": "análise de nematoides do solo/raiz; reboleiras a campo",
       "acao": "Rotação com não-hospedeiras (milho) / cobertura supressora; cultivar resistente",
       "fonte": "Embrapa Soja — manejo de nematoides"
     },
     "daninhas": {
-      "label": "Competição de plantas daninhas",
-      "fator": "Daninhas",
-      "grupo_dado": "manejo",
-      "cadeia": ["infestação no início do ciclo", "competição por luz/água/nutrientes", "menor crescimento da soja", "queda de potencial"],
+      "label": "Competição de plantas daninhas", "fator": "Daninhas", "grupo_dado": "manejo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.85,
+      "cadeia": [
+        {"passo": "infestação no início do ciclo", "peso": 0.8},
+        {"passo": "competição por luz/água/nutrientes", "peso": 0.85},
+        {"passo": "menor crescimento da soja", "peso": 0.8},
+        {"passo": "queda de potencial", "peso": 0.85}
+      ],
       "confirma_se": "monitoramento da infestação; histórico de resistência (buva/capim-amargoso)",
       "acao": "Herbicida no momento certo (pré + pós); manejo de resistência",
       "fonte": "Embrapa — manejo de plantas daninhas"
     },
     "pragas": {
-      "label": "Pragas (percevejos/lagartas)",
-      "fator": "Pragas",
-      "grupo_dado": "manejo",
-      "cadeia": ["pressão de pragas em R", "dano a vagens/grãos", "grãos chochos / menor peso", "queda de produtividade e qualidade"],
+      "label": "Pragas (percevejos/lagartas)", "fator": "Pragas", "grupo_dado": "manejo",
+      "controlabilidade": "sim", "nivel_evidencia": "alto", "confianca_cientifica": 0.85,
+      "cadeia": [
+        {"passo": "pressão de pragas em R", "peso": 0.8},
+        {"passo": "dano a vagens/grãos", "peso": 0.85},
+        {"passo": "grãos chochos / menor peso", "peso": 0.85},
+        {"passo": "queda de produtividade e qualidade", "peso": 0.9}
+      ],
       "confirma_se": "monitoramento (pano de batida); nível de ação",
       "acao": "Inseticida conforme MIP-Soja no momento certo",
       "fonte": "Embrapa — Manejo Integrado de Pragas (MIP-Soja)"

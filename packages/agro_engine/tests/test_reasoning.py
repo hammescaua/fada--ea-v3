@@ -12,7 +12,10 @@ def test_impact_chain_traz_cadeia_e_fonte():
     assert ch is not None
     assert ch["fator"] == "Nutrição"
     assert len(ch["cadeia"]) >= 4
-    assert "produtividade" in ch["cadeia"][-1].lower()
+    # cadeia ponderada: cada ligação tem passo + peso
+    assert all("peso" in e and "passo" in e for e in ch["cadeia"])
+    assert "produtividade" in ch["cadeia"][-1]["passo"].lower()
+    assert ch["confianca_cientifica"] and ch["controlabilidade"]
     assert ch["fonte"] and ch["confirma_se"] and ch["acao"]
 
 
@@ -21,9 +24,33 @@ def test_diagnose_estrutura(base_scenario):
     assert d["potencial_sc_ha"] >= d["esperado_sc_ha"]
     assert d["gap_sc_ha"] >= 0
     for h in d["hipoteses"]:
-        for k in ("causa", "fator", "perda_sc_ha", "probabilidade", "certeza_do_dado", "cadeia", "confirma_se", "acao", "fonte"):
+        for k in ("causa", "fator", "perda_sc_ha", "probabilidade", "forca_cientifica",
+                  "confianca_cientifica", "controlabilidade", "certeza_do_dado", "cadeia",
+                  "confirma_se", "acao", "fonte"):
             assert k in h
     assert isinstance(d["resumo"], str) and d["resumo"]
+
+
+def test_quatro_niveis_de_confianca(base_scenario):
+    """Dados → Modelo → Recomendação → Resultado: a incerteza acumula a cada etapa."""
+    n = diagnose(base_scenario)["niveis_confianca"]
+    assert 0 <= n["resultado"] <= n["recomendacao"] <= max(n["dados"], n["modelo"]) <= 1.0
+    assert n["recomendacao"] <= n["dados"] and n["recomendacao"] <= n["modelo"]
+
+
+def test_principal_motivo_da_incerteza(base_scenario):
+    pi = diagnose(base_scenario, provenance={"clima": "estimado"})["principal_incerteza"]
+    assert pi is not None
+    assert pi["amplitude_sc_ha"] > 0 and pi["variavel"]
+
+
+def test_controlabilidade_marcada(base_scenario):
+    """Água é parcialmente controlável; ferrugem é controlável — vem marcado."""
+    from dataclasses import replace
+    seco = replace(base_scenario, soil=replace(base_scenario.soil, phosphorus_ppm=4))
+    d = diagnose(seco)
+    for h in d["hipoteses"]:
+        assert h["controlabilidade"] in {"sim", "parcial", "nao"}
 
 
 def test_diagnose_ranqueia_maior_limitacao_primeiro(base_scenario):

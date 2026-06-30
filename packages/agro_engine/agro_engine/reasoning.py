@@ -1,14 +1,15 @@
 """Motor de Raciocínio Agronômico — o núcleo que pensa como um agrônomo.
 
-Em vez de só dizer "a produtividade é X", este motor DIAGNOSTICA *por que* o talhão está
-abaixo do potencial — gerando **hipóteses** ranqueadas, cada uma com a sua **cadeia de
-impacto** (causa → efeito → … → produtividade, do Impact Graph), a **probabilidade** de ser
-a limitação, a **confiança do dado** que a sustenta e **o que mede para confirmar**.
+Diagnostica *por que* o talhão está abaixo do potencial gerando **hipóteses** ranqueadas,
+cada uma com a sua **cadeia de impacto** (Impact Graph PONDERADO), a **probabilidade** de
+ser a limitação, a **força científica** da relação (pesos das ligações), a **confiança do
+dado** que a sustenta, a **controlabilidade** (dá para agir?) e **o que medir para
+confirmar**. Marca como "a confirmar" quando o dado é um default regional.
 
-É a diferença entre um sistema que responde perguntas e um que descobre problemas. Cada
-hipótese não é inventada: vem da decomposição IPPD (quanto cada fator derruba) cruzada com
-o conhecimento causal e a proveniência dos dados. Quando o dado é um default regional, a
-hipótese vem marcada como "a confirmar" — exatamente como um agrônomo raciocinaria.
+Devolve também os **quatro níveis de confiança** (dados → modelo → recomendação →
+resultado) e o **principal motivo da incerteza** — separando o que sabemos do que supomos.
+Nada é inventado: tudo vem da decomposição IPPD cruzada com o conhecimento causal (com
+peso/condição/evidência) e a proveniência dos dados.
 """
 
 from __future__ import annotations
@@ -19,19 +20,13 @@ from .data_sources import accuracy_report
 from .models import Scenario
 from .simulate import simulate
 
-# Fator da cascata → causa no Impact Graph (alguns dependem do solo do talhão).
 _DIRECT_CAUSE = {
-    "Água": "deficit_hidrico",
-    "Calor": "calor",
-    "Compactação": "compactacao",
-    "Doenças": "ferrugem",
-    "Pragas": "pragas",
-    "Daninhas": "daninhas",
-    "População": "populacao_baixa",
-    "Janela de semeadura": "janela",
-    "Nematoides": "nematoides",
-    "Solo": "acidez",
+    "Água": "deficit_hidrico", "Calor": "calor", "Compactação": "compactacao",
+    "Doenças": "ferrugem", "Pragas": "pragas", "Daninhas": "daninhas",
+    "População": "populacao_baixa", "Janela de semeadura": "janela",
+    "Nematoides": "nematoides", "Solo": "acidez",
 }
+_OPS = {">": lambda a, b: a > b, "<": lambda a, b: a < b, ">=": lambda a, b: a >= b, "<=": lambda a, b: a <= b}
 
 
 def _cause_for(label: str, scenario: Scenario) -> str | None:
@@ -44,8 +39,36 @@ def _cause_for(label: str, scenario: Scenario) -> str | None:
 
 
 def impact_chain(cause_key: str) -> dict | None:
-    """A cadeia de impacto (causa → … → produtividade) de uma limitação."""
     return kb.impact_graph().get(cause_key)
+
+
+def _read(scenario: Scenario, path: str):
+    obj = scenario
+    for part in path.split("."):
+        obj = getattr(obj, part, None)
+        if obj is None:
+            return None
+    return obj
+
+
+def _condition_factor(scenario: Scenario, cond: dict | None) -> float:
+    """1.0 se a condição da cadeia é satisfeita (ou inexistente); 0.4 se não (cadeia menos provável)."""
+    if not cond:
+        return 1.0
+    val = _read(scenario, cond.get("campo", ""))
+    op = _OPS.get(cond.get("op", ">"))
+    if val is None or op is None:
+        return 1.0
+    return 1.0 if op(val, cond.get("valor", 0)) else 0.4
+
+
+def _chain_force(node: dict) -> float:
+    pesos = [e.get("peso", 1.0) for e in node.get("cadeia", []) if isinstance(e, dict)]
+    return round(sum(pesos) / len(pesos), 2) if pesos else 1.0
+
+
+def _steps(node: dict) -> list[str]:
+    return [e.get("passo", "") if isinstance(e, dict) else str(e) for e in node.get("cadeia", [])]
 
 
 def diagnose(scenario: Scenario, provenance: dict | None = None, observations=None) -> dict:
@@ -69,8 +92,8 @@ def diagnose(scenario: Scenario, provenance: dict | None = None, observations=No
         if not node:
             continue
         loss = round(abs(c.delta_sc_ha), 1)
-        prob = min(0.97, (loss / potential) / 0.12) if potential else 0.0
-        # evidência observada do mesmo tipo reforça a hipótese
+        cond_factor = _condition_factor(scenario, node.get("condicao"))
+        prob = min(0.97, (loss / potential) / 0.12) * cond_factor if potential else 0.0
         prob = min(0.99, prob + obs_sev.get(cause_key, 0.0))
         certeza = round(conf_by_group.get(node.get("grupo_dado", ""), 0.4), 2)
         hypotheses.append({
@@ -79,22 +102,56 @@ def diagnose(scenario: Scenario, provenance: dict | None = None, observations=No
             "perda_sc_ha": loss,
             "perda_rs_ha": round(loss * scenario.soybean_price_per_sc, 0),
             "probabilidade": round(prob, 2),
+            "forca_cientifica": _chain_force(node),
+            "confianca_cientifica": node.get("confianca_cientifica", 0.7),
+            "nivel_evidencia": node.get("nivel_evidencia", "medio"),
+            "controlabilidade": node.get("controlabilidade", "parcial"),
             "certeza_do_dado": certeza,
             "a_confirmar": certeza < 0.7,
-            "cadeia": node["cadeia"],
+            "cadeia": _steps(node),
             "confirma_se": node["confirma_se"],
             "acao": node["acao"],
             "fonte": node["fonte"],
         })
 
     hypotheses.sort(key=lambda h: h["perda_sc_ha"], reverse=True)
+    niveis = _niveis_confianca(acc, hypotheses, y)
     return {
         "potencial_sc_ha": round(potential, 1),
         "esperado_sc_ha": round(y.expected_sc_ha, 1),
+        "incerteza_sc_ha": round(y.uncertainty_sc_ha, 1),
         "gap_sc_ha": gap,
         "hipoteses": hypotheses,
+        "niveis_confianca": niveis,
+        "principal_incerteza": _principal_incerteza(acc),
         "resumo": _resumo(gap, hypotheses),
     }
+
+
+def _niveis_confianca(acc: dict, hypotheses: list[dict], y) -> dict:
+    """Quatro níveis: Dados → Modelo → Recomendação → Resultado (incerteza acumula a cada etapa)."""
+    dados = acc["precision_index"]
+    if hypotheses:
+        wsum = sum(h["perda_sc_ha"] for h in hypotheses) or 1.0
+        modelo = sum(h["confianca_cientifica"] * h["perda_sc_ha"] for h in hypotheses) / wsum
+    else:
+        modelo = y.confidence
+    recomendacao = dados * modelo
+    spread = y.uncertainty_sc_ha / y.expected_sc_ha if y.expected_sc_ha else 0.3
+    resultado = recomendacao * (1.0 - min(0.3, spread))
+    return {
+        "dados": round(dados, 2),
+        "modelo": round(modelo, 2),
+        "recomendacao": round(recomendacao, 2),
+        "resultado": round(resultado, 2),
+    }
+
+
+def _principal_incerteza(acc: dict) -> dict | None:
+    top = next((v for v in acc["variables"] if v["leverage_sc_ha"] > 0), None)
+    if not top:
+        return None
+    return {"variavel": top["label"], "amplitude_sc_ha": top["leverage_sc_ha"], "como_reduzir": top["how_to_improve"]}
 
 
 _OBS_TO_CAUSE = {"ferrugem": "ferrugem", "praga": "pragas", "daninha": "daninhas"}
@@ -102,7 +159,6 @@ _SEV = {"baixa": 0.1, "media": 0.25, "média": 0.25, "alta": 0.4, "severa": 0.5}
 
 
 def _observed_severity(observations) -> dict:
-    """Boost de probabilidade por observações de campo (o agrônomo viu o sintoma)."""
     out: dict[str, float] = {}
     for o in observations or []:
         kind = getattr(o, "kind", None) or (o.get("kind") if isinstance(o, dict) else None)

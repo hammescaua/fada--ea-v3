@@ -78,6 +78,14 @@ def test_estado_da_safra_pre_plantio_permite_semeadura(base_scenario):
     assert r["estado"]["fase"] == "preparo_solo"
 
 
+def test_decision_value_filtra_acao_irrelevante(base_scenario):
+    """O Decision Value Engine não recomenda ação de retorno desprezível."""
+    acts = prioritized_actions(base_scenario)
+    for a in acts:
+        assert a["veredito"] in {"recomendar", "avaliar"}
+        assert a["impacto_rs"] >= 60  # 'nao_recomendar' foi filtrado
+
+
 def test_clima_la_nina_derruba_dimensao_clima(base_scenario):
     """Sob La Niña o risco sobe; o radar deve refletir clima como ponto fraco."""
     r = season_radar(base_scenario)

@@ -86,10 +86,11 @@ em `interaction_rules.json`, não como código.
 O passo de "modelar componentes" para "modelar **relações**". Em vez de só conhecer
 variáveis, o sistema conhece **cadeias de impacto** e raciocina como um agrônomo.
 
-- **Impact Graph** (`impact_graph.json`): para cada limitação, a cadeia
-  *causa → efeito → … → produtividade* (ex.: *baixo P → raiz menor → menos água → menor
-  enchimento → grãos mais leves*), com a fonte, **o que medir para confirmar** e a ação
-  que corrige.
+- **Impact Graph PONDERADO** (`impact_graph.json`): o conhecimento deixa de ser texto e
+  vira **modelo**. Cada limitação tem a cadeia *causa → efeito → … → produtividade* em que
+  **cada ligação tem uma força (peso)**; a cadeia tem **condição de validade** (ex.: só vale
+  em argila >45%), **nível de evidência**, **confiança científica** e **controlabilidade**
+  (sim/parcial/não). O Hypothesis Engine usa pesos e condições para diagnosticar.
 - **Hypothesis Engine** (`reasoning.py`, `diagnose`): a partir da decomposição IPPD,
   identifica os fatores que mais derrubam a produtividade e os transforma em **hipóteses
   ranqueadas** — cada uma com a cadeia de impacto, a **probabilidade** de ser a limitação,
@@ -98,10 +99,20 @@ variáveis, o sistema conhece **cadeias de impacto** e raciocina como um agrôno
   *Verificado: "talhão 68 sc/ha abaixo do potencial; maior limitação provável: déficit
   hídrico (~16 sc/ha) — dado de baixa confiança, confirme com o balanço hídrico"*.
 
+**Quatro níveis de confiança** (a incerteza acumula): **Dados → Modelo → Recomendação →
+Resultado**. Ex. medido (talhão com defaults): Dados 37% → Modelo 86% → Recomendação 32%
+→ Resultado 25% — honesto: ciência forte não compensa dado fraco. Mais o **principal
+motivo da incerteza** (a variável de maior alavancagem) e como reduzi-lo.
+
+**Decision Value Engine** (`priorities.py`): antes de recomendar, "vale a pena?". Cada ação
+recebe um veredito (recomendar/avaliar) e as de retorno desprezível são **filtradas** —
+evita recomendação irrelevante. Combinado com a **controlabilidade**, o copiloto só sugere
+agir sobre o que o agricultor de fato pode mudar.
+
 É o **núcleo** ao qual os demais componentes (Radar, Priorização, Briefing, Assistant)
 tendem a convergir como *vistas* do mesmo raciocínio — consistência e explicabilidade. A
-consolidação total (todos os painéis sem lógica própria) é evolução em andamento;
-`reasoning.py` é o começo dela.
+consolidação total (um **World Model** como única fonte de verdade que todos os motores
+consultam) é o próximo pilar; `reasoning.py` + grafo ponderado + decision value são a base.
 
 ### Conhecimento em camadas (direção)
 

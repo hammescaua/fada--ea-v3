@@ -35,6 +35,20 @@ _ACTION_PHASES = {
 }
 _PHASE_ORDER = ["preparo_solo", "semeadura", "vegetativo", "reprodutivo", "colheita"]
 
+# Decision Value Engine: antes de recomendar, "vale a pena?". Evita recomendação irrelevante.
+_VALUE_RECOMENDAR_RS = 200.0   # ganho líquido que justifica recomendar com convicção
+_VALUE_AVALIAR_RS = 60.0       # abaixo disto, é ruído (não recomendar)
+_VALUE_MIN_PROB = 0.55         # confiança mínima para sair de "não recomendar"
+
+
+def _decision_value(delta_profit: float, prob: float) -> str:
+    """'recomendar' | 'avaliar' | 'nao_recomendar' — o retorno justifica a ação?"""
+    if delta_profit >= _VALUE_RECOMENDAR_RS and prob >= 0.6:
+        return "recomendar"
+    if delta_profit >= _VALUE_AVALIAR_RS and prob >= _VALUE_MIN_PROB:
+        return "avaliar"
+    return "nao_recomendar"
+
 
 def _janela_status(key: str, phase: str | None) -> str:
     """'agora' (acionável), 'em breve' (fase ainda não chegou) ou 'passou' (perdeu a janela)."""
@@ -63,6 +77,9 @@ def prioritized_actions(scenario: Scenario, top: int = 6, n_prob: int = 200, pha
     for d in decisions:
         if d.delta_profit_per_ha <= 0:
             continue
+        veredito = _decision_value(d.delta_profit_per_ha, d.probability_positive)
+        if veredito == "nao_recomendar":
+            continue  # Decision Value Engine: filtra recomendações sem retorno real
         items.append({
             "key": d.key,
             "acao": d.label,
@@ -72,6 +89,7 @@ def prioritized_actions(scenario: Scenario, top: int = 6, n_prob: int = 200, pha
             "custo_per_ha": d.added_cost_per_ha,
             "roi": d.action_roi,
             "probabilidade": d.probability_positive,
+            "veredito": veredito,
             "prazo": _PRAZO.get(d.key, "na safra"),
             "porque": d.justification,
             "janela_status": _janela_status(d.key, phase),

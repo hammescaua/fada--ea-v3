@@ -259,6 +259,10 @@ export interface Hypothesis {
   perda_sc_ha: number;
   perda_rs_ha: number;
   probabilidade: number;
+  forca_cientifica: number;
+  confianca_cientifica: number;
+  nivel_evidencia: string;
+  controlabilidade: "sim" | "parcial" | "nao";
   certeza_do_dado: number;
   a_confirmar: boolean;
   cadeia: string[];
@@ -270,8 +274,11 @@ export interface Hypothesis {
 export interface DiagnoseOut {
   potencial_sc_ha: number;
   esperado_sc_ha: number;
+  incerteza_sc_ha: number;
   gap_sc_ha: number;
   hipoteses: Hypothesis[];
+  niveis_confianca: { dados: number; modelo: number; recomendacao: number; resultado: number };
+  principal_incerteza: { variavel: string; amplitude_sc_ha: number; como_reduzir: string } | null;
   resumo: string;
 }
 
@@ -285,6 +292,7 @@ export interface PriorityAction {
   custo_per_ha: number;
   roi: number | null;
   probabilidade: number;
+  veredito?: "recomendar" | "avaliar";
   prazo: string;
   porque: string;
   janela_status?: "agora" | "em breve" | "passou";
