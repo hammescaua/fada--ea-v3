@@ -106,36 +106,7 @@ export function SeasonBriefing({ b, loading }: { b: BriefingOut | undefined; loa
         </ul>
       )}
 
-      {/* Ações priorizadas por retorno */}
-      {b.actions.length > 0 && (
-        <div className="mt-4">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-            O que fazer primeiro (ordenado por retorno)
-          </div>
-          <ol className="space-y-2">
-            {b.actions.map((a) => (
-              <li key={a.key} className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white p-2.5">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-leaf text-xs font-bold text-white">
-                  {a.rank}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <span className="text-sm font-medium text-stone-800">{a.label}</span>
-                    <span className="text-sm font-semibold text-leafdark">
-                      +{a.delta_yield_sc_ha.toFixed(1)} sc/ha · +{brl(a.delta_profit_per_ha)}/ha
-                    </span>
-                  </div>
-                  <div className="mt-0.5 text-xs text-stone-500">
-                    {Math.round(a.probability_positive * 100)}% de chance de melhorar o lucro
-                    {a.action_roi != null && ` · ROI da ação ${a.action_roi.toFixed(1)}x`}
-                  </div>
-                  <p className="mt-1 text-xs text-stone-600">{a.justification}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
+      {/* As ações priorizadas vivem no Radar (fila de decisão) — aqui não se repete. */}
     </div>
   );
 }
