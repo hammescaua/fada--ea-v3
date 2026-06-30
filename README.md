@@ -1,88 +1,105 @@
-# 🌱 FADA EA v3 — Gêmeo Digital da Soja (Noroeste do RS)
+# 🌱 FADA EA v3 — Copiloto Agronômico da Soja (Noroeste do RS)
 
-Plataforma de apoio à decisão que constrói um **Gêmeo Digital (Digital Twin) vivo de
-cada talhão** de soja. Em vez de uma "caixa-preta" que cospe um número, o sistema
-**decompõe** a produtividade esperada e mostra *por que* aquele resultado é previsto —
-e quanto cada fator (solo, água, nutrição, janela de plantio, sanidade…) contribuiu.
+**Gêmeo Digital vivo de cada talhão de soja**, que vira um **copiloto de decisão**: em vez
+de uma "caixa-preta" que cospe um número, o FADA **decompõe** a produtividade esperada,
+**diagnostica** por que ela é o que é, **prioriza** as ações por retorno e **aprende** com
+cada safra — sempre explicando o porquê, o impacto esperado e o quanto se pode confiar.
 
-> **Filosofia:** primeiro um **motor agronômico determinístico e explicável**, baseado
-> em ciência consolidada (fenologia, FAO-56, ZARC). A **IA entra depois**, como camada
-> de *correção* personalizada por talhão, quando houver dados reais de safras — nunca
-> no centro.
+> **Filosofia:** primeiro um **motor agronômico determinístico e explicável** (fenologia,
+> FAO-56, ZARC, CQFS), com cada coeficiente **citado**. A IA entra *acima*, como correção
+> personalizada por talhão — **nunca no centro, nunca inventando números**.
 
-O diferencial é a personalização: cada talhão tem seu perfil de solo, clima local e
-histórico; o agricultor pode rodar um **Laboratório Virtual** — "e se eu plantar 10
-dias antes?", "e se reduzir o fungicida?", "vale investir R$180/ha em adubação?" — e
-ver, em segundos, o impacto na produtividade (± incerteza) e na rentabilidade.
+A "estrela do norte": ao abrir, o agricultor vê **as 4 respostas que importam** — qual o
+maior risco hoje, qual a melhor decisão agora, quanto ela vale e por quê (com a confiança).
 
 ---
 
-## Estado atual — Marco 1 (vertical slice rodável)
+## O que a plataforma faz
 
-✅ **Motor agronômico v0** (`packages/agro_engine`): fenologia por graus-dia, balanço
-hídrico FAO-56, janela de semeadura ZARC, **decomposição IPPD** com intervalo de
-confiança, modelo econômico (lucro, ROI, break-even), **simulador Monte Carlo**
-(distribuição de lucro e risco de prejuízo), **Motor de Decisão** (prioriza
-intervenções por retorno esperado, com probabilidade via Monte Carlo pareado) e
-**Knowledge Engine** (calibração previsto-vs-real que aprende a correção de cada
-talhão a cada safra), **Orçamento/fluxo de caixa + impacto por manejo**, **motor de
-fertilidade** (dose CQFS + ROI), **motor de cenários** (acha o melhor plano para o
-talhão) e **veracidade dos dados** (índice de confiança + lacunas por valor-da-informação).
-**Clima real por talhão** (climatologia Open-Meteo). IPPD com 10 fatores. 50 testes passando.
-✅ **API** (`apps/api`): FastAPI expondo `/simulate`, `/sowing-window`, catálogos, e
-CRUD de fazendas/talhões em PostGIS. Cliente de clima real (Open-Meteo).
-✅ **Web** (`apps/web`): Next.js + MapLibre + Recharts. **Cockpit persistido** (criar/
-selecionar fazenda e talhão, salvar análise de solo e safras — carrega o talhão no
-laboratório), mapa, controles do cenário e o **Laboratório Virtual** com assistente de
-chat, gráfico waterfall do IPPD, **recomendações de manejo priorizadas por retorno**,
-bloco econômico, calendário fenológico, **análise de risco Monte Carlo** e comparação
-"cenário base vs atual".
+- **🛰️ Radar da safra** — saúde em 6 dimensões (Solo, Clima, Sanidade, Nutrição, Mercado,
+  Execução), as 4 respostas-chave e a **fila de decisão por urgência** (o que fazer
+  primeiro, com impacto em sc/ha e R$, ROI, prazo e confiança).
+- **🔬 Diagnóstico** — pensa como agrônomo: **hipóteses** ranqueadas para *por que não colho
+  mais*, cada uma com a **cadeia de impacto** (causa → efeito → … → produtividade), a
+  probabilidade, a controlabilidade e o que medir para confirmar.
+- **📅 Acompanhamento ao vivo** — passo-a-passo por fase do ciclo (preparo → semeadura →
+  vegetativo → reprodutivo → colheita), com a base científica de cada manejo.
+- **⚖️ Plano vs. Realidade** — registra-se o que aconteceu (chuva, ferrugem, estande) e o
+  gêmeo **realimenta o número** (ex.: aplicação lavada por chuva vale menos), com fonte.
+- **🧬 Personalidade do talhão & Memória** — traços aprendidos a cada safra + *"esta safra
+  está 87% parecida com 2024/25"*.
+- **🎲 Risco & cenários** — Monte Carlo (com outlook **ENSO** El Niño/La Niña), **melhor
+  plano** (busca data × população × fungicida) e **contrafactuais** ("e se…").
+- **🎯 Precisão & dados que faltam** — quão verídico é cada dado para *este* talhão e o que
+  medir primeiro para reduzir a incerteza.
+- **💬 Assistente** — Claude Opus 4.8 via *tool use* narra os números dos motores (nunca
+  calcula); sem chave de IA, um narrador determinístico responde dos mesmos motores.
 
-✅ **Assistente de decisão (Nível 3)**: o "ChatGPT da fazenda" — **Claude Opus 4.8** via
-*tool use* consulta os motores e **narra os números, nunca calcula**. Endpoint
-`/assistant` + painel de chat. Sem `ANTHROPIC_API_KEY`, um narrador determinístico
-responde a partir dos mesmos motores.
-
-🔜 Próximas fases: satélite (Sentinel-2/NDVI), import de monitor de colheita/piloto
-automático, motor de causalidade, cockpit talhão-cêntrico persistido.
-Ver [`docs/roadmap.md`](docs/roadmap.md).
+Tudo personalizado por talhão (solo, clima do ponto, cultivar, histórico) e **honesto**
+sobre a própria confiança.
 
 ---
 
-## Arquitetura
+## Arquitetura — o cérebro
 
 ```
-Next.js (mapa + laboratório virtual)        apps/web
+Next.js (cockpit do copiloto)               apps/web        ← painéis SÓ apresentam
         │  REST
-FastAPI (serviços + clima)                  apps/api
+FastAPI (serviços + clima + IA)             apps/api
         │
-agro_engine (motores determinísticos)       packages/agro_engine
+agro_engine (o cérebro — Python puro)       packages/agro_engine
+   núcleo determinístico → estado único → raciocínio → decisão → aprendizado
         │
 PostgreSQL + PostGIS (gêmeo digital)        infra/docker-compose.yml
 ```
 
-Stack 100% open-source / custo mínimo: **MapLibre** (sem Mapbox), **Open-Meteo /
-NASA POWER** (clima gratuito), **PostGIS** self-host. Detalhes em
-[`docs/arquitetura.md`](docs/arquitetura.md).
+O `state.world_state` é a **fonte única de verdade**: roda a simulação e a análise de
+acurácia uma vez e as compartilha com todos os motores — consistência total, sem recálculo.
+Catálogo completo dos motores por responsabilidade em [`docs/arquitetura.md`](docs/arquitetura.md).
+
+Stack 100% open-source / custo mínimo: **MapLibre** (sem Mapbox), **Open-Meteo / NASA
+POWER** (clima gratuito), **PostGIS** self-host.
+
+---
+
+## Estado — v1.0 (consolidada, pronta para validação com agricultores)
+
+✅ **31 motores** organizados por responsabilidade única, sobre um núcleo determinístico
+(fenologia GDD · água FAO-56 · janela ZARC · IPPD · economia).
+✅ **Base de conhecimento auditável** (coeficientes, preços, cadeias de impacto, regras de
+interação) com **fonte citada** e teste de consistência.
+✅ **Camada de evidências** (tudo vira observação com confiança), **Knowledge Engine**
+(calibra previsto×real por talhão) e os 5 motores do copiloto: **State, Reasoning,
+Decision Queue, Memory, Missing Information**.
+✅ **124 testes** no motor passando · web e API buildam · fluxo ponta-a-ponta verificado no
+PostGIS (criar fazenda → talhão → solo → safra → colheita → calibração → memória).
+
+Matrizes do NO-RS cobertas: água/déficit, **ENSO**, ferrugem, fertilidade P/K/calagem,
+cultivar, ZARC, população, pragas, daninhas, compactação, **nematoides, rotação** +
+calibração por talhão.
+
+🔜 Próximas fases (não nesta versão): satélite Sentinel-2/NDVI, import de monitor de
+colheita, ML (CatBoost) sobre os mesmos atributos. Ver [`docs/roadmap.md`](docs/roadmap.md).
 
 ---
 
 ## Como rodar (dev)
 
-Pré-requisitos: Docker, Python 3.11+, [uv](https://docs.astral.sh/uv/), Node 20+, pnpm.
+Pré-requisitos: Docker, Python 3.11+, [uv](https://docs.astral.sh/uv/), Node 20+.
 
 ```bash
 make install      # instala engine, api e web
 make db-up        # sobe o PostGIS
 make migrate      # cria o schema
-make seed         # cultivares + fazenda-demo (opcional)
 make api          # API em http://localhost:8000  (docs em /docs)
 make web          # web em http://localhost:3000
-make test         # testes do motor agronômico
+make test         # 124 testes do motor agronômico
 ```
 
-O Laboratório Virtual funciona **sem banco** (a simulação é stateless). O banco é
-necessário apenas para o cadastro/persistência do gêmeo digital.
+O cockpit funciona **sem banco** (o motor é stateless); o PostGIS é necessário só para a
+persistência do gêmeo (fazendas, talhões, safras, evidências). Sem `ANTHROPIC_API_KEY`, o
+assistente usa o narrador determinístico. **Comece pela página `/guia`** para entender a
+plataforma em linguagem de produtor.
 
 ---
 
@@ -90,24 +107,22 @@ necessário apenas para o cadastro/persistência do gêmeo digital.
 
 ```
 apps/
-  web/                Next.js (App Router) + MapLibre + Recharts
+  web/                Next.js (App Router) + MapLibre + Recharts — só apresentação
   api/                FastAPI + SQLAlchemy + PostGIS + Alembic
 packages/
-  agro_engine/        motor determinístico (fenologia, água, IPPD, economia) + testes
+  agro_engine/        o cérebro: 31 motores determinísticos + 124 testes
 data/
-  zarc/               janelas de semeadura ZARC (NO do RS)
-  reference/          parâmetros agronômicos da soja (auditáveis)
+  knowledge/          base de conhecimento auditável (coeficientes, preços, impact graph)
 infra/                docker-compose (PostGIS)
-docs/                 arquitetura, modelo de dados, motores, fontes, roadmap, captação
+docs/                 arquitetura, matrizes do NO-RS, avaliação, fontes, roadmap
 ```
 
 ## Documentação
 
-- [`docs/modelo-canonico.md`](docs/modelo-canonico.md) — **o método único** (um padrão para todo manejo/variável) + a taxonomia fechada (catálogo de manejos e de variáveis) + o motor de cenários.
-- [`docs/base-conhecimento.md`](docs/base-conhecimento.md) — **de onde vêm os números** (coeficientes com fonte + catálogo de insumos/preços + motor de fertilidade).
-- [`docs/arquitetura.md`](docs/arquitetura.md) — camadas, decisões e os 5 motores.
-- [`docs/motores-agronomicos.md`](docs/motores-agronomicos.md) — fórmulas e referências.
-- [`docs/modelo-dados.md`](docs/modelo-dados.md) — o gêmeo digital no banco.
-- [`docs/fontes-dados.md`](docs/fontes-dados.md) — APIs públicas, licenças, ZARC.
-- [`docs/metodologia-captacao-dados.md`](docs/metodologia-captacao-dados.md) — onboarding progressivo.
-- [`docs/roadmap.md`](docs/roadmap.md) — fases 1 → 5.
+- [`docs/arquitetura.md`](docs/arquitetura.md) — camadas, **catálogo de motores**, fluxo de dados, contrato de recomendação.
+- [`docs/arquitetura-evidencias.md`](docs/arquitetura-evidencias.md) — a camada de evidências e o núcleo de raciocínio (State, Reasoning, Decision Queue, Memory, Missing Information).
+- [`docs/matrizes-soja-noroeste-rs.md`](docs/matrizes-soja-noroeste-rs.md) — os drivers de produtividade da região, com fontes.
+- [`docs/base-conhecimento.md`](docs/base-conhecimento.md) — de onde vêm os números (coeficientes + preços + evidência por manejo).
+- [`docs/acuracia-por-talhao.md`](docs/acuracia-por-talhao.md) — de onde vem cada dado e como torná-lo mais preciso.
+- [`docs/avaliacao-produto-e-metodo.md`](docs/avaliacao-produto-e-metodo.md) — avaliação crítica do produto e do método.
+- [`docs/modelo-canonico.md`](docs/modelo-canonico.md) · [`docs/modelo-dados.md`](docs/modelo-dados.md) · [`docs/motores-agronomicos.md`](docs/motores-agronomicos.md) · [`docs/fontes-dados.md`](docs/fontes-dados.md) · [`docs/roadmap.md`](docs/roadmap.md).
