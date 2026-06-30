@@ -8,7 +8,6 @@ from fastapi import APIRouter
 
 from agro_engine import (
     accuracy_report,
-    assess_data_quality,
     crop_plan,
     diagnose,
     infer_provenance,
@@ -43,7 +42,6 @@ from ..schemas import (
     BriefingIn,
     CounterfactualIn,
     CropPlanIn,
-    DataQualityIn,
     MonteCarloIn,
     ScenarioIn,
     SimulationOut,
@@ -272,14 +270,6 @@ def post_assistant(payload: AssistantIn) -> dict:
     quando não há ANTHROPIC_API_KEY."""
     scenario = _to_scenario(payload.scenario)
     return assistant.ask(payload.question, scenario)
-
-
-@router.post("/data-quality")
-def post_data_quality(payload: DataQualityIn) -> dict:
-    """Veracidade dos dados do talhão: índice de confiança + lacunas ranqueadas por
-    valor-da-informação (o que medir primeiro). Auto-detecta a fonte do clima."""
-    scenario = _to_scenario(payload.scenario)
-    return assess_data_quality(scenario, _with_climate_prov(scenario, payload.provenance))
 
 
 @router.post("/optimize-season")

@@ -16,9 +16,12 @@ from .models import Scenario
 from .provenance import GROUP_WEIGHT
 
 
-def missing_information(scenario: Scenario, provenance: dict | None = None) -> dict:
-    """Lista priorizada de dados a coletar para aumentar a confiança das recomendações."""
-    acc = accuracy_report(scenario, provenance)
+def missing_information(scenario: Scenario, provenance: dict | None = None, *, acc=None) -> dict:
+    """Lista priorizada de dados a coletar para aumentar a confiança das recomendações.
+
+    ``acc`` pode ser pré-computado (pelo State Engine) para reaproveitar a mesma análise
+    de acurácia — fonte única, sem rodar o relatório duas vezes."""
+    acc = acc if acc is not None else accuracy_report(scenario, provenance)
     pedidos: list[dict] = []
     for v in acc["variables"]:
         if v["quality"] >= 0.85:

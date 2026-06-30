@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .data_sources import accuracy_report
 from .decision import recommend_decisions
 from .models import Scenario
 from .montecarlo import run_montecarlo
-from .provenance import assess as assess_data_quality
 from .simulate import simulate
 
 # Limiares do status de saúde da safra (calibrados para a realidade do NO-RS).
@@ -105,8 +105,14 @@ def season_briefing(scenario: Scenario, provenance: dict | None = None) -> dict:
 
     status, status_label = _status(econ.profit_per_ha, prob_loss, penalty)
 
-    dq = assess_data_quality(scenario, provenance)
-    top_gap = next((g for g in dq["gaps"] if g["leverage_sc_ha"] > 0), None)
+    # Confiança dos dados: motor único de acurácia (data_sources).
+    dq = accuracy_report(scenario, provenance)
+    data_confidence = dq["precision_index"]
+    top_var = next((v for v in dq["variables"] if v["leverage_sc_ha"] > 0), None)
+    top_gap = (
+        {"group": top_var["group"], "leverage_sc_ha": top_var["leverage_sc_ha"], "como_obter": top_var["how_to_improve"]}
+        if top_var else None
+    )
 
     # Ações: só as que aumentam o lucro, ranqueadas pelo Δlucro (motor de decisão).
     raw = recommend_decisions(scenario, n_prob=250, seed=7, top=None)
@@ -125,7 +131,7 @@ def season_briefing(scenario: Scenario, provenance: dict | None = None) -> dict:
             )
         )
 
-    alertas = _alertas(econ, prob_loss, position, penalty, dq["data_confidence"])
+    alertas = _alertas(econ, prob_loss, position, penalty, data_confidence)
     veredito = _veredito(scenario, y, econ, mc, position, actions, dq, top_gap)
 
     briefing = SeasonBriefing(
@@ -143,7 +149,7 @@ def season_briefing(scenario: Scenario, provenance: dict | None = None) -> dict:
         prob_loss=prob_loss,
         sowing_position=position,
         sowing_penalty_sc_ha=round(penalty, 1),
-        data_confidence=dq["data_confidence"],
+        data_confidence=data_confidence,
         top_data_gap=top_gap,
         actions=actions,
         veredito=veredito,

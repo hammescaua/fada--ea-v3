@@ -71,14 +71,17 @@ def _steps(node: dict) -> list[str]:
     return [e.get("passo", "") if isinstance(e, dict) else str(e) for e in node.get("cadeia", [])]
 
 
-def diagnose(scenario: Scenario, provenance: dict | None = None, observations=None) -> dict:
-    """Hypothesis Engine: ranqueia as causas prováveis do talhão estar abaixo do potencial."""
-    sim = simulate(scenario)
+def diagnose(scenario: Scenario, provenance: dict | None = None, observations=None, *, sim=None, acc=None) -> dict:
+    """Hypothesis Engine: ranqueia as causas prováveis do talhão estar abaixo do potencial.
+
+    ``sim``/``acc`` podem ser pré-computados (pelo State Engine) para não recalcular —
+    garante consistência e evita rodar simulate/accuracy duas vezes no mesmo estado."""
+    sim = sim or simulate(scenario)
     y = sim.yield_result
     potential = y.base_potential_sc_ha
     gap = round(potential - y.expected_sc_ha, 1)
 
-    acc = accuracy_report(scenario, provenance)
+    acc = acc if acc is not None else accuracy_report(scenario, provenance)
     conf_by_group = {v["group"]: v["quality"] for v in acc["variables"]}
     graph = kb.impact_graph()
     obs_sev = _observed_severity(observations)

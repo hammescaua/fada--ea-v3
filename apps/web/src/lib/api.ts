@@ -5,7 +5,6 @@ import type {
   CalibrationOut,
   CounterfactualOut,
   CropPlanOut,
-  DataQualityOut,
   DiagnoseOut,
   MemoryOut,
   ObservationIn,
@@ -70,21 +69,11 @@ export const api = {
     jpost<SeasonReviewOut>(`/api/fields/${fieldId}/season-review`, { scenario }),
   addObservation: (fieldId: string, obs: ObservationIn) =>
     jpost<ObservationOut>(`/api/fields/${fieldId}/observations`, obs),
-  dataQuality: (scenario: ScenarioIn, provenance: Record<string, string>) =>
-    jpost<DataQualityOut>("/api/data-quality", { scenario, provenance }),
   calibration: (records: SeasonOutcome[]) =>
     jpost<CalibrationOut>("/api/calibration/compute", { records }),
   assistant: (question: string, scenario: ScenarioIn) =>
     jpost<AssistantOut>("/api/assistant", { question, scenario }),
   municipalities: () => jget<string[]>("/api/municipalities"),
-  sampleCultivars: () =>
-    jget<
-      { name: string; maturity_group: number; base_potential_sc_ha: number; cycle_days: number; disease_tolerance: number }[]
-    >("/api/cultivars/sample"),
-  sowingWindow: (municipality: string, year: number) =>
-    jget<Record<string, string>>(
-      `/api/sowing-window?municipality=${encodeURIComponent(municipality)}&year=${year}`,
-    ),
 
   // --- Gêmeo Digital persistido (cockpit) ---
   farms: () => jget<FarmOut[]>("/api/farms"),

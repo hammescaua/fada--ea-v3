@@ -41,7 +41,10 @@ código, é o **modelo digital de conhecimento de cada talhão**, refinado a cad
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Os cinco motores (+ orquestrador)
+## Núcleo de simulação (5 motores + orquestrador)
+
+Estes são os motores determinísticos sobre os quais todo o resto se apoia. O catálogo
+completo dos motores de decisão/raciocínio vem logo abaixo.
 
 | Motor | Pacote | Entrada → Saída |
 |------|--------|-----------------|
@@ -51,6 +54,69 @@ código, é o **modelo digital de conhecimento de cada talhão**, refinado a cad
 | Produtividade (IPPD) | `yield_model.py` | potencial × fatores → sc/ha ± incerteza, decomposto |
 | Econômico | `economics.py` | custos + preço + produtividade → lucro, ROI, break-even |
 | **Orquestrador** | `simulate.py` | cenário → resultado completo do Laboratório Virtual |
+
+## Catálogo de motores v1.0 (responsabilidade única por motor)
+
+Acima do núcleo de simulação, a plataforma evoluiu para um **copiloto de decisão**. Cada
+motor tem **uma** responsabilidade e conversa com os demais por interfaces de dados (dicts/
+dataclasses), com baixo acoplamento. Todos partem do mesmo núcleo determinístico.
+
+| Camada | Motores | Responsabilidade |
+|--------|---------|------------------|
+| **Núcleo determinístico** | `phenology` · `water_balance` · `sowing_window` · `yield_model` (IPPD) · `economics` · **`simulate`** | Calcular a safra: datas, água, janela, produtividade ± , economia. |
+| **Conhecimento** | `kb` (loader) · `reference` (constantes, sync da KB) · `data/knowledge/*.json` | Coeficientes, preços, cadeias de impacto e fontes — auditáveis e citados. |
+| **Risco & cenários** | `montecarlo` · `scenario_search` · `counterfactual` | Distribuição de resultados (ENSO), melhor plano, "e se…". |
+| **Decisão** | `decision` (avalia intervenções) · `priorities` (fila por urgência + Decision Value) · `fertility` · `budget` | Transformar análise em ações priorizadas por retorno. |
+| **Veracidade dos dados** | `provenance` (primitivas de alavancagem) · `data_sources` (**`accuracy_report`** — motor único) · `missing_info` | Quão confiável é o dado, o que medir primeiro, qual dado pedir. |
+| **Raciocínio** | `reasoning` (hipóteses + impact graph ponderado) · `radar` (copiloto/dimensões) · `briefing` | Diagnosticar *por quê* e responder as 4 perguntas. |
+| **Evidências & aprendizado** | `evidence` (confiança/corroboração) · `interactions` (evento→consequência) · `knowledge` (calibração) · `personality` · `memory` | A safra vira evidência; o talhão aprende e recorda. |
+| **Estado unificado** | **`state`** (`world_state` — fonte única) · `crop_plan` (fase do ciclo) | Reúne tudo num só estado de realidade que as vistas consomem. |
+
+**Fonte única de verdade.** `state.world_state` roda `simulate` e `accuracy_report` **uma
+vez** e os compartilha com `radar`, `reasoning` e `missing_info` (parâmetros `sim`/`acc`).
+Assim todas as vistas veem exatamente os mesmos números, sem recálculo.
+
+**Veracidade dos dados = um motor só.** `data_sources.accuracy_report` é o único ponto que
+mede confiança/lacunas; `provenance` fornece apenas as primitivas (pesos, scores e a
+alavancagem por perturbação) que ele usa. O briefing e o State consomem esse mesmo motor.
+
+## Fluxo de dados (entrada → decisão → interface)
+
+```
+Entrada (cenário do talhão)
+   ↓  validação (Pydantic, schemas.py)
+   ↓  proveniência efetiva (_with_climate_prov: clima detectado + inferência do conteúdo)
+Observações (evidências reais: chuva, ferrugem, estande…)  ──┐
+   ↓                                                          │ realimentam
+Estado da safra  (state.world_state: simulate + accuracy 1×)  │
+   ↓                                                          │
+Reasoning (hipóteses + impact graph)  ·  Diagnóstico          │
+   ↓                                                          │
+Simulações (Monte Carlo, contrafactual, melhor plano)         │
+   ↓                                                          │
+Decision Engine (priorities: fila por urgência + Decision Value)
+   ↓
+Interface (painéis = apenas apresentação; nenhuma lógica de negócio)
+```
+
+**Regra de ouro:** nenhum painel faz conta. Toda lógica vive nos motores; a UI só
+apresenta o estado e, se algo não melhora uma decisão do agricultor, fica no backend.
+
+## Contrato de recomendação (formato único)
+
+Toda recomendação ao agricultor — venha do Radar, do Briefing ou da fila de decisão —
+carrega o **mesmo conjunto de campos**, originados em `decision.recommend_decisions` (a
+fonte) e formatados por `priorities.prioritized_actions`:
+
+| Campo | Significado |
+|------|-------------|
+| `acao` / `porque` | a ação sugerida e a justificativa técnica |
+| `impacto_sc_ha` / `impacto_rs` | impacto esperado em produtividade e em R$/ha |
+| `custo_per_ha` / `roi` | custo da ação e retorno sobre o investimento |
+| `probabilidade` | chance de melhorar o lucro (Monte Carlo pareado) |
+| `urgencia` | 0–100 = retorno × prazo × confiança (ordem da fila) |
+| `veredito` | Decision Value: `recomendar` / `avaliar` (o que não vale é filtrado) |
+| `prazo` / `janela_status` | quando agir e se a janela ainda está aberta (estado da safra) |
 
 ## Decisões de stack (solo / custo mínimo)
 

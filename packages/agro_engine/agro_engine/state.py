@@ -14,10 +14,12 @@ from __future__ import annotations
 
 from datetime import date
 
+from .data_sources import accuracy_report
 from .missing_info import missing_information
 from .models import Scenario
 from .radar import season_radar
 from .reasoning import diagnose
+from .simulate import simulate
 
 
 def world_state(
@@ -26,10 +28,15 @@ def world_state(
     provenance: dict | None = None,
     observations=None,
 ) -> dict:
-    """Compõe o estado unificado da safra (fonte única para todas as vistas)."""
-    radar = season_radar(scenario, today)
-    diag = diagnose(scenario, provenance, observations)
-    missing = missing_information(scenario, provenance)
+    """Compõe o estado unificado da safra (fonte única para todas as vistas).
+
+    Roda a simulação e a análise de acurácia UMA vez e as compartilha entre os motores —
+    garante que todas as vistas vejam exatamente os mesmos números e evita recálculo."""
+    sim = simulate(scenario)
+    acc = accuracy_report(scenario, provenance)
+    radar = season_radar(scenario, today, sim=sim)
+    diag = diagnose(scenario, provenance, observations, sim=sim, acc=acc)
+    missing = missing_information(scenario, provenance, acc=acc)
 
     # Fila de decisão: as ações ordenadas por URGÊNCIA (o que fazer primeiro).
     fila = sorted(radar["actions"], key=lambda a: a.get("urgencia", 0), reverse=True)

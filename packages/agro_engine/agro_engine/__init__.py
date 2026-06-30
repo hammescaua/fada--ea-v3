@@ -45,7 +45,6 @@ from .priorities import prioritized_actions
 from .radar import season_radar
 from .reasoning import diagnose, impact_chain
 from .state import world_state
-from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
 from .simulate import simulate
 from .sowing_window import evaluate as evaluate_sowing_window
@@ -76,7 +75,6 @@ __all__ = [
     "accuracy_report",
     "apply_correction",
     "apply_interactions",
-    "assess_data_quality",
     "crop_plan",
     "calibrate",
     "compute_economics",

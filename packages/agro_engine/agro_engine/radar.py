@@ -70,7 +70,7 @@ def _mercado_score(econ) -> float:
     return round(max(0.0, min(100.0, score)), 0)
 
 
-def season_radar(scenario: Scenario, today: date | None = None) -> dict:
+def season_radar(scenario: Scenario, today: date | None = None, *, sim=None) -> dict:
     """Monta o Radar da Safra: índice geral, 6 dimensões e os 3 destaques + as 4 respostas.
 
     Ciente do ESTADO da safra (fase do ciclo hoje): as recomendações priorizam o que dá
@@ -78,7 +78,7 @@ def season_radar(scenario: Scenario, today: date | None = None) -> dict:
     today = today or date.today()
     phase = current_phase(scenario, today)
     foco_dims, foco_texto = _PHASE_FOCUS.get(phase, ([], ""))
-    sim = simulate(scenario)
+    sim = sim or simulate(scenario)
     y = sim.yield_result
     econ = sim.economics
     mult = _factor_multipliers(y.base_potential_sc_ha, y.contributions)

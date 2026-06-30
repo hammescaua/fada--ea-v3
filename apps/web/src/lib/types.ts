@@ -119,13 +119,6 @@ export interface MonteCarloOut {
   };
 }
 
-export interface DataQualityOut {
-  data_confidence: number;
-  sources: Record<string, string>;
-  gaps: { group: string; current_source: string; leverage_sc_ha: number; como_obter: string }[];
-  resumo: string;
-}
-
 export interface BriefingAction {
   rank: number;
   key: string;

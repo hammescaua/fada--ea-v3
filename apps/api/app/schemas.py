@@ -84,11 +84,6 @@ class AssistantIn(BaseModel):
     scenario: ScenarioIn
 
 
-class DataQualityIn(BaseModel):
-    scenario: ScenarioIn
-    provenance: dict[str, str] = Field(default_factory=dict)
-
-
 class BriefingIn(BaseModel):
     scenario: ScenarioIn
     provenance: dict[str, str] = Field(default_factory=dict)
