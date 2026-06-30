@@ -18,14 +18,24 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("seasons", sa.Column("predicted_yield_sc_ha", sa.Float(), nullable=True))
-    op.add_column("seasons", sa.Column("actual_yield_sc_ha", sa.Float(), nullable=True))
-    op.add_column("seasons", sa.Column("scenario_snapshot", JSONB(), nullable=True))
-    op.add_column("seasons", sa.Column("features", JSONB(), nullable=True))
+    # 0001 cria o schema via Base.metadata.create_all (sempre o modelo atual), então num
+    # banco novo estas colunas já existem. Idempotente: adiciona só o que faltar.
+    bind = op.get_bind()
+    existing = {c["name"] for c in sa.inspect(bind).get_columns("seasons")}
+    cols = {
+        "predicted_yield_sc_ha": sa.Column("predicted_yield_sc_ha", sa.Float(), nullable=True),
+        "actual_yield_sc_ha": sa.Column("actual_yield_sc_ha", sa.Float(), nullable=True),
+        "scenario_snapshot": sa.Column("scenario_snapshot", JSONB(), nullable=True),
+        "features": sa.Column("features", JSONB(), nullable=True),
+    }
+    for name, col in cols.items():
+        if name not in existing:
+            op.add_column("seasons", col)
 
 
 def downgrade() -> None:
-    op.drop_column("seasons", "features")
-    op.drop_column("seasons", "scenario_snapshot")
-    op.drop_column("seasons", "actual_yield_sc_ha")
-    op.drop_column("seasons", "predicted_yield_sc_ha")
+    bind = op.get_bind()
+    existing = {c["name"] for c in sa.inspect(bind).get_columns("seasons")}
+    for name in ("features", "scenario_snapshot", "actual_yield_sc_ha", "predicted_yield_sc_ha"):
+        if name in existing:
+            op.drop_column("seasons", name)

@@ -19,6 +19,9 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Idempotente: 0001 (create_all) já cria a tabela num banco novo. Só cria se faltar.
+    if "observations" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.create_table(
         "observations",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
