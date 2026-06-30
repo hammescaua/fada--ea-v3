@@ -10,6 +10,7 @@ from agro_engine import (
     accuracy_report,
     assess_data_quality,
     crop_plan,
+    diagnose,
     infer_provenance,
     operations_impact,
     run_counterfactuals,
@@ -203,6 +204,16 @@ def post_crop_plan(payload: CropPlanIn) -> dict:
         provenance=_with_climate_prov(scenario, payload.provenance),
         climate_known_fraction=_climate_known_fraction(scenario),
     )
+
+
+@router.post("/diagnose")
+def post_diagnose(payload: ScenarioIn) -> dict:
+    """Motor de Raciocínio (Hypothesis Engine): diagnostica POR QUE o talhão está abaixo do
+    potencial — hipóteses ranqueadas, cada uma com a cadeia de impacto (causa→…→
+    produtividade), probabilidade, confiança do dado e o que medir para confirmar."""
+    scenario = _to_scenario(payload)
+    prov = _with_climate_prov(scenario, {})
+    return diagnose(scenario, prov)
 
 
 @router.post("/radar")

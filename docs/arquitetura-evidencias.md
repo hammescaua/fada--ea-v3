@@ -81,6 +81,36 @@ O mecanismo é **geral**: vale para qualquer aplicação (fungicida/herbicida/in
 casada por tipo e data) e para o estande — e novas regras evento→efeito entram como dado
 em `interaction_rules.json`, não como código.
 
+## Motor de Raciocínio Agronômico — Impact Graph + Hypothesis Engine
+
+O passo de "modelar componentes" para "modelar **relações**". Em vez de só conhecer
+variáveis, o sistema conhece **cadeias de impacto** e raciocina como um agrônomo.
+
+- **Impact Graph** (`impact_graph.json`): para cada limitação, a cadeia
+  *causa → efeito → … → produtividade* (ex.: *baixo P → raiz menor → menos água → menor
+  enchimento → grãos mais leves*), com a fonte, **o que medir para confirmar** e a ação
+  que corrige.
+- **Hypothesis Engine** (`reasoning.py`, `diagnose`): a partir da decomposição IPPD,
+  identifica os fatores que mais derrubam a produtividade e os transforma em **hipóteses
+  ranqueadas** — cada uma com a cadeia de impacto, a **probabilidade** de ser a limitação,
+  a **confiança do dado** que a sustenta e a marca **"a confirmar"** quando o dado é um
+  default regional. Observações de campo (ferrugem/praga) **reforçam** a hipótese.
+  *Verificado: "talhão 68 sc/ha abaixo do potencial; maior limitação provável: déficit
+  hídrico (~16 sc/ha) — dado de baixa confiança, confirme com o balanço hídrico"*.
+
+É o **núcleo** ao qual os demais componentes (Radar, Priorização, Briefing, Assistant)
+tendem a convergir como *vistas* do mesmo raciocínio — consistência e explicabilidade. A
+consolidação total (todos os painéis sem lógica própria) é evolução em andamento;
+`reasoning.py` é o começo dela.
+
+### Conhecimento em camadas (direção)
+
+A base `data/knowledge/` evolui para quatro tipos, que nunca se misturam:
+**científico** (curvas, fenologia, CQFS, FAO — não muda), **regional** (NO-RS: ENSO,
+janela, solos, doenças), **do agricultor** (comportamento aprendido) e **do talhão** (o
+mais valioso — predisposições). Hoje o científico/regional estão em JSON; o do agricultor
+e do talhão vivem no Knowledge Engine/Personalidade e crescem com as safras.
+
 ## Counterfactual Engine (`counterfactual.py`)
 
 Os "universos paralelos" da safra: *e se eu não tivesse aplicado o fungicida? e se tivesse

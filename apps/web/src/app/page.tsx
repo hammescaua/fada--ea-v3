@@ -13,6 +13,7 @@ import { Onboarding } from "@/components/Onboarding";
 import { PersonalityPanel } from "@/components/PersonalityPanel";
 import { CounterfactualPanel } from "@/components/CounterfactualPanel";
 import { ObservationLog } from "@/components/ObservationLog";
+import { DiagnosisPanel } from "@/components/DiagnosisPanel";
 import { SeasonReviewPanel } from "@/components/SeasonReviewPanel";
 import { SeasonReport } from "@/components/SeasonReport";
 import { YieldWaterfall } from "@/components/YieldWaterfall";
@@ -270,6 +271,11 @@ export default function Home() {
           <div className="space-y-5">
             {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
             {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
+            {view === "acompanhamento" && (
+              <div className="rounded-xl border border-stone-200 bg-white p-4">
+                <DiagnosisPanel scenario={debounced} />
+              </div>
+            )}
             <CropTimeline plan={cropPlan} loading={cropPlanLoading} handlers={timelineHandlers} />
           </div>
           <div className="space-y-5">

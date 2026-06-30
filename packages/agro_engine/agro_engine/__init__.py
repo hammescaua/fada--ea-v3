@@ -41,6 +41,7 @@ from .montecarlo import run_montecarlo
 from .phenology import stage_dates
 from .priorities import prioritized_actions
 from .radar import season_radar
+from .reasoning import diagnose, impact_chain
 from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
 from .simulate import simulate
@@ -79,6 +80,8 @@ __all__ = [
     "corroborate",
     "data_quality",
     "decompose_yield",
+    "diagnose",
+    "impact_chain",
     "detect_interactions",
     "interactions_report",
     "evaluate_sowing_window",

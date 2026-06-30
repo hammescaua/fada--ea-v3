@@ -6,6 +6,7 @@ import type {
   CounterfactualOut,
   CropPlanOut,
   DataQualityOut,
+  DiagnoseOut,
   ObservationIn,
   ObservationOut,
   PersonalityOut,
@@ -53,6 +54,7 @@ export const api = {
   fertility: (scenario: ScenarioIn) => jpost<FertilityRec[]>("/api/fertility", scenario),
   optimizeSeason: (scenario: ScenarioIn) => jpost<OptimizeOut>("/api/optimize-season", scenario),
   radar: (scenario: ScenarioIn) => jpost<RadarOut>("/api/radar", scenario),
+  diagnose: (scenario: ScenarioIn) => jpost<DiagnoseOut>("/api/diagnose", scenario),
   briefing: (scenario: ScenarioIn, provenance: Record<string, string>) =>
     jpost<BriefingOut>("/api/briefing", { scenario, provenance }),
   cropPlan: (scenario: ScenarioIn, provenance: Record<string, string>, today?: string) =>

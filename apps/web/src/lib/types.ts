@@ -253,6 +253,28 @@ export interface CropPlanOut {
   stages: { stage: string; date: string; status: string }[];
 }
 
+export interface Hypothesis {
+  causa: string;
+  fator: string;
+  perda_sc_ha: number;
+  perda_rs_ha: number;
+  probabilidade: number;
+  certeza_do_dado: number;
+  a_confirmar: boolean;
+  cadeia: string[];
+  confirma_se: string;
+  acao: string;
+  fonte: string;
+}
+
+export interface DiagnoseOut {
+  potencial_sc_ha: number;
+  esperado_sc_ha: number;
+  gap_sc_ha: number;
+  hipoteses: Hypothesis[];
+  resumo: string;
+}
+
 export interface PriorityAction {
   rank: number;
   key: string;

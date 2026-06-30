@@ -72,6 +72,11 @@ def interaction_rules() -> dict:
     return _load("interaction_rules.json").get("rules", {})
 
 
+def impact_graph() -> dict:
+    """Cadeias de impacto (causa → efeito → … → produtividade) por limitação, com fonte."""
+    return _load("impact_graph.json").get("cadeias", {})
+
+
 def param(path: str, default=None):
     """Lê um coeficiente por caminho pontilhado, ex.: ``'calagem.v_alvo_soja'``.
 
