@@ -293,9 +293,20 @@ export interface PriorityAction {
   roi: number | null;
   probabilidade: number;
   veredito?: "recomendar" | "avaliar";
+  urgencia?: number;
   prazo: string;
   porque: string;
   janela_status?: "agora" | "em breve" | "passou";
+}
+
+export interface MemoryOut {
+  similares: {
+    crop_year: string;
+    semelhanca: number;
+    principal_diferenca: string;
+    resultado: { colhido_sc_ha: number; vs_previsto: string } | null;
+  }[];
+  resumo: string;
 }
 
 export interface RadarOut {

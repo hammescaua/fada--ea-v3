@@ -39,9 +39,12 @@ from .knowledge import (
 )
 from .montecarlo import run_montecarlo
 from .phenology import stage_dates
+from .memory import PastSeason, similar_seasons
+from .missing_info import missing_information
 from .priorities import prioritized_actions
 from .radar import season_radar
 from .reasoning import diagnose, impact_chain
+from .state import world_state
 from .provenance import assess as assess_data_quality
 from .scenario_search import optimize_season
 from .simulate import simulate
@@ -59,6 +62,7 @@ __all__ = [
     "DailyWeather",
     "FieldSeason",
     "Observation",
+    "PastSeason",
     "EconomicsResult",
     "FactorContribution",
     "Operation",
@@ -87,11 +91,14 @@ __all__ = [
     "evaluate_sowing_window",
     "infer_provenance",
     "manejo_evidence",
+    "missing_information",
     "operations_impact",
     "personality",
     "prioritized_actions",
     "run_counterfactuals",
     "season_radar",
+    "similar_seasons",
+    "world_state",
     "optimize_season",
     "recommend_amendments",
     "recommend_decisions",

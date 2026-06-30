@@ -122,6 +122,29 @@ janela, solos, doenças), **do agricultor** (comportamento aprendido) e **do tal
 mais valioso — predisposições). Hoje o científico/regional estão em JSON; o do agricultor
 e do talhão vivem no Knowledge Engine/Personalidade e crescem com as safras.
 
+## O núcleo de copiloto — 5 motores sobre um estado único
+
+A direção da consolidação: todos os motores raciocinam sobre o **mesmo estado de
+realidade**, e a interface só apresenta.
+
+1. **State Engine** (`state.py`, `world_state`) — a **fonte única de verdade**: num
+   instante, reúne fase do ciclo, dimensões (6), confiança (4 níveis), gargalo, fila de
+   decisão por urgência e os dados que faltam. Os painéis deixam de recalcular a situação.
+2. **Reasoning Engine** (`reasoning.py`) — hipóteses → cadeia de impacto → confiança →
+   explicação (acima).
+3. **Decision Queue Engine** (`priorities.py`) — as análises viram uma **fila** ordenada
+   por **urgência** (retorno × prazo × confiança), filtrada pelo Decision Value. O
+   agricultor executa de cima para baixo.
+4. **Memory Engine** (`memory.py`, `similar_seasons`) — *"esta safra está 87% parecida com
+   2024/25 — naquele ano o talhão colheu X (acima/abaixo do previsto)"*. Recordação, não só
+   aprendizado; a semelhança é medida sobre os atributos da safra.
+5. **Missing Information Engine** (`missing_info.py`) — o sistema **pede os dados** que mais
+   reduziriam a própria incerteza, ordenados por valor da informação. Em vez de só receber,
+   busca reduzir a incerteza — como um especialista.
+
+Regra de ouro adotada: *se não melhora uma decisão do agricultor, pode existir no motor,
+mas não precisa aparecer na interface*.
+
 ## Counterfactual Engine (`counterfactual.py`)
 
 Os "universos paralelos" da safra: *e se eu não tivesse aplicado o fungicida? e se tivesse

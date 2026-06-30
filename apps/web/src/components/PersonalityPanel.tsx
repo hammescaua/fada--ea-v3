@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { PersonalityTrait } from "@/lib/types";
+import type { PersonalityTrait, ScenarioIn } from "@/lib/types";
 
 function TraitRow({ t }: { t: PersonalityTrait }) {
   const pct = Math.round(t.value * 100);
@@ -38,10 +38,16 @@ const DQ_LABEL: Record<string, string> = {
   mercado: "Mercado",
 };
 
-export function PersonalityPanel({ fieldId }: { fieldId: string | null }) {
+export function PersonalityPanel({ fieldId, scenario }: { fieldId: string | null; scenario: ScenarioIn }) {
   const { data } = useQuery({
     queryKey: ["personality", fieldId],
     queryFn: () => api.personality(fieldId!),
+    enabled: !!fieldId,
+    retry: false,
+  });
+  const { data: memory } = useQuery({
+    queryKey: ["memory", fieldId, scenario],
+    queryFn: () => api.fieldMemory(fieldId!, scenario),
     enabled: !!fieldId,
     retry: false,
   });
@@ -66,7 +72,13 @@ export function PersonalityPanel({ fieldId }: { fieldId: string | null }) {
         <h3 className="text-sm font-semibold text-stone-600">🧬 Personalidade do talhão</h3>
         <span className="text-sm font-bold text-leafdark">conhecimento {pct}%</span>
       </div>
-      <p className="mb-3 text-xs text-stone-500">{data.resumo}</p>
+      <p className="mb-2 text-xs text-stone-500">{data.resumo}</p>
+
+      {memory && memory.similares.length > 0 && (
+        <p className="mb-3 rounded-lg bg-stone-50 p-2 text-xs text-stone-600">
+          🗓️ <span className="font-medium text-stone-700">Memória:</span> {memory.resumo}
+        </p>
+      )}
 
       {data.traits.length === 0 ? (
         <p className="rounded-lg bg-stone-50 p-3 text-xs text-stone-500">

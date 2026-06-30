@@ -7,6 +7,7 @@ import type {
   CropPlanOut,
   DataQualityOut,
   DiagnoseOut,
+  MemoryOut,
   ObservationIn,
   ObservationOut,
   PersonalityOut,
@@ -100,6 +101,8 @@ export const api = {
     jpost<{ id: string }>(`/api/fields/${fieldId}/seasons`, { crop_year, scenario }),
   fieldCalibration: (fieldId: string) =>
     jget<CalibrationOut>(`/api/fields/${fieldId}/calibration`),
+  fieldMemory: (fieldId: string, scenario: ScenarioIn) =>
+    jpost<MemoryOut>(`/api/fields/${fieldId}/memory`, { scenario }),
   recordHarvest: (seasonId: string, actual_yield_sc_ha: number) =>
     jpost<{ id: string }>(
       `/api/seasons/${seasonId}/harvest?actual_yield_sc_ha=${actual_yield_sc_ha}`,

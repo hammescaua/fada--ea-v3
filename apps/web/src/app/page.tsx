@@ -290,7 +290,7 @@ export default function Home() {
               />
             </div>
             <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
-              <PersonalityPanel fieldId={selectedFieldId} />
+              <PersonalityPanel fieldId={selectedFieldId} scenario={debounced} />
             </div>
             <div className="rounded-xl border border-stone-200 bg-white p-4">
               <CounterfactualPanel scenario={debounced} />

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from agro_engine import (
     FieldSeason,
     Observation as EvidenceObs,
+    PastSeason,
     SeasonRecord,
     calibrate,
     apply_interactions,
@@ -23,6 +24,7 @@ from agro_engine import (
     interactions_report,
     personality,
     season_features,
+    similar_seasons,
     simulate,
 )
 
@@ -212,6 +214,25 @@ def season_review(field_id: str, payload: SeasonReviewIn, db: Session = Depends(
         "interactions": interactions_report(evid),
         "n_observations": len(evid),
     }
+
+
+@router.post("/fields/{field_id}/memory")
+def field_memory(field_id: str, payload: SeasonReviewIn, db: Session = Depends(get_session)) -> dict:
+    """Memory Engine: acha as safras passadas do talhão mais parecidas com a atual e o que
+    aconteceu nelas — 'esta safra está X% parecida com 2024/25'."""
+    if not db.get(Field, field_id):
+        raise HTTPException(404, "talhão não encontrado")
+    scenario = _to_scenario(payload.scenario)
+    sim = simulate(scenario)
+    current = season_features(scenario, sim)
+    seasons = db.scalars(
+        select(Season).where(Season.field_id == field_id, Season.features.is_not(None))
+    ).all()
+    past = [
+        PastSeason(s.crop_year, s.features or {}, s.predicted_yield_sc_ha, s.actual_yield_sc_ha)
+        for s in seasons
+    ]
+    return similar_seasons(current, past)
 
 
 @router.get("/fields/{field_id}/calibration", response_model=CalibrationOut)

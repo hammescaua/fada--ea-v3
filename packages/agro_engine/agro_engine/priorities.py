@@ -50,6 +50,18 @@ def _decision_value(delta_profit: float, prob: float) -> str:
     return "nao_recomendar"
 
 
+# Proximidade do prazo por status de janela (entra na urgência — o que não pode esperar).
+_DEADLINE_WEIGHT = {"agora": 1.0, "em breve": 0.5, "passou": 0.0}
+
+
+def _urgencia(impacto_rs: float, prob: float, janela_status: str) -> int:
+    """Fila de decisão: urgência 0..100 = retorno × prazo × confiança (o que fazer primeiro)."""
+    impacto_norm = min(1.0, impacto_rs / 1000.0)
+    deadline = _DEADLINE_WEIGHT.get(janela_status, 0.7)
+    score = 0.5 * impacto_norm + 0.3 * deadline + 0.2 * prob
+    return round(score * 100)
+
+
 def _janela_status(key: str, phase: str | None) -> str:
     """'agora' (acionável), 'em breve' (fase ainda não chegou) ou 'passou' (perdeu a janela)."""
     if phase is None:
@@ -90,6 +102,7 @@ def prioritized_actions(scenario: Scenario, top: int = 6, n_prob: int = 200, pha
             "roi": d.action_roi,
             "probabilidade": d.probability_positive,
             "veredito": veredito,
+            "urgencia": _urgencia(d.delta_profit_per_ha, d.probability_positive, _janela_status(d.key, phase)),
             "prazo": _PRAZO.get(d.key, "na safra"),
             "porque": d.justification,
             "janela_status": _janela_status(d.key, phase),

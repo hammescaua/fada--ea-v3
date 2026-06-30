@@ -15,6 +15,7 @@ from agro_engine import (
     operations_impact,
     run_counterfactuals,
     season_radar,
+    world_state,
     optimize_season,
     recommend_amendments,
     recommend_decisions,
@@ -214,6 +215,14 @@ def post_diagnose(payload: ScenarioIn) -> dict:
     scenario = _to_scenario(payload)
     prov = _with_climate_prov(scenario, {})
     return diagnose(scenario, prov)
+
+
+@router.post("/state")
+def post_state(payload: ScenarioIn) -> dict:
+    """State Engine: o estado VIVO da safra (fonte única) — fase, dimensões, confiança em 4
+    níveis, gargalo, fila de decisão por urgência e os dados que faltam para decidir."""
+    scenario = _to_scenario(payload)
+    return world_state(scenario, provenance=_with_climate_prov(scenario, {}))
 
 
 @router.post("/radar")

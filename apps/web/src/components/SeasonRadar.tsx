@@ -94,6 +94,7 @@ export function SeasonRadar({ r, loading }: { r: RadarOut | undefined; loading: 
                 <tr>
                   <th className="px-2 py-1.5 text-left font-medium">#</th>
                   <th className="px-2 py-1.5 text-left font-medium">Ação</th>
+                  <th className="px-2 py-1.5 text-right font-medium">Urg.</th>
                   <th className="px-2 py-1.5 text-right font-medium">Impacto</th>
                   <th className="px-2 py-1.5 text-right font-medium">Custo</th>
                   <th className="px-2 py-1.5 text-right font-medium">ROI</th>
@@ -111,6 +112,17 @@ export function SeasonRadar({ r, loading }: { r: RadarOut | undefined; loading: 
                       {a.acao}
                       {a.janela_status === "passou" && <span className="ml-1 rounded bg-stone-100 px-1 text-[9px] uppercase text-stone-400">janela passou</span>}
                       {a.janela_status === "em breve" && <span className="ml-1 rounded bg-amber-100 px-1 text-[9px] uppercase text-amber-600">em breve</span>}
+                    </td>
+                    <td className="px-2 py-1.5 text-right">
+                      {a.urgencia != null && (
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                            a.urgencia >= 70 ? "bg-orange-100 text-orange-700" : a.urgencia >= 45 ? "bg-amber-100 text-amber-700" : "bg-stone-100 text-stone-500"
+                          }`}
+                        >
+                          {a.urgencia}
+                        </span>
+                      )}
                     </td>
                     <td className="px-2 py-1.5 text-right">
                       <div className="font-medium text-leafdark">+{a.impacto_sc_ha.toFixed(1)} sc/ha</div>
