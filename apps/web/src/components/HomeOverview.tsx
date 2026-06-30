@@ -99,7 +99,7 @@ export function HomeOverview({
                     </div>
                   </div>
                   <button onClick={onSeeDetails} className="shrink-0 self-center rounded-md border border-stone-300 px-2.5 py-1 text-xs text-stone-600 hover:bg-white">
-                    ver detalhes
+                    Entender recomendação
                   </button>
                 </li>
               ))}
@@ -108,34 +108,8 @@ export function HomeOverview({
         )}
       </div>
 
-      {/* Maior risco e maior oportunidade — uma linha cada, com contexto */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-stone-200 bg-white p-5">
-          <div className="text-[11px] uppercase tracking-wide text-stone-400">Maior risco</div>
-          {radar.maior_risco ? (
-            <>
-              <div className="text-lg font-semibold text-orange-800">{radar.maior_risco.fator}</div>
-              <div className="text-sm text-stone-500">perda estimada de {radar.maior_risco.perda_sc_ha.toFixed(0)} sc/ha se não tratado</div>
-            </>
-          ) : (
-            <div className="text-sm text-stone-500">Sem risco relevante no momento.</div>
-          )}
-        </div>
-        <div className="rounded-2xl border border-stone-200 bg-white p-5">
-          <div className="text-[11px] uppercase tracking-wide text-stone-400">Maior oportunidade</div>
-          {radar.maior_oportunidade ? (
-            <>
-              <div className="text-lg font-semibold text-leafdark">{radar.maior_oportunidade.acao}</div>
-              <div className="text-sm text-stone-500">
-                +{radar.maior_oportunidade.impacto_sc_ha.toFixed(1)} sc/ha · +{brl(radar.maior_oportunidade.impacto_rs)}/ha
-              </div>
-            </>
-          ) : (
-            <div className="text-sm text-stone-500">Plano já otimizado.</div>
-          )}
-        </div>
-      </div>
-
+      {/* Nada além de Potencial · Situação · Lucro · Decisões. A Home fica limpa;
+          o risco, a oportunidade e o porquê moram no Talhão. */}
       <p className="text-center text-xs text-stone-400">
         Quer entender o porquê? Abra <button onClick={onSeeDetails} className="underline hover:text-stone-600">o talhão</button> para o diagnóstico completo.
       </p>

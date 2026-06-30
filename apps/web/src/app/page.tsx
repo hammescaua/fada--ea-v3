@@ -51,7 +51,7 @@ const NAV: [View, string, string][] = [
   ["home", "🏠", "Visão geral"],
   ["talhao", "🌾", "Talhão"],
   ["planejamento", "📅", "Planejamento"],
-  ["simulacoes", "🔬", "Simulações"],
+  ["simulacoes", "🔬", "Testar cenários"],
   ["historico", "📚", "Histórico"],
 ];
 
@@ -59,7 +59,7 @@ const SCREEN_HINT: Record<View, string> = {
   home: "o resumo da safra e a próxima melhor decisão",
   talhao: "como está o talhão hoje e por quê",
   planejamento: "o calendário da safra e o retorno de cada manejo",
-  simulacoes: "teste cenários antes de decidir no campo",
+  simulacoes: "teste \"e se…\" antes de decidir no campo",
   historico: "o que o talhão já ensinou, safra após safra",
 };
 
@@ -302,38 +302,46 @@ export default function Home() {
           />
         )}
 
-        {/* ---- 2. TALHÃO (como está e por quê) ---- */}
+        {/* ---- 2. TALHÃO (como está e por quê) ----
+            Regra de altitude: no máximo 5 blocos visíveis de entrada
+            (radar, briefing, diagnóstico, talhão, personalidade). O resto
+            fica num accordion, para a tela não virar dashboard de novo. */}
         {view === "talhao" && (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
-            <div className="space-y-5">
-              {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
-              {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
-                <DiagnosisPanel scenario={debounced} />
+          <>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
+              <div className="space-y-5">
+                {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
+                {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
+                <div className="rounded-xl border border-stone-200 bg-white p-4">
+                  <DiagnosisPanel scenario={debounced} />
+                </div>
               </div>
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
-                <CounterfactualPanel scenario={debounced} />
+              <div className="space-y-5">
+                <div className="rounded-xl border border-stone-200 bg-white p-4">
+                  <FarmManager
+                    scenario={scenario}
+                    onFieldChange={setSelectedFieldId}
+                    onLoadField={loadFieldHandler}
+                  />
+                </div>
+                <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+                  <PersonalityPanel fieldId={selectedFieldId} scenario={debounced} />
+                </div>
               </div>
             </div>
-            <div className="space-y-5">
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
-                <FarmManager
-                  scenario={scenario}
-                  onFieldChange={setSelectedFieldId}
-                  onLoadField={loadFieldHandler}
-                />
-              </div>
-              <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
-                <PersonalityPanel fieldId={selectedFieldId} scenario={debounced} />
-              </div>
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
+
+            <details className="group mt-5 rounded-xl border border-stone-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium text-stone-600 hover:text-leafdark">
+                <span>Mais detalhes do talhão — cenários alternativos, observações de campo e precisão dos dados</span>
+                <span className="text-stone-400 transition group-open:rotate-180">▾</span>
+              </summary>
+              <div className="space-y-5 border-t border-stone-100 p-4">
+                <CounterfactualPanel scenario={debounced} />
                 <ObservationLog fieldId={selectedFieldId} />
-              </div>
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
                 <AccuracyPanel acc={accuracy} />
               </div>
-            </div>
-          </div>
+            </details>
+          </>
         )}
 
         {/* ---- 3. PLANEJAMENTO (calendário + retorno de cada manejo) ---- */}
