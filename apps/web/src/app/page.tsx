@@ -28,6 +28,8 @@ import { FarmManager } from "@/components/FarmManager";
 import { SeasonPlanPanel } from "@/components/SeasonPlanPanel";
 import { FertilityPanel } from "@/components/FertilityPanel";
 import { BestPlanPanel } from "@/components/BestPlanPanel";
+import { KnowledgeBasis } from "@/components/KnowledgeBasis";
+import { RegisterEvent } from "@/components/RegisterEvent";
 
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
   ssr: false,
@@ -45,22 +47,25 @@ function useDebounced<T>(value: T, ms: number): T {
 
 const PHENO_ORDER = ["VE", "V1", "V4", "R1", "R2", "R3", "R4", "R5", "R5.5", "R6", "R7", "R8"];
 
-type View = "home" | "talhao" | "planejamento" | "simulacoes" | "historico";
+// Navegação pela SAFRA do produtor, não pelos módulos do software. Tudo é "meu".
+type View = "home" | "talhao" | "planejamento" | "registrar" | "simulacoes" | "historico";
 
 const NAV: [View, string, string][] = [
-  ["home", "🏠", "Visão geral"],
-  ["talhao", "🌾", "Talhão"],
-  ["planejamento", "📅", "Planejamento"],
-  ["simulacoes", "🔬", "Testar cenários"],
-  ["historico", "📚", "Histórico"],
+  ["home", "🌱", "Minha safra"],
+  ["talhao", "🌾", "Meu talhão"],
+  ["planejamento", "📅", "Calendário"],
+  ["registrar", "✍️", "Registrar"],
+  ["simulacoes", "🔬", "Simular"],
+  ["historico", "📈", "Resultados"],
 ];
 
 const SCREEN_HINT: Record<View, string> = {
-  home: "o resumo da safra e a próxima melhor decisão",
-  talhao: "como está o talhão hoje e por quê",
-  planejamento: "o calendário da safra e o retorno de cada manejo",
-  simulacoes: "teste \"e se…\" antes de decidir no campo",
-  historico: "o que o talhão já ensinou, safra após safra",
+  home: "como está sua safra e o que fazer hoje",
+  talhao: "cada talhão com sua história — e como o FADA chegou nos números",
+  planejamento: "o que já aconteceu e o que vem pela frente",
+  registrar: "conte o que aconteceu no campo — leva segundos",
+  simulacoes: "teste uma decisão antes de executar no campo",
+  historico: "o previsto × o realizado, safra após safra",
 };
 
 export default function Home() {
@@ -213,6 +218,11 @@ export default function Home() {
     if (patch.soil) setSoilReal(true);
   };
 
+  // Registro conversacional: a aplicação informada entra direto no cenário e
+  // re-simula na hora.
+  const registerOp = (op: ScenarioIn["operations"][number]) =>
+    setScenario((s) => ({ ...s, operations: [...s.operations, op] }));
+
   const completeOnboarding = (patch: Partial<ScenarioIn>, soilInformed: boolean) => {
     setScenario((s) => ({ ...s, ...patch }));
     setSoilReal(soilInformed);
@@ -331,6 +341,19 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Como o FADA chegou nos números — credibilidade no lugar onde
+                os números aparecem (contextual, não numa página de guia). */}
+            {sim && (
+              <div className="mt-5">
+                <KnowledgeBasis
+                  expected={sim.yield_result.expected_sc_ha}
+                  precision={accuracy?.precision_index ?? sim.yield_result.confidence}
+                  scenario={scenario}
+                  soilReal={soilReal}
+                />
+              </div>
+            )}
+
             <details className="group mt-5 rounded-xl border border-stone-200 bg-white">
               <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium text-stone-600 hover:text-leafdark">
                 <span>Mais detalhes do talhão — cenários alternativos, observações de campo e precisão dos dados</span>
@@ -388,7 +411,21 @@ export default function Home() {
           </div>
         )}
 
-        {/* ---- 4. SIMULAÇÕES (teste antes de decidir no campo) ---- */}
+        {/* ---- REGISTRAR (um único lugar, conversacional) ---- */}
+        {view === "registrar" && (
+          <div className="space-y-3">
+            <RegisterEvent today={new Date().toISOString().slice(0, 10)} onRegister={registerOp} />
+            {scenario.operations.length > 0 && (
+              <p className="text-center text-xs text-stone-400">
+                {scenario.operations.length}{" "}
+                {scenario.operations.length === 1 ? "manejo registrado" : "manejos registrados"} nesta safra ·
+                aparecem no Calendário e já entram na previsão.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ---- SIMULAR (teste antes de decidir no campo) ---- */}
         {view === "simulacoes" && (
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
             {/* Coluna de controles */}

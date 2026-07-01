@@ -55,12 +55,13 @@ export function HomeOverview({
 
   return (
     <div className="space-y-5">
-      {/* Cabeçalho conversacional */}
+      {/* Q1 — Como está minha safra? */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6">
         <p className="text-sm text-stone-500">
           {greeting()}. Safra {scenario.municipality} {cropYear(scenario.sowing_date)}.
           {loading && <span className="ml-2 text-xs text-stone-400">analisando…</span>}
         </p>
+        <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-leaf">Como está minha safra</div>
         <div className="mt-2 flex flex-wrap items-end gap-x-6 gap-y-2">
           <div>
             <div className="flex items-center text-[11px] uppercase tracking-wide text-stone-400">
@@ -80,8 +81,9 @@ export function HomeOverview({
         </div>
       </div>
 
-      {/* As decisões de hoje */}
+      {/* Q2 — O que preciso fazer? */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6">
+        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-leaf">O que preciso fazer</div>
         {decisoes.length === 0 ? (
           <div className="flex items-center gap-2 text-leafdark">
             <span className="text-lg">✓</span>
@@ -117,9 +119,11 @@ export function HomeOverview({
         )}
       </div>
 
-      {/* O que ainda falta informar — calmo, recolhido por padrão. O topo segue
-          limpo (Potencial · Situação · Lucro · Decisões); o risco e o porquê moram no Talhão. */}
-      <DigitalizationLevel scenario={scenario} soilReal={soilReal} onGoToTalhao={onSeeDetails} />
+      {/* Q3 — O que ainda falta? Calmo, recolhido por padrão; o topo segue limpo. */}
+      <div>
+        <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-leaf">O que ainda falta</div>
+        <DigitalizationLevel scenario={scenario} soilReal={soilReal} onGoToTalhao={onSeeDetails} />
+      </div>
 
       <p className="text-center text-xs text-stone-400">
         Quer entender o porquê? Abra <button onClick={onSeeDetails} className="underline hover:text-stone-600">o talhão</button> para o diagnóstico completo.
