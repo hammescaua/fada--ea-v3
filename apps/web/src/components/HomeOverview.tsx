@@ -1,6 +1,8 @@
 "use client";
 
 import type { RadarOut, ScenarioIn } from "@/lib/types";
+import { WhyBadge } from "@/components/WhyBadge";
+import { DigitalizationLevel } from "@/components/DigitalizationLevel";
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -26,11 +28,13 @@ const SIT: Record<RadarOut["score_label"], { dot: string; txt: string; cls: stri
 export function HomeOverview({
   radar,
   scenario,
+  soilReal,
   loading,
   onSeeDetails,
 }: {
   radar: RadarOut | undefined;
   scenario: ScenarioIn;
+  soilReal: boolean;
   loading: boolean;
   onSeeDetails: () => void;
 }) {
@@ -59,15 +63,19 @@ export function HomeOverview({
         </p>
         <div className="mt-2 flex flex-wrap items-end gap-x-6 gap-y-2">
           <div>
-            <div className="text-[11px] uppercase tracking-wide text-stone-400">Potencial atual</div>
+            <div className="flex items-center text-[11px] uppercase tracking-wide text-stone-400">
+              Potencial atual <WhyBadge id="potencial" />
+            </div>
             <div className="text-4xl font-bold text-stone-800">{radar.expected_sc_ha.toFixed(0)} <span className="text-xl font-medium text-stone-400">sc/ha</span></div>
           </div>
           <div className={`flex items-center gap-2 pb-1 text-lg font-semibold ${sit.cls}`}>
             <span>{sit.dot}</span>
             <span>{sit.txt}</span>
+            <WhyBadge id="situacao" />
           </div>
-          <div className="pb-1.5 text-sm text-stone-500">
-            lucro estimado <span className="font-semibold text-stone-700">{brl(radar.profit_per_ha)}/ha</span>
+          <div className="flex items-center pb-1.5 text-sm text-stone-500">
+            lucro estimado <span className="ml-1 font-semibold text-stone-700">{brl(radar.profit_per_ha)}/ha</span>
+            <WhyBadge id="lucro" />
           </div>
         </div>
       </div>
@@ -81,8 +89,9 @@ export function HomeOverview({
           </div>
         ) : (
           <>
-            <h2 className="mb-3 text-base font-bold text-stone-800">
+            <h2 className="mb-3 flex items-center text-base font-bold text-stone-800">
               Hoje {decisoes.length === 1 ? "existe 1 decisão importante" : `existem ${decisoes.length} decisões importantes`}
+              <WhyBadge id="decisao" />
             </h2>
             <ol className="space-y-3">
               {decisoes.map((a, i) => (
@@ -108,8 +117,10 @@ export function HomeOverview({
         )}
       </div>
 
-      {/* Nada além de Potencial · Situação · Lucro · Decisões. A Home fica limpa;
-          o risco, a oportunidade e o porquê moram no Talhão. */}
+      {/* O que ainda falta informar — calmo, recolhido por padrão. O topo segue
+          limpo (Potencial · Situação · Lucro · Decisões); o risco e o porquê moram no Talhão. */}
+      <DigitalizationLevel scenario={scenario} soilReal={soilReal} onGoToTalhao={onSeeDetails} />
+
       <p className="text-center text-xs text-stone-400">
         Quer entender o porquê? Abra <button onClick={onSeeDetails} className="underline hover:text-stone-600">o talhão</button> para o diagnóstico completo.
       </p>

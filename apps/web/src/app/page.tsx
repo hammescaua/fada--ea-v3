@@ -297,6 +297,7 @@ export default function Home() {
           <HomeOverview
             radar={radar}
             scenario={scenario}
+            soilReal={soilReal}
             loading={radarLoading}
             onSeeDetails={() => setView("talhao")}
           />

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import type { ScenarioIn } from "@/lib/types";
 
 const input = "rounded-md border border-stone-300 px-2 py-1.5 text-sm focus:border-leaf focus:outline-none";
@@ -19,7 +21,7 @@ const CULTIVARS = [
 ];
 
 export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Props) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [municipality, setMunicipality] = useState(scenario.municipality);
   const [lat, setLat] = useState(scenario.latitude);
   const [lon, setLon] = useState(scenario.longitude);
@@ -33,51 +35,89 @@ export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Pro
   const [nematode, setNematode] = useState<NonNullable<ScenarioIn["nematode_pressure"]>>(scenario.nematode_pressure ?? "nenhuma");
   const [enso, setEnso] = useState<NonNullable<ScenarioIn["enso"]>>(scenario.enso ?? "neutro");
 
-  const finish = () => {
-    const cultivar = CULTIVARS[cultivarIdx];
-    onComplete(
-      {
-        municipality,
-        latitude: lat,
-        longitude: lon,
-        soil: hasSoil ? soil : scenario.soil,
-        cultivar,
-        sowing_date: sowing,
-        soybean_price_per_sc: price,
-        population_k_per_ha: pop,
-        previous_crop: prevCrop,
-        nematode_pressure: nematode,
-        enso,
-        use_live_weather: true,
-      },
-      hasSoil === true,
-    );
+  // Cenário montado a partir do que o produtor informou — usado tanto para o
+  // payoff ("já encontrei oportunidades") quanto para concluir.
+  const patch: Partial<ScenarioIn> = {
+    municipality,
+    latitude: lat,
+    longitude: lon,
+    soil: hasSoil ? soil : scenario.soil,
+    cultivar: CULTIVARS[cultivarIdx],
+    sowing_date: sowing,
+    soybean_price_per_sc: price,
+    population_k_per_ha: pop,
+    previous_crop: prevCrop,
+    nematode_pressure: nematode,
+    enso,
+    use_live_weather: true,
   };
+  const assembled: ScenarioIn = { ...scenario, ...patch };
+
+  // Valor antes de "terminar o cadastro": roda o radar real assim que os dados
+  // entram, ainda na última tela do onboarding.
+  const { data: radar, isFetching: analyzing } = useQuery({
+    queryKey: ["onboarding-radar", assembled],
+    queryFn: () => api.radar(assembled),
+    enabled: step === 4,
+  });
+  const oportunidades = radar
+    ? radar.actions.filter((a) => a.janela_status !== "passou").length
+    : 0;
+
+  const finish = () => onComplete(patch, hasSoil === true);
 
   const setS = (patch: Partial<ScenarioIn["soil"]>) => setSoil((s) => ({ ...s, ...patch }));
 
   return (
     <div className="rounded-2xl border border-leaf/30 bg-white p-6 shadow-sm">
-      <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-leafdark">🌱 Vamos configurar seu talhão</h2>
-        <button onClick={onSkip} className="text-xs text-stone-400 underline">
-          pular e usar exemplo
-        </button>
-      </div>
-      <p className="mb-4 text-sm text-stone-500">
-        Em 3 passos o gêmeo digital fica personalizado para a sua lavoura. Quanto mais real o
-        dado, mais verídica a previsão — e a ferramenta sempre diz de onde veio cada número.
-      </p>
+      {/* Boas-vindas: nenhum dashboard, nenhum formulário — só o convite. */}
+      {step === 0 && (
+        <div className="space-y-5 text-center">
+          <div className="text-4xl">🌱</div>
+          <h2 className="text-2xl font-bold text-leafdark">Vamos montar sua safra</h2>
+          <p className="mx-auto max-w-md text-sm text-stone-600">
+            Leva poucos minutos. Você responde o básico sobre o talhão e o FADA faz o resto —
+            previsão, riscos e as próximas decisões. Pode pular o que não tiver em mãos; nada
+            trava.
+          </p>
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={() => setStep(1)}
+              className="rounded-md bg-leaf px-6 py-2.5 text-sm font-semibold text-white hover:bg-leafdark"
+            >
+              Começar
+            </button>
+            <button onClick={onSkip} className="text-xs text-stone-400 underline">
+              só quero ver um exemplo pronto
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* indicador de passos */}
-      <div className="mb-5 flex gap-2">
-        {[1, 2, 3].map((n) => (
-          <div
-            key={n}
-            className={`h-1.5 flex-1 rounded-full ${n <= step ? "bg-leaf" : "bg-stone-200"}`}
-          />
-        ))}
-      </div>
+      {step >= 1 && step <= 3 && (
+        <>
+          <div className="mb-1 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-leafdark">🌱 Vamos configurar seu talhão</h2>
+            <button onClick={onSkip} className="text-xs text-stone-400 underline">
+              pular e usar exemplo
+            </button>
+          </div>
+          <p className="mb-4 text-sm text-stone-500">
+            Em 3 passos o gêmeo digital fica personalizado para a sua lavoura. Quanto mais real o
+            dado, mais verídica a previsão — e a ferramenta sempre diz de onde veio cada número.
+          </p>
+
+          {/* indicador de passos */}
+          <div className="mb-5 flex gap-2">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className={`h-1.5 flex-1 rounded-full ${n <= step ? "bg-leaf" : "bg-stone-200"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {step === 1 && (
         <div className="space-y-4">
@@ -249,10 +289,75 @@ export function Onboarding({ scenario, municipalities, onComplete, onSkip }: Pro
             <button onClick={() => setStep(2)} className="text-sm text-stone-500">
               ← voltar
             </button>
-            <button onClick={finish} className="rounded-md bg-leaf px-5 py-2 text-sm font-semibold text-white hover:bg-leafdark">
-              Ver minha safra →
+            <button onClick={() => setStep(4)} className="rounded-md bg-leaf px-5 py-2 text-sm font-semibold text-white hover:bg-leafdark">
+              Analisar minha safra →
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Payoff: valor imediato, ainda dentro do onboarding. */}
+      {step === 4 && (
+        <div className="space-y-5 text-center">
+          {analyzing || !radar ? (
+            <div className="space-y-3 py-6">
+              <div className="text-3xl">🌱</div>
+              <p className="text-sm font-medium text-stone-600">Analisando sua safra…</p>
+              <p className="text-xs text-stone-400">cruzando clima, solo e janela de semeadura do seu talhão</p>
+              <div className="mx-auto h-1.5 w-40 overflow-hidden rounded-full bg-stone-100">
+                <div className="h-full w-1/2 animate-pulse rounded-full bg-leaf" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="text-4xl">✅</div>
+              <h2 className="text-2xl font-bold text-leafdark">Sua safra está criada</h2>
+              <p className="text-sm text-stone-600">
+                {oportunidades > 0 ? (
+                  <>
+                    Já encontrei{" "}
+                    <span className="font-semibold text-stone-800">
+                      {oportunidades === 1 ? "1 oportunidade" : `${oportunidades} oportunidades`}
+                    </span>{" "}
+                    no seu talhão.
+                  </>
+                ) : (
+                  <>Seu plano já está bem ajustado — sem ações urgentes no momento.</>
+                )}
+              </p>
+
+              <div className="mx-auto flex max-w-sm flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-xl bg-stone-50 p-4">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-stone-400">Potencial</div>
+                  <div className="text-2xl font-bold text-stone-800">
+                    {radar.expected_sc_ha.toFixed(0)} <span className="text-sm font-medium text-stone-400">sc/ha</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-stone-400">Lucro estimado</div>
+                  <div className="text-2xl font-bold text-stone-800">
+                    {radar.profit_per_ha.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })}
+                    <span className="text-sm font-medium text-stone-400">/ha</span>
+                  </div>
+                </div>
+              </div>
+
+              {radar.maior_oportunidade && (
+                <p className="mx-auto max-w-md text-sm text-stone-500">
+                  Maior oportunidade agora:{" "}
+                  <span className="font-medium text-leafdark">{radar.maior_oportunidade.acao}</span>{" "}
+                  (+{radar.maior_oportunidade.impacto_sc_ha.toFixed(1)} sc/ha).
+                </p>
+              )}
+
+              <button
+                onClick={finish}
+                className="rounded-md bg-leaf px-6 py-2.5 text-sm font-semibold text-white hover:bg-leafdark"
+              >
+                Ver minha safra →
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
