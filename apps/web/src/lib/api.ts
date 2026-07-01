@@ -122,17 +122,19 @@ export function defaultScenario(): ScenarioIn {
       disease_tolerance: 0.6,
       nematode_tolerance: 0.5,
     },
-    sowing_date: "2025-11-05",
+    // Safra vigente (2026/27, em planejamento): mantém o gêmeo "vivo" ao abrir —
+    // fase atual, decisões acionáveis e janela de semeadura ainda à frente.
+    sowing_date: "2026-11-05",
     municipality: "Santo Ângelo",
     latitude: -28.3,
     longitude: -54.26,
     population_k_per_ha: 300,
     row_spacing_cm: 45,
     operations: [
-      { kind: "herbicida", op_date: "2025-11-20", cost_per_ha: 160, quality: 0.9 },
-      { kind: "inseticida", op_date: "2026-01-05", cost_per_ha: 120, quality: 0.9 },
-      { kind: "fungicida", op_date: "2026-01-10", cost_per_ha: 180, quality: 0.9 },
-      { kind: "fungicida", op_date: "2026-01-24", cost_per_ha: 180, quality: 0.9 },
+      { kind: "herbicida", op_date: "2026-11-20", cost_per_ha: 160, quality: 0.9 },
+      { kind: "inseticida", op_date: "2027-01-05", cost_per_ha: 120, quality: 0.9 },
+      { kind: "fungicida", op_date: "2027-01-10", cost_per_ha: 180, quality: 0.9 },
+      { kind: "fungicida", op_date: "2027-01-24", cost_per_ha: 180, quality: 0.9 },
     ],
     // Custos de referência (mercado BR/RS 2025 — ver /reference/inputs); o agricultor ajusta ao real.
     costs: [
