@@ -12,6 +12,10 @@ function greeting(): string {
   return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
 }
 
+function hoje(): string {
+  return new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+}
+
 function cropYear(sowing: string): string {
   const d = new Date(sowing);
   const y = d.getFullYear();
@@ -54,14 +58,17 @@ export function HomeOverview({
     .slice(0, 2);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Q1 — Como está minha safra? */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6">
         <p className="text-sm text-stone-500">
-          {greeting()}. Safra {scenario.municipality} {cropYear(scenario.sowing_date)}.
+          {greeting()} · <span className="capitalize">{hoje()}</span>
           {loading && <span className="ml-2 text-xs text-stone-400">analisando…</span>}
         </p>
-        <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-leaf">Como está minha safra</div>
+        <div className="mt-0.5 text-xs text-stone-400">
+          Safra de {scenario.municipality} · {cropYear(scenario.sowing_date)}
+        </div>
+        <div className="mt-3 text-[11px] uppercase tracking-wide text-stone-400">Como está minha safra</div>
         <div className="mt-2 flex flex-wrap items-end gap-x-6 gap-y-2">
           <div>
             <div className="flex items-center text-[11px] uppercase tracking-wide text-stone-400">
@@ -83,7 +90,7 @@ export function HomeOverview({
 
       {/* Q2 — O que preciso fazer? */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-leaf">O que preciso fazer</div>
+        <div className="mb-3 text-[11px] uppercase tracking-wide text-stone-400">O que preciso fazer hoje</div>
         {decisoes.length === 0 ? (
           <div className="flex items-center gap-2 text-leafdark">
             <span className="text-lg">✓</span>
@@ -121,7 +128,7 @@ export function HomeOverview({
 
       {/* Q3 — O que ainda falta? Calmo, recolhido por padrão; o topo segue limpo. */}
       <div>
-        <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-leaf">O que ainda falta</div>
+        <div className="mb-2 px-1 text-[11px] uppercase tracking-wide text-stone-400">O que ainda falta informar</div>
         <DigitalizationLevel scenario={scenario} soilReal={soilReal} onGoToTalhao={onSeeDetails} />
       </div>
 

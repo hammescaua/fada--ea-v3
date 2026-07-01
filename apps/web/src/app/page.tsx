@@ -253,38 +253,41 @@ export default function Home() {
     <main className="mx-auto max-w-7xl px-4 py-6">
       <SeasonReport scenario={scenario} briefing={briefing} sim={sim ?? undefined} accuracy={accuracy} />
       <div className="print:hidden">
-        <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-leafdark">🌱 FADA — Gêmeo Digital da Soja</h1>
-            <p className="text-sm text-stone-500">
-              {scenario.municipality} · {SCREEN_HINT[view]}.
-            </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-leafdark">🌱 FADA</h1>
+              <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium capitalize text-stone-500">
+                Hoje · {new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long" })}
+              </span>
+              {isFetching && <span className="text-xs text-stone-400">atualizando…</span>}
+            </div>
+            <p className="mt-0.5 text-sm text-stone-500">{SCREEN_HINT[view]}.</p>
           </div>
           <div className="flex items-center gap-2">
-            {isFetching && <span className="text-xs text-stone-400">atualizando…</span>}
             <a
               href="/guia"
-              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
+              className="rounded-md border border-stone-200 px-3 py-1.5 text-sm text-stone-500 hover:bg-stone-50"
             >
-              ❔ Como funciona
+              ❔ Ajuda
             </a>
             <button
               onClick={() => window.print()}
-              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
+              className="rounded-md border border-stone-200 px-3 py-1.5 text-sm text-stone-500 hover:bg-stone-50"
             >
-              📄 Relatório (PDF)
+              📄 PDF
             </button>
             <button
               onClick={() => setOnboarding(true)}
-              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-50"
+              className="rounded-md border border-stone-200 px-3 py-1.5 text-sm text-stone-500 hover:bg-stone-50"
             >
-              Reconfigurar talhão
+              Reconfigurar
             </button>
           </div>
         </header>
 
         {/* Navegação: 5 telas. A Home é o copiloto; o detalhe está atrás de cada aba. */}
-        <nav className="mb-5 flex gap-1 rounded-lg bg-stone-100 p-1">
+        <nav className="mb-6 flex gap-1 rounded-lg bg-stone-100 p-1">
           {NAV.map(([v, icon, label]) => (
             <button
               key={v}
@@ -322,21 +325,18 @@ export default function Home() {
             fica num accordion, para a tela não virar dashboard de novo. */}
         {view === "talhao" && (
           <>
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
-              <div className="space-y-5">
-                {/* A cara amigável do diagnóstico: Saúde do Talhão com drill-down. */}
-                <TalhaoHealth radar={radar} loading={radarLoading} />
-                {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
-              </div>
-              <div className="space-y-5">
-                <div className="rounded-xl border border-stone-200 bg-white p-4">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+              {/* A cara amigável do diagnóstico: Saúde do Talhão com drill-down. */}
+              <TalhaoHealth radar={radar} loading={radarLoading} />
+              <div className="space-y-6">
+                <div className="rounded-2xl border border-stone-200 bg-white p-5">
                   <FarmManager
                     scenario={scenario}
                     onFieldChange={setSelectedFieldId}
                     onLoadField={loadFieldHandler}
                   />
                 </div>
-                <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+                <div className="rounded-2xl border border-leaf/30 bg-white p-5 shadow-sm">
                   <PersonalityPanel fieldId={selectedFieldId} scenario={debounced} />
                 </div>
               </div>
@@ -345,7 +345,7 @@ export default function Home() {
             {/* Como o FADA chegou nos números — credibilidade no lugar onde
                 os números aparecem (contextual, não numa página de guia). */}
             {sim && (
-              <div className="mt-5">
+              <div className="mt-6">
                 <KnowledgeBasis
                   expected={sim.yield_result.expected_sc_ha}
                   precision={accuracy?.precision_index ?? sim.yield_result.confidence}
@@ -355,14 +355,15 @@ export default function Home() {
               </div>
             )}
 
-            {/* Profundidade para quem quiser: diagnóstico técnico, radar de
-                prioridades, cenários, observações e precisão dos dados. */}
-            <details className="group mt-5 rounded-xl border border-stone-200 bg-white">
-              <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium text-stone-600 hover:text-leafdark">
-                <span>Ver análise detalhada (diagnóstico técnico, prioridades e precisão dos dados)</span>
+            {/* Profundidade para quem quiser: briefing, diagnóstico técnico,
+                radar de prioridades, cenários, observações e precisão. */}
+            <details className="group mt-6 rounded-2xl border border-stone-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between p-5 text-sm font-medium text-stone-600 hover:text-leafdark">
+                <span>Ver análise detalhada (briefing, diagnóstico técnico, prioridades e precisão)</span>
                 <span className="text-stone-400 transition group-open:rotate-180">▾</span>
               </summary>
-              <div className="space-y-5 border-t border-stone-100 p-4">
+              <div className="space-y-6 border-t border-stone-100 p-5">
+                {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
                 <DiagnosisPanel scenario={debounced} />
                 {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
                 <CounterfactualPanel scenario={debounced} />
@@ -373,46 +374,44 @@ export default function Home() {
           </>
         )}
 
-        {/* ---- 3. PLANEJAMENTO (calendário + retorno de cada manejo) ---- */}
+        {/* ---- 3. CALENDÁRIO (o que já passou e o que vem) ---- */}
         {view === "planejamento" && (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
-            <div className="space-y-5">
-              <CropTimeline plan={cropPlan} loading={cropPlanLoading} handlers={timelineHandlers} />
-              {plan && (
-                <div className="rounded-xl border border-stone-200 bg-white p-4">
+          <div className="space-y-6">
+            {/* A linha do tempo da safra é a estrela; o resto abre sob demanda. */}
+            <CropTimeline plan={cropPlan} loading={cropPlanLoading} handlers={timelineHandlers} />
+
+            {plan && (
+              <details className="group rounded-2xl border border-stone-200 bg-white">
+                <summary className="flex cursor-pointer list-none items-center justify-between p-5 text-sm font-medium text-stone-600 hover:text-leafdark">
+                  <span>Custos, retorno e janelas da safra</span>
+                  <span className="text-stone-400 transition group-open:rotate-180">▾</span>
+                </summary>
+                <div className="space-y-6 border-t border-stone-100 p-5">
                   <SeasonPlanPanel plan={plan} />
+                  {sim && <EconomicsCard e={sim.economics} />}
+                  <FertilityPanel recs={fertility} loading={fertilityLoading} />
+                  {sim && (
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                      <div>
+                        <h3 className="mb-2 text-sm font-semibold text-stone-600">Janela de semeadura (ZARC)</h3>
+                        <SowingWindow data={sim.sowing_window} />
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-sm font-semibold text-stone-600">Calendário fenológico</h3>
+                        <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                          {phenoRows.map((r) => (
+                            <li key={r.stage} className="flex justify-between">
+                              <span className="font-medium text-stone-500">{r.stage}</span>
+                              <span className="text-stone-700">{new Date(r.date).toLocaleDateString("pt-BR")}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="space-y-5">
-              {sim && (
-                <div className="rounded-xl border border-stone-200 bg-white p-4">
-                  <EconomicsCard e={sim.economics} />
-                </div>
-              )}
-              <div className="rounded-xl border border-stone-200 bg-white p-4">
-                <FertilityPanel recs={fertility} loading={fertilityLoading} />
-              </div>
-              {sim && (
-                <div className="grid grid-cols-1 gap-5">
-                  <div className="rounded-xl border border-stone-200 bg-white p-4">
-                    <h3 className="mb-2 text-sm font-semibold text-stone-600">Janela de semeadura (ZARC)</h3>
-                    <SowingWindow data={sim.sowing_window} />
-                  </div>
-                  <div className="rounded-xl border border-stone-200 bg-white p-4">
-                    <h3 className="mb-2 text-sm font-semibold text-stone-600">Calendário fenológico</h3>
-                    <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      {phenoRows.map((r) => (
-                        <li key={r.stage} className="flex justify-between">
-                          <span className="font-medium text-stone-500">{r.stage}</span>
-                          <span className="text-stone-700">{new Date(r.date).toLocaleDateString("pt-BR")}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
+              </details>
+            )}
           </div>
         )}
 
@@ -592,13 +591,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* ---- 5. HISTÓRICO E APRENDIZADO ---- */}
+        {/* ---- 5. RESULTADOS E APRENDIZADO ---- */}
         {view === "historico" && (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <div className="rounded-xl border border-stone-200 bg-white p-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border border-stone-200 bg-white p-5">
               <LearningPanel currentExpected={sim?.yield_result.expected_sc_ha ?? 0} />
             </div>
-            <div className="rounded-xl border border-leaf/30 bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-leaf/30 bg-white p-5 shadow-sm">
               <SeasonReviewPanel fieldId={selectedFieldId} scenario={debounced} />
             </div>
           </div>

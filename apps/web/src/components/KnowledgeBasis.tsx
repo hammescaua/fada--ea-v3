@@ -49,10 +49,11 @@ export function KnowledgeBasis({
   ];
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-5">
+    <div className="rounded-2xl border border-stone-200 bg-white p-6">
       <h3 className="text-sm font-bold text-stone-800">Como o FADA chegou nesse número</h3>
 
-      {/* Assumir a incerteza gera mais confiança que um número "mágico". */}
+      {/* Assumir a incerteza gera mais confiança que um número "mágico". Isto
+          fica sempre visível; o detalhe (pirâmide e fontes) abre sob demanda. */}
       <p className="mt-2 text-sm leading-relaxed text-stone-600">
         Nossa estimativa é <span className="font-semibold text-stone-800">{expected.toFixed(1)} sc/ha</span>, com{" "}
         <span className="font-semibold text-stone-800">{pct}% de confiança</span> nos dados — porque já conhecemos{" "}
@@ -65,8 +66,13 @@ export function KnowledgeBasis({
         )}
       </p>
 
+      <details className="group mt-3">
+        <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-leafdark">
+          <span className="transition group-open:rotate-180">▾</span> Ver a base do cálculo (pirâmide de conhecimento e fontes)
+        </summary>
+        <div className="mt-4">
       {/* Pirâmide de conhecimento: da ciência ao talhão. */}
-      <div className="mt-4">
+      <div>
         <div className="mb-2 text-[11px] uppercase tracking-wide text-stone-400">
           O FADA começa com ciência e vai ficando específico da sua lavoura
         </div>
@@ -123,11 +129,13 @@ export function KnowledgeBasis({
         </div>
       </div>
 
-      <p className="mt-4 border-t border-stone-100 pt-3 text-xs text-stone-500">
-        Nenhum sistema prevê uma safra com exatidão. O que o FADA faz é construir um modelo da{" "}
-        <span className="font-medium text-stone-700">sua</span> lavoura e, a cada safra, trocar médias pelo
-        conhecimento real do seu talhão.
-      </p>
+          <p className="mt-4 border-t border-stone-100 pt-3 text-xs text-stone-500">
+            Nenhum sistema prevê uma safra com exatidão. O que o FADA faz é construir um modelo da{" "}
+            <span className="font-medium text-stone-700">sua</span> lavoura e, a cada safra, trocar médias pelo
+            conhecimento real do seu talhão.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }
