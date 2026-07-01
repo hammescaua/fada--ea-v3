@@ -30,6 +30,8 @@ import { FertilityPanel } from "@/components/FertilityPanel";
 import { BestPlanPanel } from "@/components/BestPlanPanel";
 import { KnowledgeBasis } from "@/components/KnowledgeBasis";
 import { RegisterEvent } from "@/components/RegisterEvent";
+import { TalhaoHealth } from "@/components/TalhaoHealth";
+import { SimulateGuided } from "@/components/SimulateGuided";
 
 const FieldMap = dynamic(() => import("@/components/FieldMap").then((m) => m.FieldMap), {
   ssr: false,
@@ -76,6 +78,7 @@ export default function Home() {
   const [view, setView] = useState<View>("home");
   const [onboarding, setOnboarding] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [labAdvanced, setLabAdvanced] = useState(false);
   const debounced = useDebounced(scenario, 350);
 
   // Onboarding na primeira visita (sem talhão configurado).
@@ -321,11 +324,9 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
               <div className="space-y-5">
-                {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
+                {/* A cara amigável do diagnóstico: Saúde do Talhão com drill-down. */}
+                <TalhaoHealth radar={radar} loading={radarLoading} />
                 {(briefing || sim) && <SeasonBriefing b={briefing} loading={briefingLoading} />}
-                <div className="rounded-xl border border-stone-200 bg-white p-4">
-                  <DiagnosisPanel scenario={debounced} />
-                </div>
               </div>
               <div className="space-y-5">
                 <div className="rounded-xl border border-stone-200 bg-white p-4">
@@ -354,12 +355,16 @@ export default function Home() {
               </div>
             )}
 
+            {/* Profundidade para quem quiser: diagnóstico técnico, radar de
+                prioridades, cenários, observações e precisão dos dados. */}
             <details className="group mt-5 rounded-xl border border-stone-200 bg-white">
               <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium text-stone-600 hover:text-leafdark">
-                <span>Mais detalhes do talhão — cenários alternativos, observações de campo e precisão dos dados</span>
+                <span>Ver análise detalhada (diagnóstico técnico, prioridades e precisão dos dados)</span>
                 <span className="text-stone-400 transition group-open:rotate-180">▾</span>
               </summary>
               <div className="space-y-5 border-t border-stone-100 p-4">
+                <DiagnosisPanel scenario={debounced} />
+                {(radar || sim) && <SeasonRadar r={radar} loading={radarLoading} />}
                 <CounterfactualPanel scenario={debounced} />
                 <ObservationLog fieldId={selectedFieldId} />
                 <AccuracyPanel acc={accuracy} />
@@ -427,7 +432,32 @@ export default function Home() {
 
         {/* ---- SIMULAR (teste antes de decidir no campo) ---- */}
         {view === "simulacoes" && (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
+          <div className="space-y-4">
+            {/* Guiado por padrão (uma pergunta por vez); o laboratório completo
+                fica no modo avançado, para quem quer controlar cada parâmetro. */}
+            <div className="flex gap-1 rounded-lg bg-stone-100 p-1">
+              <button
+                onClick={() => setLabAdvanced(false)}
+                className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${!labAdvanced ? "bg-white text-leafdark shadow-sm" : "text-stone-500 hover:text-stone-700"}`}
+              >
+                Guiado
+              </button>
+              <button
+                onClick={() => setLabAdvanced(true)}
+                className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${labAdvanced ? "bg-white text-leafdark shadow-sm" : "text-stone-500 hover:text-stone-700"}`}
+              >
+                Modo avançado
+              </button>
+            </div>
+
+            {!labAdvanced ? (
+              <SimulateGuided
+                scenario={debounced}
+                baseSim={sim ?? undefined}
+                onApply={(patch) => setScenario((s) => ({ ...s, ...patch }))}
+              />
+            ) : (
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
             {/* Coluna de controles */}
             <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
               <FarmManager
@@ -557,6 +587,8 @@ export default function Home() {
                 </>
               )}
             </div>
+            </div>
+            )}
           </div>
         )}
 
