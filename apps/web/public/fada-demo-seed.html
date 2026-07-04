@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FADA — carregando demonstração…</title>
+<style>
+  html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:#f6f5f1;color:#1b2430}
+  .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+  .logo{font-weight:800;font-size:34px;color:#2E8B57;letter-spacing:.5px}
+  .sub{color:#53637d;font-size:15px;max-width:420px;line-height:1.4}
+  .spin{width:34px;height:34px;border:4px solid #cfe6d6;border-top-color:#2E8B57;border-radius:50%;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  a{color:#2E8B57;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">🌱 FADA</div>
+  <div class="spin"></div>
+  <div class="sub">Carregando o talhão de demonstração (Sanga Funda · Horizontina/RS)…<br>
+    Você será redirecionado em instantes. Se não for, <a href="/">clique aqui</a>.</div>
+</div>
+<script>
+// Cenário de demonstração (talhão maduro — saúde 89, previsão ~54 sc/ha).
+// Todos os números derivam deste cenário quando o app roda com a API no ar.
+var SCENARIO = {"soil":{"texture":"argiloso","clay_pct":60.0,"organic_matter_pct":3.4,"ph":6.0,"cec":14.0,"base_saturation_pct":62,"phosphorus_ppm":15,"potassium_ppm":135,"compaction":"leve","rooting_depth_m":0.6},"cultivar":{"name":"GMR 5.5","maturity_group":5.5,"base_potential_sc_ha":95.0,"cycle_days":130,"disease_tolerance":0.5,"nematode_tolerance":0.5},"sowing_date":"2025-11-12","municipality":"Horizontina","latitude":-27.63,"longitude":-54.31,"population_k_per_ha":300,"row_spacing_cm":45.0,"operations":[{"kind":"herbicida","op_date":"2025-11-25","product":"","dose":0.0,"cost_per_ha":160,"quality":0.85},{"kind":"fungicida","op_date":"2026-01-08","product":"","dose":0.0,"cost_per_ha":180,"quality":0.9},{"kind":"fungicida","op_date":"2026-01-22","product":"","dose":0.0,"cost_per_ha":180,"quality":0.9}],"costs":[{"category":"semente","description":"Semente RR","cost_per_ha":520},{"category":"fertilizante","description":"Adubo+calc.","cost_per_ha":1650},{"category":"diesel","description":"Operações","cost_per_ha":380},{"category":"outros","description":"Frete+secagem","cost_per_ha":620}],"soybean_price_per_sc":120.0,"enso":"neutro","nematode_pressure":"nenhuma","previous_crop":"milho","calibration_bias_sc_ha":0.0,"calibration_confidence":0.0,"calibration_seasons":0};
+try {
+  localStorage.setItem("fada_state", JSON.stringify({ scenario: SCENARIO, soilReal: true }));
+  localStorage.setItem("fada_setup", "1");
+} catch (e) { /* modo privado pode bloquear — o app ainda abre com o padrão */ }
+setTimeout(function(){ window.location.replace("/"); }, 700);
+</script>
+</body>
+</html>
